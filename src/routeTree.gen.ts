@@ -19,6 +19,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDepensesRouteImport } from './routes/_authenticated/depenses'
 import { Route as AuthenticatedFacturesRouteImport } from './routes/_authenticated/factures'
 import { Route as AuthenticatedPcsRouteImport } from './routes/_authenticated/pcs'
+import { Route as AuthenticatedRapportsRouteImport } from './routes/_authenticated/rapports'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
 import { Route as AuthenticatedTaxeSejourRouteImport } from './routes/_authenticated/taxe-sejour'
 
@@ -71,6 +72,11 @@ const AuthenticatedPcsRoute = AuthenticatedPcsRouteImport.update({
   path: '/pcs',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRapportsRoute = AuthenticatedRapportsRouteImport.update({
+  id: '/rapports',
+  path: '/rapports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedReservationsRoute =
   AuthenticatedReservationsRouteImport.update({
     id: '/reservations',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/depenses': typeof AuthenticatedDepensesRoute
   '/factures': typeof AuthenticatedFacturesRoute
   '/pcs': typeof AuthenticatedPcsRoute
+  '/rapports': typeof AuthenticatedRapportsRoute
   '/reservations': typeof AuthenticatedReservationsRoute
   '/taxe-sejour': typeof AuthenticatedTaxeSejourRoute
 }
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/depenses': typeof AuthenticatedDepensesRoute
   '/factures': typeof AuthenticatedFacturesRoute
   '/pcs': typeof AuthenticatedPcsRoute
+  '/rapports': typeof AuthenticatedRapportsRoute
   '/reservations': typeof AuthenticatedReservationsRoute
   '/taxe-sejour': typeof AuthenticatedTaxeSejourRoute
 }
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/_authenticated/depenses': typeof AuthenticatedDepensesRoute
   '/_authenticated/factures': typeof AuthenticatedFacturesRoute
   '/_authenticated/pcs': typeof AuthenticatedPcsRoute
+  '/_authenticated/rapports': typeof AuthenticatedRapportsRoute
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
   '/_authenticated/taxe-sejour': typeof AuthenticatedTaxeSejourRoute
 }
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/depenses'
     | '/factures'
     | '/pcs'
+    | '/rapports'
     | '/reservations'
     | '/taxe-sejour'
   fileRoutesByTo: FileRoutesByTo
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/depenses'
     | '/factures'
     | '/pcs'
+    | '/rapports'
     | '/reservations'
     | '/taxe-sejour'
   id:
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/_authenticated/depenses'
     | '/_authenticated/factures'
     | '/_authenticated/pcs'
+    | '/_authenticated/rapports'
     | '/_authenticated/reservations'
     | '/_authenticated/taxe-sejour'
   fileRoutesById: FileRoutesById
@@ -245,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPcsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/rapports': {
+      id: '/_authenticated/rapports'
+      path: '/rapports'
+      fullPath: '/rapports'
+      preLoaderRoute: typeof AuthenticatedRapportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reservations': {
       id: '/_authenticated/reservations'
       path: '/reservations'
@@ -270,6 +289,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDepensesRoute: typeof AuthenticatedDepensesRoute
   AuthenticatedFacturesRoute: typeof AuthenticatedFacturesRoute
   AuthenticatedPcsRoute: typeof AuthenticatedPcsRoute
+  AuthenticatedRapportsRoute: typeof AuthenticatedRapportsRoute
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
   AuthenticatedTaxeSejourRoute: typeof AuthenticatedTaxeSejourRoute
 }
@@ -282,6 +302,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDepensesRoute: AuthenticatedDepensesRoute,
   AuthenticatedFacturesRoute: AuthenticatedFacturesRoute,
   AuthenticatedPcsRoute: AuthenticatedPcsRoute,
+  AuthenticatedRapportsRoute: AuthenticatedRapportsRoute,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
   AuthenticatedTaxeSejourRoute: AuthenticatedTaxeSejourRoute,
 }
