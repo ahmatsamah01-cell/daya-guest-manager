@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
 import { Route as AuthenticatedChambresRouteImport } from './routes/_authenticated/chambres'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -30,6 +31,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedCaisseRoute = AuthenticatedCaisseRouteImport.update({
+  id: '/caisse',
+  path: '/caisse',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedChambresRoute = AuthenticatedChambresRouteImport.update({
   id: '/chambres',
@@ -56,6 +62,7 @@ const AuthenticatedReservationsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/caisse': typeof AuthenticatedCaisseRoute
   '/chambres': typeof AuthenticatedChambresRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/caisse': typeof AuthenticatedCaisseRoute
   '/chambres': typeof AuthenticatedChambresRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -74,6 +82,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/caisse': typeof AuthenticatedCaisseRoute
   '/_authenticated/chambres': typeof AuthenticatedChambresRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -82,14 +91,28 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/chambres' | '/clients' | '/dashboard' | '/reservations'
+    | '/'
+    | '/auth'
+    | '/caisse'
+    | '/chambres'
+    | '/clients'
+    | '/dashboard'
+    | '/reservations'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/chambres' | '/clients' | '/dashboard' | '/reservations'
+  to:
+    | '/'
+    | '/auth'
+    | '/caisse'
+    | '/chambres'
+    | '/clients'
+    | '/dashboard'
+    | '/reservations'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/caisse'
     | '/_authenticated/chambres'
     | '/_authenticated/clients'
     | '/_authenticated/dashboard'
@@ -125,6 +148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/caisse': {
+      id: '/_authenticated/caisse'
+      path: '/caisse'
+      fullPath: '/caisse'
+      preLoaderRoute: typeof AuthenticatedCaisseRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/chambres': {
       id: '/_authenticated/chambres'
       path: '/chambres'
@@ -157,6 +187,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCaisseRoute: typeof AuthenticatedCaisseRoute
   AuthenticatedChambresRoute: typeof AuthenticatedChambresRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -164,6 +195,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCaisseRoute: AuthenticatedCaisseRoute,
   AuthenticatedChambresRoute: AuthenticatedChambresRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
