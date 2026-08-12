@@ -47,7 +47,7 @@ function ParametresPage() {
   const { data: etab } = useEtablissement();
   const { data: params } = useParametres(etab?.id);
   const { data: monRole } = useMonRole();
-  const estAdmin = monRole === "admin";
+  const estAdmin = monRole?.estAdmin ?? false;
 
   const [etabForm, setEtabForm] = useState({
     nom: "",

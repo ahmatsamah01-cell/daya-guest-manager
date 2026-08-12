@@ -18,6 +18,7 @@ import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDepensesRouteImport } from './routes/_authenticated/depenses'
 import { Route as AuthenticatedFacturesRouteImport } from './routes/_authenticated/factures'
+import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedPcsRouteImport } from './routes/_authenticated/pcs'
 import { Route as AuthenticatedRapportsRouteImport } from './routes/_authenticated/rapports'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
@@ -67,6 +68,11 @@ const AuthenticatedFacturesRoute = AuthenticatedFacturesRouteImport.update({
   path: '/factures',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedParametresRoute = AuthenticatedParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPcsRoute = AuthenticatedPcsRouteImport.update({
   id: '/pcs',
   path: '/pcs',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/depenses': typeof AuthenticatedDepensesRoute
   '/factures': typeof AuthenticatedFacturesRoute
+  '/parametres': typeof AuthenticatedParametresRoute
   '/pcs': typeof AuthenticatedPcsRoute
   '/rapports': typeof AuthenticatedRapportsRoute
   '/reservations': typeof AuthenticatedReservationsRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/depenses': typeof AuthenticatedDepensesRoute
   '/factures': typeof AuthenticatedFacturesRoute
+  '/parametres': typeof AuthenticatedParametresRoute
   '/pcs': typeof AuthenticatedPcsRoute
   '/rapports': typeof AuthenticatedRapportsRoute
   '/reservations': typeof AuthenticatedReservationsRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/depenses': typeof AuthenticatedDepensesRoute
   '/_authenticated/factures': typeof AuthenticatedFacturesRoute
+  '/_authenticated/parametres': typeof AuthenticatedParametresRoute
   '/_authenticated/pcs': typeof AuthenticatedPcsRoute
   '/_authenticated/rapports': typeof AuthenticatedRapportsRoute
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/depenses'
     | '/factures'
+    | '/parametres'
     | '/pcs'
     | '/rapports'
     | '/reservations'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/depenses'
     | '/factures'
+    | '/parametres'
     | '/pcs'
     | '/rapports'
     | '/reservations'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/depenses'
     | '/_authenticated/factures'
+    | '/_authenticated/parametres'
     | '/_authenticated/pcs'
     | '/_authenticated/rapports'
     | '/_authenticated/reservations'
@@ -250,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFacturesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/parametres': {
+      id: '/_authenticated/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof AuthenticatedParametresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pcs': {
       id: '/_authenticated/pcs'
       path: '/pcs'
@@ -288,6 +307,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDepensesRoute: typeof AuthenticatedDepensesRoute
   AuthenticatedFacturesRoute: typeof AuthenticatedFacturesRoute
+  AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
   AuthenticatedPcsRoute: typeof AuthenticatedPcsRoute
   AuthenticatedRapportsRoute: typeof AuthenticatedRapportsRoute
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
@@ -301,6 +321,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDepensesRoute: AuthenticatedDepensesRoute,
   AuthenticatedFacturesRoute: AuthenticatedFacturesRoute,
+  AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedPcsRoute: AuthenticatedPcsRoute,
   AuthenticatedRapportsRoute: AuthenticatedRapportsRoute,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
