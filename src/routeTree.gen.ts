@@ -20,6 +20,7 @@ import { Route as AuthenticatedDepensesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedFacturesRouteImport } from './routes/_authenticated/factures'
 import { Route as AuthenticatedPcsRouteImport } from './routes/_authenticated/pcs'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
+import { Route as AuthenticatedTaxeSejourRouteImport } from './routes/_authenticated/taxe-sejour'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,6 +77,11 @@ const AuthenticatedReservationsRoute =
     path: '/reservations',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedTaxeSejourRoute = AuthenticatedTaxeSejourRouteImport.update({
+  id: '/taxe-sejour',
+  path: '/taxe-sejour',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/factures': typeof AuthenticatedFacturesRoute
   '/pcs': typeof AuthenticatedPcsRoute
   '/reservations': typeof AuthenticatedReservationsRoute
+  '/taxe-sejour': typeof AuthenticatedTaxeSejourRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/factures': typeof AuthenticatedFacturesRoute
   '/pcs': typeof AuthenticatedPcsRoute
   '/reservations': typeof AuthenticatedReservationsRoute
+  '/taxe-sejour': typeof AuthenticatedTaxeSejourRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/_authenticated/factures': typeof AuthenticatedFacturesRoute
   '/_authenticated/pcs': typeof AuthenticatedPcsRoute
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
+  '/_authenticated/taxe-sejour': typeof AuthenticatedTaxeSejourRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/factures'
     | '/pcs'
     | '/reservations'
+    | '/taxe-sejour'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/factures'
     | '/pcs'
     | '/reservations'
+    | '/taxe-sejour'
   id:
     | '__root__'
     | '/'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/factures'
     | '/_authenticated/pcs'
     | '/_authenticated/reservations'
+    | '/_authenticated/taxe-sejour'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -240,6 +252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReservationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/taxe-sejour': {
+      id: '/_authenticated/taxe-sejour'
+      path: '/taxe-sejour'
+      fullPath: '/taxe-sejour'
+      preLoaderRoute: typeof AuthenticatedTaxeSejourRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -252,6 +271,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFacturesRoute: typeof AuthenticatedFacturesRoute
   AuthenticatedPcsRoute: typeof AuthenticatedPcsRoute
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
+  AuthenticatedTaxeSejourRoute: typeof AuthenticatedTaxeSejourRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -263,6 +283,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFacturesRoute: AuthenticatedFacturesRoute,
   AuthenticatedPcsRoute: AuthenticatedPcsRoute,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
+  AuthenticatedTaxeSejourRoute: AuthenticatedTaxeSejourRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
