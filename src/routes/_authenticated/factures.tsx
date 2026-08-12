@@ -43,7 +43,7 @@ function FacturesPage() {
       const { data, error } = await supabase
         .from("factures")
         .select("*, clients(nom, prenom)")
-        .order("date_emission", { ascending: false });
+        .order("date_facture", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -119,7 +119,7 @@ function FacturesPage() {
                   <TableCell>
                     {f.clients?.prenom} {f.clients?.nom}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">{formatDate(f.date_emission)}</TableCell>
+                  <TableCell className="whitespace-nowrap">{formatDate(f.date_facture)}</TableCell>
                   <TableCell className="whitespace-nowrap">
                     {formatFCFA(f.montant_hebergement)}
                   </TableCell>
@@ -164,7 +164,7 @@ function FacturesPage() {
           <div className="space-y-3 text-sm">
             <p className="text-muted-foreground">
               {facture?.clients?.prenom} {facture?.clients?.nom} —{" "}
-              {facture ? formatDate(facture.date_emission) : ""}
+              {facture ? formatDate(facture.date_facture) : ""}
             </p>
             <div className="divide-y rounded-lg border">
               {(lignes ?? []).map((l) => (

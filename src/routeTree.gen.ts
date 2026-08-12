@@ -16,6 +16,7 @@ import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedChambresRouteImport } from './routes/_authenticated/chambres'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedFacturesRouteImport } from './routes/_authenticated/factures'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
 
 const IndexRoute = IndexRouteImport.update({
@@ -52,6 +53,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFacturesRoute = AuthenticatedFacturesRouteImport.update({
+  id: '/factures',
+  path: '/factures',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedReservationsRoute =
   AuthenticatedReservationsRouteImport.update({
     id: '/reservations',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/chambres': typeof AuthenticatedChambresRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/factures': typeof AuthenticatedFacturesRoute
   '/reservations': typeof AuthenticatedReservationsRoute
 }
 export interface FileRoutesByTo {
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/chambres': typeof AuthenticatedChambresRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/factures': typeof AuthenticatedFacturesRoute
   '/reservations': typeof AuthenticatedReservationsRoute
 }
 export interface FileRoutesById {
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/_authenticated/chambres': typeof AuthenticatedChambresRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/factures': typeof AuthenticatedFacturesRoute
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
 }
 export interface FileRouteTypes {
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/chambres'
     | '/clients'
     | '/dashboard'
+    | '/factures'
     | '/reservations'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/chambres'
     | '/clients'
     | '/dashboard'
+    | '/factures'
     | '/reservations'
   id:
     | '__root__'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/_authenticated/chambres'
     | '/_authenticated/clients'
     | '/_authenticated/dashboard'
+    | '/_authenticated/factures'
     | '/_authenticated/reservations'
   fileRoutesById: FileRoutesById
 }
@@ -176,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/factures': {
+      id: '/_authenticated/factures'
+      path: '/factures'
+      fullPath: '/factures'
+      preLoaderRoute: typeof AuthenticatedFacturesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reservations': {
       id: '/_authenticated/reservations'
       path: '/reservations'
@@ -191,6 +210,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChambresRoute: typeof AuthenticatedChambresRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedFacturesRoute: typeof AuthenticatedFacturesRoute
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
 }
 
@@ -199,6 +219,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChambresRoute: AuthenticatedChambresRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedFacturesRoute: AuthenticatedFacturesRoute,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
 }
 
