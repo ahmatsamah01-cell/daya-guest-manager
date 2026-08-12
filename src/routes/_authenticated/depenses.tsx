@@ -61,7 +61,7 @@ function DepensesPage() {
   const [mois, setMois] = useState(today().slice(0, 7));
   const [form, setForm] = useState({
     date_depense: today(),
-    categorie: CATEGORIES[0],
+    categorie: "Achats",
     libelle: "",
     montant: "",
     mode_paiement: "especes",

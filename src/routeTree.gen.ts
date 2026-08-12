@@ -16,6 +16,7 @@ import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedChambresRouteImport } from './routes/_authenticated/chambres'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDepensesRouteImport } from './routes/_authenticated/depenses'
 import { Route as AuthenticatedFacturesRouteImport } from './routes/_authenticated/factures'
 import { Route as AuthenticatedPcsRouteImport } from './routes/_authenticated/pcs'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
@@ -54,6 +55,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDepensesRoute = AuthenticatedDepensesRouteImport.update({
+  id: '/depenses',
+  path: '/depenses',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedFacturesRoute = AuthenticatedFacturesRouteImport.update({
   id: '/factures',
   path: '/factures',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/chambres': typeof AuthenticatedChambresRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/depenses': typeof AuthenticatedDepensesRoute
   '/factures': typeof AuthenticatedFacturesRoute
   '/pcs': typeof AuthenticatedPcsRoute
   '/reservations': typeof AuthenticatedReservationsRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/chambres': typeof AuthenticatedChambresRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/depenses': typeof AuthenticatedDepensesRoute
   '/factures': typeof AuthenticatedFacturesRoute
   '/pcs': typeof AuthenticatedPcsRoute
   '/reservations': typeof AuthenticatedReservationsRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_authenticated/chambres': typeof AuthenticatedChambresRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/depenses': typeof AuthenticatedDepensesRoute
   '/_authenticated/factures': typeof AuthenticatedFacturesRoute
   '/_authenticated/pcs': typeof AuthenticatedPcsRoute
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/chambres'
     | '/clients'
     | '/dashboard'
+    | '/depenses'
     | '/factures'
     | '/pcs'
     | '/reservations'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/chambres'
     | '/clients'
     | '/dashboard'
+    | '/depenses'
     | '/factures'
     | '/pcs'
     | '/reservations'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/_authenticated/chambres'
     | '/_authenticated/clients'
     | '/_authenticated/dashboard'
+    | '/_authenticated/depenses'
     | '/_authenticated/factures'
     | '/_authenticated/pcs'
     | '/_authenticated/reservations'
@@ -200,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/depenses': {
+      id: '/_authenticated/depenses'
+      path: '/depenses'
+      fullPath: '/depenses'
+      preLoaderRoute: typeof AuthenticatedDepensesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/factures': {
       id: '/_authenticated/factures'
       path: '/factures'
@@ -229,6 +248,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChambresRoute: typeof AuthenticatedChambresRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDepensesRoute: typeof AuthenticatedDepensesRoute
   AuthenticatedFacturesRoute: typeof AuthenticatedFacturesRoute
   AuthenticatedPcsRoute: typeof AuthenticatedPcsRoute
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
@@ -239,6 +259,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChambresRoute: AuthenticatedChambresRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDepensesRoute: AuthenticatedDepensesRoute,
   AuthenticatedFacturesRoute: AuthenticatedFacturesRoute,
   AuthenticatedPcsRoute: AuthenticatedPcsRoute,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
