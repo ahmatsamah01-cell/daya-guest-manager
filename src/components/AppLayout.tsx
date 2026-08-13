@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useEtablissement, useMonRole } from "@/hooks/use-hotel";
+import { BrandLogo, SLOGAN } from "@/components/Brand";
 import { cn } from "@/lib/utils";
 
 const NAV = [
