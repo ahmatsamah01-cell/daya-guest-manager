@@ -116,11 +116,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </Sheet>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b bg-card/80 px-4 py-3 backdrop-blur lg:hidden">
+        <header className="no-print sticky top-0 z-30 flex items-center gap-3 border-b bg-card/80 px-4 py-2 backdrop-blur lg:hidden">
           <Button variant="outline" size="icon" onClick={() => setOpen(true)}>
             <Menu className="size-5" />
           </Button>
-          <span className="font-display font-semibold">LE DAYA Hotel Manager</span>
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="rounded bg-white p-1">
+              <BrandLogo className="max-h-9" />
+            </div>
+            <span className="font-display truncate text-sm font-semibold">Hotel Manager</span>
+          </div>
         </header>
         <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
