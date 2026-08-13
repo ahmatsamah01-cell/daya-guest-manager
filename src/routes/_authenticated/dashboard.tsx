@@ -1,4 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useQuefrom@tanstack/react-query";Route
 import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,11 +79,10 @@ function Stat({
   }
 
   return contenu;
-functioniconiconniconicon
 
 function Dashboard() {
   const jour = today();
-
+  const [periode, setPeriode] = useState("jour");
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard", jour],
     queryFn: async () => {
@@ -134,7 +141,20 @@ function Dashboard() {
         </div>
       </div>
 
-      <PageHeader
+      <div className="mb-4 flex justify-end">
+  <Select value={periode} onValueChange={setPeriode}>
+    <SelectTrigger className="w-[180px]">
+      <SelectValue placeholder="Période" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="jour">Aujourd'hui</SelectItem>
+      <SelectItem value="semaine">Cette semaine</SelectItem>
+      <SelectItem value="mois">Ce mois</SelectItem>
+      <SelectItem value="annee">Cette année</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
+<PageHeader
         title="Tableau de bord"
         description={`LE DAYA Guest House — situation du ${formatDate(jour)}`}
       />
