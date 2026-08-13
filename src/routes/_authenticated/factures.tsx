@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
+import { DocumentHeader } from "@/components/Brand";
 import { formatFCFA, formatDate } from "@/lib/format";
 import { useEtablissement } from "@/hooks/use-hotel";
 

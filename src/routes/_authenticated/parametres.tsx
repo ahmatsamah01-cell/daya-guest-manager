@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
+import { BrandLogo, SLOGAN } from "@/components/Brand";
 import { formatFCFA } from "@/lib/format";
 import { useEtablissement, useParametres, useMonRole } from "@/hooks/use-hotel";
 

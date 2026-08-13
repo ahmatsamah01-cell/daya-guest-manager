@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
+import { DocumentHeader } from "@/components/Brand";
 import { formatFCFA, nbNuits, today } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/rapports")({
