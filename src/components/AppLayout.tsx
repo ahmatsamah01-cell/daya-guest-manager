@@ -104,7 +104,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background lg:flex">
-      <aside className="hidden w-64 shrink-0 lg:sticky lg:top-0 lg:block lg:h-screen">
+      <aside className="no-print hidden w-64 shrink-0 lg:sticky lg:top-0 lg:block lg:h-screen">
         <NavContent />
       </aside>
 
