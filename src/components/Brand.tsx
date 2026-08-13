@@ -30,13 +30,13 @@ export function DocumentHeader({
   etablissement,
 }: {
   titre: string;
-  sousTitre?: string;
+  sousTitre?: string | undefined;
   etablissement?: {
     nom?: string | null;
     ville?: string | null;
     telephone?: string | null;
     email?: string | null;
-  } | null;
+  } | null | undefined;
 }) {
   return (
     <header className="mb-4 border-b pb-4">
