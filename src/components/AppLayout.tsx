@@ -43,12 +43,15 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="border-b border-sidebar-border px-5 py-5">
-        <p className="font-display text-lg leading-tight font-semibold text-sidebar-primary">
-          LE DAYA
+      <div className="border-b border-sidebar-border px-5 py-4">
+        <div className="rounded-lg bg-white p-2">
+          <BrandLogo className="mx-auto max-h-14" />
+        </div>
+        <p className="mt-2 text-center text-[10px] tracking-widest uppercase opacity-70">
+          Hotel Manager
         </p>
-        <p className="text-xs tracking-widest uppercase opacity-70">Hotel Manager</p>
-        <p className="mt-2 truncate text-xs opacity-60">
+        <p className="mt-1 truncate text-center text-[11px] opacity-60 italic">{SLOGAN}</p>
+        <p className="mt-1 truncate text-center text-xs opacity-60">
           {etab?.nom ?? "…"} — {etab?.ville ?? ""}
         </p>
       </div>
