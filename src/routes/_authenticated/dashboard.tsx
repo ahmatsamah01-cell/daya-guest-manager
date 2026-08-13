@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Select,
   SelectContent,
@@ -7,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQuefrom@tanstack/react-query";Route
 import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       },
       { property: "og:title", content: "Tableau de bord — LE DAYA Hotel Manager" },
       {
-       property: "og:description",
+        property: "og:description",
         content: "Occupation, recettes et activité du jour de LE DAYA Guest House.",
       },
     ],
@@ -79,6 +79,7 @@ function Stat({
   }
 
   return contenu;
+}
 
 function Dashboard() {
   const jour = today();
@@ -142,19 +143,19 @@ function Dashboard() {
       </div>
 
       <div className="mb-4 flex justify-end">
-  <Select value={periode} onValueChange={setPeriode}>
-    <SelectTrigger className="w-[180px]">
-      <SelectValue placeholder="Période" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="jour">Aujourd'hui</SelectItem>
-      <SelectItem value="semaine">Cette semaine</SelectItem>
-      <SelectItem value="mois">Ce mois</SelectItem>
-      <SelectItem value="annee">Cette année</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
-<PageHeader
+        <Select value={periode} onValueChange={setPeriode}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Période" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="jour">Aujourd'hui</SelectItem>
+            <SelectItem value="semaine">Cette semaine</SelectItem>
+            <SelectItem value="mois">Ce mois</SelectItem>
+            <SelectItem value="annee">Cette année</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <PageHeader
         title="Tableau de bord"
         description={`LE DAYA Guest House — situation du ${formatDate(jour)}`}
       />
@@ -166,7 +167,7 @@ function Dashboard() {
           detail={`${data.chambres.length - occupees.size} chambre(s) disponible(s)`}
           icon={BedDouble}
           to="/_authenticated/chambres"     
-         />
+        />
         <Stat
           titre="Arrivées / départs du jour"
           valeur={`${arrivees.length} / ${departs.length}`}
@@ -179,7 +180,7 @@ function Dashboard() {
           valeur={formatFCFA(entrees)}
           detail={`Sorties de caisse : ${formatFCFA(sorties)}`}
           icon={Wallet}
-            to="/_authenticated/caisses"
+          to="/_authenticated/caisses"
         />
         <Stat
           titre="Dépenses du jour"
@@ -192,14 +193,14 @@ function Dashboard() {
           valeur={formatFCFA(taxeMois)}
           detail="Collectée depuis le 1er du mois"
           icon={Landmark}
-            to="/_authenticated/taxe-séjour"
+          to="/_authenticated/taxe-séjour"
         />
         <Stat
           titre="Clients enregistrés"
           valeur={String(data.clients.length)}
           detail="Fichier clients de l'établissement"
           icon={Users}
-            to="/_authenticated/clients"
+          to="/_authenticated/clients"
         />
       </div>
 
@@ -232,6 +233,7 @@ function Dashboard() {
               <p className="text-sm text-muted-foreground">Aucune chambre enregistrée.</p>
             ) : null}
           </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
@@ -251,7 +253,7 @@ function Dashboard() {
                       {r.clients?.prenom ?? ""} {r.clients?.nom ?? "Client"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {r.chambres?.nom} — du {formatDate(r.date_arrivee)} au{" "}
+                      {r.chambres?.nom} — du {formatDate(r.date_arrivee)} au {" "}
                       {formatDate(r.date_depart)}
                     </p>
                   </div>
