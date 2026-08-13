@@ -159,10 +159,15 @@ function FacturesPage() {
 
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
         <DialogContent>
-          <DialogHeader>
+          <DialogHeader className="no-print">
             <DialogTitle>Facture {facture?.numero}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3 text-sm">
+          <div className="print-area space-y-3 text-sm">
+            <DocumentHeader
+              titre={`Facture ${facture?.numero ?? ""}`}
+              sousTitre={facture ? formatDate(facture.date_facture) : undefined}
+              etablissement={etab}
+            />
             <p className="text-muted-foreground">
               {facture?.clients?.prenom} {facture?.clients?.nom} —{" "}
               {facture ? formatDate(facture.date_facture) : ""}
@@ -179,6 +184,14 @@ function FacturesPage() {
               <span>Total</span>
               <span>{formatFCFA(facture?.montant_total ?? 0)}</span>
             </div>
+            <p className="pt-2 text-[10px] text-muted-foreground">
+              Document généré par LE DAYA Hotel Manager.
+            </p>
+          </div>
+          <div className="no-print flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              Imprimer / PDF
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
