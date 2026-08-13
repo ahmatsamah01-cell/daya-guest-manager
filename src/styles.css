@@ -150,3 +150,29 @@
     letter-spacing: -0.015em;
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body:has(.print-area) * {
+    visibility: hidden;
+  }
+
+  body:has(.print-area) .print-area,
+  body:has(.print-area) .print-area * {
+    visibility: visible;
+  }
+
+  body:has(.print-area) .print-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+}
