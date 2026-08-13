@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuefrom@tanstack/react-query";Route
 import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       },
       { property: "og:title", content: "Tableau de bord — LE DAYA Hotel Manager" },
       {
-        property: "og:description",
+       property: "og:description",
         content: "Occupation, recettes et activité du jour de LE DAYA Guest House.",
       },
     ],
@@ -32,25 +32,46 @@ function Stat({
   valeur,
   detail,
   icon: Icon,
+  to,
 }: {
   titre: string;
   valeur: string;
   detail?: string;
   icon: React.ComponentType<{ className?: string }>;
+  to?: string;
 }) {
-  return (
-    <Card>
+  const contenu = (
+    <Card className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{titre}</CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {titre}
+        </CardTitle>
         <Icon className="size-4 text-primary" />
       </CardHeader>
+
       <CardContent>
         <p className="font-display text-2xl font-semibold">{valeur}</p>
-        {detail ? <p className="mt-1 text-xs text-muted-foreground">{detail}</p> : null}
+
+        {detail ? (
+          <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
+        ) : null}
       </CardContent>
     </Card>
   );
-}
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
+        {contenu}
+      </Link>
+    );
+  }
+
+  return contenu;
+functioniconiconniconicon
 
 function Dashboard() {
   const jour = today();
@@ -124,18 +145,21 @@ function Dashboard() {
           valeur={`${occupees.size}/${data.chambres.length}`}
           detail={`${data.chambres.length - occupees.size} chambre(s) disponible(s)`}
           icon={BedDouble}
-        />
+          to="/_authenticated/chambres"     
+         />
         <Stat
           titre="Arrivées / départs du jour"
           valeur={`${arrivees.length} / ${departs.length}`}
           detail="Mouvements prévus aujourd'hui"
           icon={CalendarCheck}
+          to="/_authenticated/réservations"
         />
         <Stat
           titre="Recettes encaissées (jour)"
           valeur={formatFCFA(entrees)}
           detail={`Sorties de caisse : ${formatFCFA(sorties)}`}
           icon={Wallet}
+            to="/_authenticated/caisses"
         />
         <Stat
           titre="Dépenses du jour"
@@ -148,12 +172,14 @@ function Dashboard() {
           valeur={formatFCFA(taxeMois)}
           detail="Collectée depuis le 1er du mois"
           icon={Landmark}
+            to="/_authenticated/taxe-séjour"
         />
         <Stat
           titre="Clients enregistrés"
           valeur={String(data.clients.length)}
           detail="Fichier clients de l'établissement"
           icon={Users}
+            to="/_authenticated/clients"
         />
       </div>
 
@@ -186,7 +212,6 @@ function Dashboard() {
               <p className="text-sm text-muted-foreground">Aucune chambre enregistrée.</p>
             ) : null}
           </CardContent>
-        </Card>
 
         <Card>
           <CardHeader>
