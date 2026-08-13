@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
+import { BrandLogo, SLOGAN } from "@/components/Brand";
 import { formatFCFA } from "@/lib/format";
 import { useEtablissement, useParametres, useMonRole } from "@/hooks/use-hotel";
 
@@ -159,9 +160,16 @@ function ParametresPage() {
         <Card>
           <CardHeader>
             <CardTitle>Établissement</CardTitle>
-            <CardDescription>Coordonnées affichées sur les documents</CardDescription>
+            <CardDescription>Coordonnées et logo affichés sur les documents</CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-6 flex flex-wrap items-center gap-4 rounded-lg border bg-white p-4">
+              <BrandLogo className="max-h-20" />
+              <div className="min-w-0 text-sm text-neutral-600">
+                <p className="font-medium text-neutral-900">Logo officiel</p>
+                <p className="italic">{SLOGAN}</p>
+              </div>
+            </div>
             <form
               className="space-y-4"
               onSubmit={(e) => {

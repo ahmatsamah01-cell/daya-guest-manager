@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
+import { DocumentHeader } from "@/components/Brand";
 import { formatFCFA, formatDate, today } from "@/lib/format";
 import { useEtablissement } from "@/hooks/use-hotel";
 
@@ -49,6 +50,7 @@ function PcsPage() {
   const qc = useQueryClient();
   const { data: etab } = useEtablissement();
   const [open, setOpen] = useState(false);
+  const [recu, setRecu] = useState<string | null>(null);
   const [form, setForm] = useState({
     type_piece: "sortie",
     date_piece: today(),
@@ -120,6 +122,8 @@ function PcsPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const pieceRecu = (pieces ?? []).find((p) => p.id === recu);
 
   return (
     <div>
@@ -218,6 +222,7 @@ function PcsPage() {
                 <TableHead>Motif</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead className="text-right">Montant</TableHead>
+                <TableHead className="text-right">Reçu</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -235,11 +240,16 @@ function PcsPage() {
                   <TableCell className="text-right whitespace-nowrap">
                     {formatFCFA(p.montant)}
                   </TableCell>
+                  <TableCell className="text-right">
+                    <Button size="sm" variant="outline" onClick={() => setRecu(p.id)}>
+                      Reçu
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
               {(pieces ?? []).length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                     Aucune pièce de caisse enregistrée.
                   </TableCell>
                 </TableRow>
@@ -248,6 +258,50 @@ function PcsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!recu} onOpenChange={(o) => !o && setRecu(null)}>
+        <DialogContent>
+          <DialogHeader className="no-print">
+            <DialogTitle>Reçu — pièce de caisse</DialogTitle>
+          </DialogHeader>
+          {pieceRecu ? (
+            <div className="print-area space-y-3 text-sm">
+              <DocumentHeader
+                titre={`Pièce de caisse ${pieceRecu.numero}`}
+                sousTitre={formatDate(pieceRecu.date_piece)}
+                etablissement={etab}
+              />
+              <div className="divide-y rounded-lg border">
+                <div className="flex justify-between gap-4 p-3">
+                  <span className="text-muted-foreground">Type</span>
+                  <span>{pieceRecu.type_piece === "entree" ? "Entrée" : "Sortie"}</span>
+                </div>
+                <div className="flex justify-between gap-4 p-3">
+                  <span className="text-muted-foreground">Bénéficiaire</span>
+                  <span>{pieceRecu.beneficiaire}</span>
+                </div>
+                <div className="flex justify-between gap-4 p-3">
+                  <span className="text-muted-foreground">Motif</span>
+                  <span>{pieceRecu.motif}</span>
+                </div>
+              </div>
+              <div className="font-display flex justify-between text-lg font-semibold">
+                <span>Montant</span>
+                <span>{formatFCFA(pieceRecu.montant)}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-6 pt-6 text-[11px] text-muted-foreground">
+                <p>Signature bénéficiaire</p>
+                <p className="text-right">Signature caissier</p>
+              </div>
+            </div>
+          ) : null}
+          <div className="no-print flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              Imprimer / PDF
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

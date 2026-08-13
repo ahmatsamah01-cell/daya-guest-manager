@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/AppLayout";
+import { BrandLogo, SLOGAN } from "@/components/Brand";
 import { formatFCFA, formatDate, today } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -102,6 +103,16 @@ function Dashboard() {
 
   return (
     <div>
+      <div className="mb-6 flex flex-wrap items-center gap-4 rounded-xl border bg-card p-4">
+        <div className="rounded-lg bg-white p-2">
+          <BrandLogo className="max-h-16 sm:max-h-20" />
+        </div>
+        <div className="min-w-0">
+          <p className="font-display text-lg font-semibold">LE DAYA Guest House</p>
+          <p className="text-sm text-muted-foreground italic">{SLOGAN}</p>
+        </div>
+      </div>
+
       <PageHeader
         title="Tableau de bord"
         description={`LE DAYA Guest House — situation du ${formatDate(jour)}`}

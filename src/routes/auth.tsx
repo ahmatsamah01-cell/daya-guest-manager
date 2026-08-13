@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BrandLogo, SLOGAN } from "@/components/Brand";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -88,11 +89,14 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-sidebar px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="font-display text-3xl font-semibold text-sidebar-primary">LE DAYA</h1>
+          <div className="mx-auto mb-4 w-fit rounded-xl bg-white p-4 shadow-lg">
+            <BrandLogo className="max-h-28 sm:max-h-32" />
+          </div>
           <p className="text-xs tracking-[0.35em] text-sidebar-foreground/70 uppercase">
             Hotel Manager
           </p>
-          <p className="mt-3 text-sm text-sidebar-foreground/70">
+          <p className="mt-2 text-sm text-sidebar-foreground/80 italic">{SLOGAN}</p>
+          <p className="mt-2 text-sm text-sidebar-foreground/70">
             Guest House — Port-Gentil, Gabon
           </p>
         </div>

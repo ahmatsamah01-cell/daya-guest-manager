@@ -6,7 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
+import { useEtablissement } from "@/hooks/use-hotel";
 import { PageHeader } from "@/components/AppLayout";
+import { DocumentHeader } from "@/components/Brand";
 import { formatFCFA, nbNuits, today } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/rapports")({
@@ -26,6 +30,7 @@ export const Route = createFileRoute("/_authenticated/rapports")({
 });
 
 function RapportsPage() {
+  const { data: etab } = useEtablissement();
   const [debut, setDebut] = useState(`${today().slice(0, 7)}-01`);
   const [fin, setFin] = useState(today());
 
@@ -111,9 +116,17 @@ function RapportsPage() {
 
   return (
     <div>
-      <PageHeader title="Rapports" description="Synthèse d'activité sur la période choisie" />
+      <PageHeader
+        title="Rapports"
+        description="Synthèse d'activité sur la période choisie"
+        action={
+          <Button variant="outline" className="no-print" onClick={() => window.print()}>
+            <Printer className="size-4" /> Imprimer / PDF
+          </Button>
+        }
+      />
 
-      <div className="mb-6 flex flex-wrap items-end gap-3">
+      <div className="no-print mb-6 flex flex-wrap items-end gap-3">
         <div className="space-y-1">
           <Label className="text-xs">Du</Label>
           <Input type="date" value={debut} onChange={(e) => setDebut(e.target.value)} />
@@ -123,6 +136,13 @@ function RapportsPage() {
           <Input type="date" value={fin} onChange={(e) => setFin(e.target.value)} />
         </div>
       </div>
+
+      <div className="print-area">
+      <DocumentHeader
+        titre="Rapport d'activité"
+        sousTitre={`Période du ${debut} au ${fin}`}
+        etablissement={etab}
+      />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((k) => (
@@ -171,6 +191,7 @@ function RapportsPage() {
           </Table>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

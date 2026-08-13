@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useEtablissement, useMonRole } from "@/hooks/use-hotel";
+import { BrandLogo, SLOGAN } from "@/components/Brand";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -43,12 +44,15 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="border-b border-sidebar-border px-5 py-5">
-        <p className="font-display text-lg leading-tight font-semibold text-sidebar-primary">
-          LE DAYA
+      <div className="border-b border-sidebar-border px-5 py-4">
+        <div className="rounded-lg bg-white p-2">
+          <BrandLogo className="mx-auto max-h-14" />
+        </div>
+        <p className="mt-2 text-center text-[10px] tracking-widest uppercase opacity-70">
+          Hotel Manager
         </p>
-        <p className="text-xs tracking-widest uppercase opacity-70">Hotel Manager</p>
-        <p className="mt-2 truncate text-xs opacity-60">
+        <p className="mt-1 truncate text-center text-[11px] opacity-60 italic">{SLOGAN}</p>
+        <p className="mt-1 truncate text-center text-xs opacity-60">
           {etab?.nom ?? "…"} — {etab?.ville ?? ""}
         </p>
       </div>
@@ -100,7 +104,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background lg:flex">
-      <aside className="hidden w-64 shrink-0 lg:sticky lg:top-0 lg:block lg:h-screen">
+      <aside className="no-print hidden w-64 shrink-0 lg:sticky lg:top-0 lg:block lg:h-screen">
         <NavContent />
       </aside>
 
@@ -112,11 +116,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </Sheet>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b bg-card/80 px-4 py-3 backdrop-blur lg:hidden">
+        <header className="no-print sticky top-0 z-30 flex items-center gap-3 border-b bg-card/80 px-4 py-2 backdrop-blur lg:hidden">
           <Button variant="outline" size="icon" onClick={() => setOpen(true)}>
             <Menu className="size-5" />
           </Button>
-          <span className="font-display font-semibold">LE DAYA Hotel Manager</span>
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="rounded bg-white p-1">
+              <BrandLogo className="max-h-9" />
+            </div>
+            <span className="font-display truncate text-sm font-semibold">Hotel Manager</span>
+          </div>
         </header>
         <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
