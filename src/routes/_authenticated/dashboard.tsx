@@ -297,7 +297,7 @@ const tauxOccupation =
         : "Cette année"
 }`}
           valeur={formatFCFA(taxeMois)}
-          detail="Collectée depuis le 1er du mois"
+          detail={`Nuitées taxées sur la période (${data.taxes.length} enregistrement(s))`}
           icon={Landmark}
           to="/taxe-sejour"
         />
