@@ -137,6 +137,15 @@ function Dashboard() {
 const departs = data.reservations.filter(
   (r) => r.date_depart >= dateDebut && r.date_depart <= jour,
 );
+titre={`Arrivées / départs — ${
+  periode === "jour"
+    ? "Aujourd'hui"
+    : periode === "semaine"
+      ? "Cette semaine"
+      : periode === "mois"
+        ? "Ce mois"
+        : "Cette année"
+}`}
   const entrees = data.operations
     .filter((o) => o.sens === "entree")
     .reduce((s, o) => s + Number(o.montant), 0);
@@ -177,15 +186,23 @@ const departs = data.reservations.filter(
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <Stat
-          titre="Occupation"
-          valeur={`${occupees.size}/${data.chambres.length}`}
-          detail={`${data.chambres.length - occupees.size} chambre(s) disponible(s)`}
-          icon={BedDouble}
-          to="/chambres"     
+         <Stat
+  titre="Occupation"
+  valeur={`${tauxOccupation}%`}
+  detail={`${nuitsOccupees} nuitées occupées sur ${nuitsDisponibles} disponibles`}
+  icon={BedDouble}
+  to="/chambres"   
         />
         <Stat
-          titre="Arrivées / départs du jour"
+          titre={`Arrivées / départs — ${
+  periode === "jour"
+    ? "Aujourd'hui"
+    : periode === "semaine"
+      ? "Cette semaine"
+      : periode === "mois"
+        ? "Ce mois"
+        : "Cette année"
+}`}
           valeur={`${arrivees.length} / ${departs.length}`}
           detail="Mouvements prévus aujourd'hui"
           icon={CalendarCheck}
