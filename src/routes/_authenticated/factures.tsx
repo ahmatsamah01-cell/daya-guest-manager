@@ -63,6 +63,38 @@ function FacturesPage() {
     },
   });
 
+  const [remiseFacture, setRemiseFacture] = useState<string | null>(null);
+  const [remiseForm, setRemiseForm] = useState({ type: "montant", valeur: "", motif: "" });
+
+  const appliquerRemise = useMutation({
+    mutationFn: async () => {
+      const f = (factures ?? []).find((x) => x.id === remiseFacture);
+      if (!f) throw new Error("Facture introuvable");
+      const base =
+        Number(f.montant_hebergement) + Number(f.montant_taxe) + Number(f.montant_autres);
+      const valeur = Number(remiseForm.valeur) || 0;
+      const remise =
+        remiseForm.type === "pourcentage" ? Math.round((base * valeur) / 100) : valeur;
+      if (remise < 0 || remise > base) throw new Error("Remise invalide");
+      const { error } = await supabase
+        .from("factures")
+        .update({
+          montant_remise: remise,
+          motif_remise: remiseForm.motif || null,
+          montant_total: base - remise,
+        })
+        .eq("id", f.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries();
+      setRemiseFacture(null);
+      setRemiseForm({ type: "montant", valeur: "", motif: "" });
+      toast.success("Remise appliquée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const payer = useMutation({
     mutationFn: async (f: NonNullable<typeof factures>[number]) => {
       const { data: u } = await supabase.auth.getUser();
@@ -108,6 +140,7 @@ function FacturesPage() {
                 <TableHead>Date</TableHead>
                 <TableHead>Hébergement</TableHead>
                 <TableHead>Taxe</TableHead>
+                <TableHead>Remise</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -125,6 +158,9 @@ function FacturesPage() {
                     {formatFCFA(f.montant_hebergement)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{formatFCFA(f.montant_taxe)}</TableCell>
+                  <TableCell className="whitespace-nowrap text-destructive">
+                    {Number(f.montant_remise) > 0 ? `- ${formatFCFA(f.montant_remise)}` : "—"}
+                  </TableCell>
                   <TableCell className="font-medium whitespace-nowrap">
                     {formatFCFA(f.montant_total)}
                   </TableCell>
@@ -138,16 +174,32 @@ function FacturesPage() {
                       Détail
                     </Button>
                     {f.statut !== "payee" ? (
-                      <Button size="sm" onClick={() => payer.mutate(f)}>
-                        Encaisser
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setRemiseFacture(f.id);
+                            setRemiseForm({
+                              type: "montant",
+                              valeur: String(Number(f.montant_remise) || ""),
+                              motif: f.motif_remise ?? "",
+                            });
+                          }}
+                        >
+                          Remise
+                        </Button>
+                        <Button size="sm" onClick={() => payer.mutate(f)}>
+                          Encaisser
+                        </Button>
+                      </>
                     ) : null}
                   </TableCell>
                 </TableRow>
               ))}
               {(factures ?? []).length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
                     Aucune facture. Les factures sont générées au check-out d'une réservation.
                   </TableCell>
                 </TableRow>

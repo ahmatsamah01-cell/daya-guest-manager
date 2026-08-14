@@ -284,7 +284,7 @@ const tauxOccupation =
           valeur={formatFCFA(depensesJour)}
           detail={`${data.depenses.length} dépense(s) enregistrée(s)`}
           icon={TrendingDown}
-          to="/Depenses"
+          to="/depenses"
         />
         <Stat
           titre={`Taxe de séjour — ${
