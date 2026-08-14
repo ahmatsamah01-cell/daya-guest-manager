@@ -130,8 +130,13 @@ function Dashboard() {
     (r) => r.statut === "en_cours" || (r.date_arrivee <= jour && r.date_depart > jour),
   );
   const occupees = new Set(enCours.map((r) => r.chambre_id));
-  const arrivees = data.reservations.filter((r) => r.date_arrivee === jour);
-  const departs = data.reservations.filter((r) => r.date_depart === jour);
+  const arrivees = data.reservations.filter(
+  (r) => r.date_arrivee >= dateDebut && r.date_arrivee <= jour,
+);
+
+const departs = data.reservations.filter(
+  (r) => r.date_depart >= dateDebut && r.date_depart <= jour,
+);
   const entrees = data.operations
     .filter((o) => o.sens === "entree")
     .reduce((s, o) => s + Number(o.montant), 0);
