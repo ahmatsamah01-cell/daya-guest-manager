@@ -185,7 +185,23 @@ const tauxOccupation =
     .filter((o) => o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
   const depensesJour = data.depenses.reduce((s, d) => s + Number(d.montant), 0);
-  const taxeMois = data.taxes.reduce((s, t) => s + Number(t.montant_total), 0);
+  const JOUR_MS = 24 * 60 * 60 * 1000;
+  const debutP = new Date(dateDebut).getTime();
+  const finP = new Date(jour).getTime() + JOUR_MS;
+  const taxeMois = data.taxes.reduce((s, t) => {
+    const debutT = new Date(t.date_nuitee).getTime();
+    const finT = debutT + Math.max(1, Number(t.nb_nuits) || 1) * JOUR_MS;
+    const nuits = Math.max(
+      0,
+      Math.round((Math.min(finT, finP) - Math.max(debutT, debutP)) / JOUR_MS),
+    );
+    if (nuits === 0) return s;
+    const unitaire =
+      Number(t.montant_unitaire) ||
+      Number(t.montant_total) / Math.max(1, Number(t.nb_nuits) || 1);
+    return s + unitaire * nuits;
+  }, 0);
+
 
   return (
     <div>
