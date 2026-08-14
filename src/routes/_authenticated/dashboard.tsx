@@ -49,7 +49,8 @@ function Stat({
   to?: string;
 }) {
   const contenu = (
-    <Card className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <Card className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">aspect-square
+
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {titre}
