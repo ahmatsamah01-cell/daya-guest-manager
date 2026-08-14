@@ -166,7 +166,7 @@ function Dashboard() {
           valeur={`${occupees.size}/${data.chambres.length}`}
           detail={`${data.chambres.length - occupees.size} chambre(s) disponible(s)`}
           icon={BedDouble}
-          to="/_authenticated/chambres"     
+          to="/chambres"     
         />
         <Stat
           titre="Arrivées / départs du jour"
