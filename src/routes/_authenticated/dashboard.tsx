@@ -173,28 +173,28 @@ function Dashboard() {
           valeur={`${arrivees.length} / ${departs.length}`}
           detail="Mouvements prévus aujourd'hui"
           icon={CalendarCheck}
-          to="/réservations"
+          to="/reservations"
         />
         <Stat
           titre="Recettes encaissées (jour)"
           valeur={formatFCFA(entrees)}
           detail={`Sorties de caisse : ${formatFCFA(sorties)}`}
           icon={Wallet}
-          to="/caisses"
+          to="/caisse"
         />
         <Stat
           titre="Dépenses du jour"
           valeur={formatFCFA(depensesJour)}
           detail={`${data.depenses.length} dépense(s) enregistrée(s)`}
           icon={TrendingDown}
-          to="/Dépenses"
+          to="/Depenses"
         />
         <Stat
           titre="Taxe de séjour (mois)"
           valeur={formatFCFA(taxeMois)}
           detail="Collectée depuis le 1er du mois"
           icon={Landmark}
-          to="/taxe-séjour"
+          to="/taxe-sejour"
         />
         <Stat
           titre="Clients enregistrés"
