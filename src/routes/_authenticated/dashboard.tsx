@@ -133,19 +133,51 @@ function Dashboard() {
   const arrivees = data.reservations.filter(
   (r) => r.date_arrivee >= dateDebut && r.date_arrivee <= jour,
 );
-
 const departs = data.reservations.filter(
   (r) => r.date_depart >= dateDebut && r.date_depart <= jour,
 );
-titre={`Arrivées / départs — ${
-  periode === "jour"
-    ? "Aujourd'hui"
-    : periode === "semaine"
-      ? "Cette semaine"
-      : periode === "mois"
-        ? "Ce mois"
-        : "Cette année"
-}`}
+const departs = data.reservations.filter(
+  (r) => r.date_depart >= dateDebut && r.date_depart <= jour,
+);
+
+const totalChambres = data.chambres.length;
+
+const nuitsDisponibles =
+  totalChambres *
+  (Math.floor(
+    (new Date(jour).getTime() - new Date(dateDebut).getTime()) /
+      (1000 * 60 * 60 * 24),
+  ) + 1);
+
+const nuitsOccupees = data.reservations.reduce((total, r) => {
+  const debutReservation = new Date(r.date_arrivee);
+  const finReservation = new Date(r.date_depart);
+  const debutPeriode = new Date(dateDebut);
+  const finPeriode = new Date(jour);
+
+  const debutEffectif =
+    debutReservation > debutPeriode ? debutReservation : debutPeriode;
+
+  const finEffectif =
+    finReservation < finPeriode ? finReservation : finPeriode;
+
+  const nuits = Math.max(
+    0,
+    Math.floor(
+      (finEffectif.getTime() - debutEffectif.getTime()) /
+        (1000 * 60 * 60 * 24),
+    ),
+  );
+
+  return total + nuits;
+}, 0);
+
+const tauxOccupation =
+  nuitsDisponibles > 0
+    ? Math.round((nuitsOccupees / nuitsDisponibles) * 100)
+    : 0;
+
+const entrees = data.operations
   const entrees = data.operations
     .filter((o) => o.sens === "entree")
     .reduce((s, o) => s + Number(o.montant), 0);
