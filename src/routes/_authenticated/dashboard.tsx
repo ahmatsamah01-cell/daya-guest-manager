@@ -154,7 +154,7 @@ const nuitsOccupees = data.reservations.reduce((total, r) => {
   const debutReservation = new Date(r.date_arrivee);
   const finReservation = new Date(r.date_depart);
   const debutPeriode = new Date(dateDebut);
-  const finPeriode = new Date(jour);
+  const finPeriode = new Date(new Date(jour).getTime() + 24 * 60 * 60 * 1000);
 
   const debutEffectif =
     debutReservation > debutPeriode ? debutReservation : debutPeriode;
