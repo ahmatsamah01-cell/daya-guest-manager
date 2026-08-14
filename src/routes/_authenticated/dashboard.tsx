@@ -96,7 +96,10 @@ function Dashboard() {
           ? `${jour.slice(0, 4)}-01-01`
           : jour;
   const { data, isLoading } = useQuery({
-    queryKey: ["dashboard", jour],
+    queryKey: ["dashboard", jour, dateDebut],
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    staleTime: 0,
     queryFn: async () => {
       const [chambres, resas, ops, deps, taxes, clients] = await Promise.all([
         supabase.from("chambres").select("*").eq("actif", true).order("nom"),
@@ -107,7 +110,7 @@ function Dashboard() {
           .order("date_arrivee"),
         supabase.from("caisse_operations").select("*").gte("date_operation", `${dateDebut}T00:00:00`),
         supabase.from("depenses").select("*").gte("date_depense", dateDebut).lte("date_depense", jour), 
-        supabase.from("taxes_sejour").select("*").gte("date_nuitee", dateDebut).lte("date_nuitee", jour), 
+        supabase.from("taxes_sejour").select("*").lte("date_nuitee", jour),
         supabase.from("clients").select("id"),
       ]);
       for (const r of [chambres, resas, ops, deps, taxes, clients]) if (r.error) throw r.error;
@@ -121,6 +124,7 @@ function Dashboard() {
       };
     },
   });
+
 
   if (isLoading || !data) {
     return <p className="text-sm text-muted-foreground">Chargement…</p>;
