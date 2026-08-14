@@ -96,7 +96,10 @@ function Dashboard() {
           ? `${jour.slice(0, 4)}-01-01`
           : jour;
   const { data, isLoading } = useQuery({
-    queryKey: ["dashboard", jour],
+    queryKey: ["dashboard", jour, dateDebut],
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    staleTime: 0,
     queryFn: async () => {
       const [chambres, resas, ops, deps, taxes, clients] = await Promise.all([
         supabase.from("chambres").select("*").eq("actif", true).order("nom"),
@@ -107,7 +110,7 @@ function Dashboard() {
           .order("date_arrivee"),
         supabase.from("caisse_operations").select("*").gte("date_operation", `${dateDebut}T00:00:00`),
         supabase.from("depenses").select("*").gte("date_depense", dateDebut).lte("date_depense", jour), 
-        supabase.from("taxes_sejour").select("*").gte("date_nuitee", dateDebut).lte("date_nuitee", jour), 
+        supabase.from("taxes_sejour").select("*").lte("date_nuitee", jour),
         supabase.from("clients").select("id"),
       ]);
       for (const r of [chambres, resas, ops, deps, taxes, clients]) if (r.error) throw r.error;
@@ -121,6 +124,7 @@ function Dashboard() {
       };
     },
   });
+
 
   if (isLoading || !data) {
     return <p className="text-sm text-muted-foreground">Chargement…</p>;
@@ -150,7 +154,7 @@ const nuitsOccupees = data.reservations.reduce((total, r) => {
   const debutReservation = new Date(r.date_arrivee);
   const finReservation = new Date(r.date_depart);
   const debutPeriode = new Date(dateDebut);
-  const finPeriode = new Date(jour);
+  const finPeriode = new Date(new Date(jour).getTime() + 24 * 60 * 60 * 1000);
 
   const debutEffectif =
     debutReservation > debutPeriode ? debutReservation : debutPeriode;
@@ -181,7 +185,23 @@ const tauxOccupation =
     .filter((o) => o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
   const depensesJour = data.depenses.reduce((s, d) => s + Number(d.montant), 0);
-  const taxeMois = data.taxes.reduce((s, t) => s + Number(t.montant_total), 0);
+  const JOUR_MS = 24 * 60 * 60 * 1000;
+  const debutP = new Date(dateDebut).getTime();
+  const finP = new Date(jour).getTime() + JOUR_MS;
+  const taxeMois = data.taxes.reduce((s, t) => {
+    const debutT = new Date(t.date_nuitee).getTime();
+    const finT = debutT + Math.max(1, Number(t.nb_nuits) || 1) * JOUR_MS;
+    const nuits = Math.max(
+      0,
+      Math.round((Math.min(finT, finP) - Math.max(debutT, debutP)) / JOUR_MS),
+    );
+    if (nuits === 0) return s;
+    const unitaire =
+      Number(t.montant_unitaire) ||
+      Number(t.montant_total) / Math.max(1, Number(t.nb_nuits) || 1);
+    return s + unitaire * nuits;
+  }, 0);
+
 
   return (
     <div>
@@ -277,7 +297,7 @@ const tauxOccupation =
         : "Cette année"
 }`}
           valeur={formatFCFA(taxeMois)}
-          detail="Collectée depuis le 1er du mois"
+          detail={`Nuitées taxées sur la période (${data.taxes.length} enregistrement(s))`}
           icon={Landmark}
           to="/taxe-sejour"
         />
