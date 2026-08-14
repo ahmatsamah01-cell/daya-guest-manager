@@ -84,9 +84,6 @@ function Stat({
 function Dashboard() {
   const jour = today();
   const [periode, setPeriode] = useState("jour");
-function Dashboard() {
-  const jour = today();
-  const [periode, setPeriode] = useState("jour");
 
   const dateDebut =
     periode === "semaine"
