@@ -173,14 +173,14 @@ function Dashboard() {
           valeur={`${arrivees.length} / ${departs.length}`}
           detail="Mouvements prévus aujourd'hui"
           icon={CalendarCheck}
-          to="/_authenticated/réservations"
+          to="/réservations"
         />
         <Stat
           titre="Recettes encaissées (jour)"
           valeur={formatFCFA(entrees)}
           detail={`Sorties de caisse : ${formatFCFA(sorties)}`}
           icon={Wallet}
-          to="/_authenticated/caisses"
+          to="/caisses"
         />
         <Stat
           titre="Dépenses du jour"
@@ -193,14 +193,14 @@ function Dashboard() {
           valeur={formatFCFA(taxeMois)}
           detail="Collectée depuis le 1er du mois"
           icon={Landmark}
-          to="/_authenticated/taxe-séjour"
+          to="/taxe-séjour"
         />
         <Stat
           titre="Clients enregistrés"
           valeur={String(data.clients.length)}
           detail="Fichier clients de l'établissement"
           icon={Users}
-          to="/_authenticated/clients"
+          to="/clients"
         />
       </div>
 
