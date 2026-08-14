@@ -1,0 +1,1 @@
+ALTER TABLE public.factures ADD COLUMN IF NOT EXISTS montant_remise numeric NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS motif_remise text;

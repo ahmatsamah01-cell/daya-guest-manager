@@ -383,8 +383,10 @@ export type Database = {
           montant_autres: number
           montant_hebergement: number
           montant_paye: number
+          montant_remise: number
           montant_taxe: number
           montant_total: number
+          motif_remise: string | null
           numero: string
           reservation_id: string | null
           statut: string
@@ -400,8 +402,10 @@ export type Database = {
           montant_autres?: number
           montant_hebergement?: number
           montant_paye?: number
+          montant_remise?: number
           montant_taxe?: number
           montant_total?: number
+          motif_remise?: string | null
           numero: string
           reservation_id?: string | null
           statut?: string
@@ -417,8 +421,10 @@ export type Database = {
           montant_autres?: number
           montant_hebergement?: number
           montant_paye?: number
+          montant_remise?: number
           montant_taxe?: number
           montant_total?: number
+          motif_remise?: string | null
           numero?: string
           reservation_id?: string | null
           statut?: string
