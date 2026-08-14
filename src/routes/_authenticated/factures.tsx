@@ -174,16 +174,32 @@ function FacturesPage() {
                       Détail
                     </Button>
                     {f.statut !== "payee" ? (
-                      <Button size="sm" onClick={() => payer.mutate(f)}>
-                        Encaisser
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setRemiseFacture(f.id);
+                            setRemiseForm({
+                              type: "montant",
+                              valeur: String(Number(f.montant_remise) || ""),
+                              motif: f.motif_remise ?? "",
+                            });
+                          }}
+                        >
+                          Remise
+                        </Button>
+                        <Button size="sm" onClick={() => payer.mutate(f)}>
+                          Encaisser
+                        </Button>
+                      </>
                     ) : null}
                   </TableCell>
                 </TableRow>
               ))}
               {(factures ?? []).length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
                     Aucune facture. Les factures sont générées au check-out d'une réservation.
                   </TableCell>
                 </TableRow>
