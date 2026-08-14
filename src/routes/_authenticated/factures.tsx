@@ -63,6 +63,38 @@ function FacturesPage() {
     },
   });
 
+  const [remiseFacture, setRemiseFacture] = useState<string | null>(null);
+  const [remiseForm, setRemiseForm] = useState({ type: "montant", valeur: "", motif: "" });
+
+  const appliquerRemise = useMutation({
+    mutationFn: async () => {
+      const f = (factures ?? []).find((x) => x.id === remiseFacture);
+      if (!f) throw new Error("Facture introuvable");
+      const base =
+        Number(f.montant_hebergement) + Number(f.montant_taxe) + Number(f.montant_autres);
+      const valeur = Number(remiseForm.valeur) || 0;
+      const remise =
+        remiseForm.type === "pourcentage" ? Math.round((base * valeur) / 100) : valeur;
+      if (remise < 0 || remise > base) throw new Error("Remise invalide");
+      const { error } = await supabase
+        .from("factures")
+        .update({
+          montant_remise: remise,
+          motif_remise: remiseForm.motif || null,
+          montant_total: base - remise,
+        })
+        .eq("id", f.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries();
+      setRemiseFacture(null);
+      setRemiseForm({ type: "montant", valeur: "", motif: "" });
+      toast.success("Remise appliquée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const payer = useMutation({
     mutationFn: async (f: NonNullable<typeof factures>[number]) => {
       const { data: u } = await supabase.auth.getUser();
