@@ -187,6 +187,7 @@ function Dashboard() {
           valeur={formatFCFA(depensesJour)}
           detail={`${data.depenses.length} dépense(s) enregistrée(s)`}
           icon={TrendingDown}
+          to="/Dépenses"
         />
         <Stat
           titre="Taxe de séjour (mois)"
