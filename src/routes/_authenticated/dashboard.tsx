@@ -136,9 +136,6 @@ function Dashboard() {
 const departs = data.reservations.filter(
   (r) => r.date_depart >= dateDebut && r.date_depart <= jour,
 );
-const departs = data.reservations.filter(
-  (r) => r.date_depart >= dateDebut && r.date_depart <= jour,
-);
 
 const totalChambres = data.chambres.length;
 
@@ -177,7 +174,6 @@ const tauxOccupation =
     ? Math.round((nuitsOccupees / nuitsDisponibles) * 100)
     : 0;
 
-const entrees = data.operations
   const entrees = data.operations
     .filter((o) => o.sens === "entree")
     .reduce((s, o) => s + Number(o.montant), 0);
