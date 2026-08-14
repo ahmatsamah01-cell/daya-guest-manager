@@ -84,6 +84,20 @@ function Stat({
 function Dashboard() {
   const jour = today();
   const [periode, setPeriode] = useState("jour");
+function Dashboard() {
+  const jour = today();
+  const [periode, setPeriode] = useState("jour");
+
+  const dateDebut =
+    periode === "semaine"
+      ? new Date(new Date(jour).setDate(new Date(jour).getDate() - 6))
+          .toISOString()
+          .slice(0, 10)
+      : periode === "mois"
+        ? `${jour.slice(0, 7)}-01`
+        : periode === "annee"
+          ? `${jour.slice(0, 4)}-01-01`
+          : jour;
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard", jour],
     queryFn: async () => {
@@ -94,9 +108,9 @@ function Dashboard() {
           .select("*, clients(nom, prenom), chambres(nom)")
           .neq("statut", "annulee")
           .order("date_arrivee"),
-        supabase.from("caisse_operations").select("*").gte("date_operation", `${jour}T00:00:00`),
-        supabase.from("depenses").select("*").eq("date_depense", jour),
-        supabase.from("taxes_sejour").select("*").gte("date_nuitee", jour.slice(0, 8) + "01"),
+        supabase.from("caisse_operations").select("*").gte("date_operation", `${dateDebut}T00:00:00`),
+        supabase.from("depenses").select("*").gte("date_depense", dateDebut).lte("date_depense", jour), 
+        supabase.from("taxes_sejour").select("*").gte("date_nuitee", dateDebut).lte("date_nuitee", jour), 
         supabase.from("clients").select("id"),
       ]);
       for (const r of [chambres, resas, ops, deps, taxes, clients]) if (r.error) throw r.error;
@@ -176,21 +190,45 @@ function Dashboard() {
           to="/reservations"
         />
         <Stat
-          titre="Recettes encaissées (jour)"
+          titre={`Recettes encaissées — ${
+  periode === "jour"
+    ? "Aujourd'hui"
+    : periode === "semaine"
+      ? "Cette semaine"
+      : periode === "mois"
+        ? "Ce mois"
+        : "Cette année"
+}`}
           valeur={formatFCFA(entrees)}
           detail={`Sorties de caisse : ${formatFCFA(sorties)}`}
           icon={Wallet}
           to="/caisse"
         />
         <Stat
-          titre="Dépenses du jour"
+          titre={`Dépenses — ${
+  periode === "jour"
+    ? "Aujourd'hui"
+    : periode === "semaine"
+      ? "Cette semaine"
+      : periode === "mois"
+        ? "Ce mois"
+        : "Cette année"
+}`}
           valeur={formatFCFA(depensesJour)}
           detail={`${data.depenses.length} dépense(s) enregistrée(s)`}
           icon={TrendingDown}
           to="/Depenses"
         />
         <Stat
-          titre="Taxe de séjour (mois)"
+          titre={`Taxe de séjour — ${
+  periode === "jour"
+    ? "Aujourd'hui"
+    : periode === "semaine"
+      ? "Cette semaine"
+      : periode === "mois"
+        ? "Ce mois"
+        : "Cette année"
+}`}
           valeur={formatFCFA(taxeMois)}
           detail="Collectée depuis le 1er du mois"
           icon={Landmark}
