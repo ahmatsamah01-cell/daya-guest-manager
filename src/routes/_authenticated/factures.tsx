@@ -158,6 +158,9 @@ function FacturesPage() {
                     {formatFCFA(f.montant_hebergement)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{formatFCFA(f.montant_taxe)}</TableCell>
+                  <TableCell className="whitespace-nowrap text-destructive">
+                    {Number(f.montant_remise) > 0 ? `- ${formatFCFA(f.montant_remise)}` : "—"}
+                  </TableCell>
                   <TableCell className="font-medium whitespace-nowrap">
                     {formatFCFA(f.montant_total)}
                   </TableCell>
