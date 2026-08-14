@@ -140,6 +140,7 @@ function FacturesPage() {
                 <TableHead>Date</TableHead>
                 <TableHead>Hébergement</TableHead>
                 <TableHead>Taxe</TableHead>
+                <TableHead>Remise</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
