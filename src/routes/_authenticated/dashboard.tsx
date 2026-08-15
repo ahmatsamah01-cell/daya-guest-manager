@@ -309,7 +309,7 @@ const chartConfig = {
       />
     </div>
   </div>
-</div
+</div>
 
       <div className="mb-4 flex justify-end">
         <Select value={periode} onValueChange={setPeriode}>
