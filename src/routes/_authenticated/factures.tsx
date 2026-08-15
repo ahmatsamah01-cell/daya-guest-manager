@@ -24,68 +24,13 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
-import { BrandLogo } from "@/components/Brand";
-import { formatFCFA, formatDate, today } from "@/lib/format";
+import { LOGO_URL } from "@/components/Brand";
+import { FactureDocument, type FactureDocumentData } from "@/components/FactureDocument";
+import { formatFCFA, formatDate } from "@/lib/format";
 import { useEtablissement } from "@/hooks/use-hotel";
 
-const UNITES = [
-  "", "UN", "DEUX", "TROIS", "QUATRE", "CINQ", "SIX", "SEPT", "HUIT", "NEUF",
-  "DIX", "ONZE", "DOUZE", "TREIZE", "QUATORZE", "QUINZE", "SEIZE", "DIX-SEPT", "DIX-HUIT", "DIX-NEUF",
-];
-const DIZAINES = [
-  "", "", "VINGT", "TRENTE", "QUARANTE", "CINQUANTE", "SOIXANTE", "SOIXANTE-DIX", "QUATRE-VINGT", "QUATRE-VINGT-DIX",
-];
-
-function nombreEnLettres(n: number): string {
-  if (n === 0) return "ZÉRO";
-
-  function trois(n: number): string {
-    const c = Math.floor(n / 100);
-    const r = n % 100;
-    let s = "";
-    if (c > 0) s += (c > 1 ? UNITES[c] + " " : "") + "CENT" + (c > 1 && r === 0 ? "S" : "") + " ";
-    if (r > 0) {
-      if (r < 20) {
-        s += UNITES[r];
-      } else {
-        const d = Math.floor(r / 10);
-        const u = r % 10;
-        if (d === 7 || d === 9) {
-          s += DIZAINES[d - 1] + "-" + UNITES[10 + u];
-        } else {
-          s += DIZAINES[d] + (u > 0 ? (u === 1 && d !== 8 ? "-ET-UN" : "-" + UNITES[u]) : d === 8 ? "S" : "");
-        }
-      }
-    }
-    return s.trim();
-  }
-
-  const tranches = [
-    { valeur: 1_000_000_000, mot: "MILLIARD" },
-    { valeur: 1_000_000, mot: "MILLION" },
-    { valeur: 1_000, mot: "MILLE" },
-  ];
-
-  let reste = Math.round(n);
-  let resultat = "";
-
-  for (const { valeur, mot } of tranches) {
-    const q = Math.floor(reste / valeur);
-    if (q > 0) {
-      const prefixe = valeur === 1000 && q === 1 ? "" : trois(q) + " ";
-      resultat += prefixe + mot + (q > 1 && mot !== "MILLE" ? "S" : "") + " ";
-      reste %= valeur;
-    }
-  }
-
-  if (reste > 0) {
-    resultat += trois(reste);
-  }
-
-  return resultat.trim();
-}
 function imprimerFacture() {
-  const contenu = document.querySelector(".print-area");
+  const contenu = document.querySelector(".facture-a4");
   if (!contenu) return;
   const fenetre = window.open("", "_blank", "width=900,height=1000");
   if (!fenetre) return;
@@ -100,8 +45,8 @@ function imprimerFacture() {
         <title>Facture</title>
         ${styles}
       </head>
-      <body style="padding: 32px; max-width: 800px; margin: 0 auto;">
-        <div class="print-area">${contenu.innerHTML}</div>
+      <body style="margin:0;">
+        ${contenu.outerHTML}
       </body>
     </html>
   `);
@@ -112,6 +57,7 @@ function imprimerFacture() {
     fenetre.print();
   };
 }
+
 export const Route = createFileRoute("/_authenticated/factures")({
   head: () => ({
     meta: [
@@ -217,6 +163,54 @@ function FacturesPage() {
 
   const facture = (factures ?? []).find((f) => f.id === detail);
 
+const factureData: FactureDocumentData | null = facture
+    ? {
+        numero: facture.numero,
+        clientNom: `${facture.clients?.prenom ?? ""} ${facture.clients?.nom ?? ""}`.trim(),
+        periodeLabel: formatDate(facture.date_facture),
+        lignesHebergement: (lignes ?? [])
+          .filter((l) => l.libelle.startsWith("Hébergement"))
+          .map((l) => ({
+            periode: l.libelle,
+            nuitees: Number(l.quantite),
+            chambre: "",
+            prixUnitaire: Number(l.prix_unitaire),
+            prixTotal: Number(l.montant),
+          })),
+        totalHebergement: Number(facture.montant_hebergement),
+        buanderie:
+          Number(facture.montant_autres) > 0
+            ? {
+                detail: formatFCFA(facture.montant_autres),
+                total: Number(facture.montant_autres),
+              }
+            : undefined,
+        remise:
+          Number(facture.montant_remise) > 0
+            ? {
+                label: facture.motif_remise || "Remise",
+                montant: Number(facture.montant_remise),
+              }
+            : undefined,
+        avance: Number(facture.montant_paye) > 0 ? Number(facture.montant_paye) : undefined,
+        totalGeneral: Number(facture.montant_total),
+        ville: etab?.ville ?? "Port-Gentil",
+        dateEmission: formatDate(facture.date_facture),
+        etablissement: {
+          nom: etab?.nom ?? "LE DAYA Guest House",
+          adresse: "BP 780",
+          telephone: "074.87.42.33",
+          email: "ledayaguestpog@gmail.com",
+          rccm: "RG/POG 2021 A 15358",
+          nif: "319220 T",
+          banque: "ORABANK : Le DAYA Guest House",
+          compte: "40021 02001 22873000201",
+          cle: "63",
+        },
+        logoUrl: LOGO_URL,
+      }
+    : null;
+
   return (
     <div>
       <PageHeader
@@ -315,116 +309,7 @@ function FacturesPage() {
           <DialogHeader className="no-print">
             <DialogTitle>Facture {facture?.numero}</DialogTitle>
           </DialogHeader>
-          <div className="print-area space-y-3 text-sm text-blue-950">
-  <div className="mb-4 text-center">
-  <div className="mx-auto mb-3 max-w-[220px]">
-    <BrandLogo className="mx-auto max-h-32" />
-  </div>
-  <p className="italic text-muted-foreground">LE DAYA Guest House</p>
-</div>
-
-  <div>
-    <p>
-      <span className="underline">Client</span> :{" "}
-      <span className="font-semibold">
-        {facture?.clients?.prenom} {facture?.clients?.nom}
-      </span>
-    </p>
-    <p className="font-semibold">Facture hébergements N°{facture?.numero}</p>
-  </div>
-
-  <p className="text-xs text-muted-foreground">
-    Les arrivées se font tous les jours entre 13h30 et 20h00
-    <br />
-    Les départs se font tous les jours au plus tard à 12h00
-  </p>
-
-  <div className="divide-y rounded-lg border">
-    {(lignes ?? [])
-      .filter((l) => !l.libelle.startsWith("Taxe de séjour"))
-      .map((l) => (
-        <div key={l.id} className="flex justify-between gap-4 p-3">
-          <span>{l.libelle}</span>
-          <span className="whitespace-nowrap">{formatFCFA(l.montant)}</span>
-        </div>
-      ))}
-  </div>
-
-  <div className="flex justify-between font-medium">
-    <span>Total HT</span>
-    <span>
-      {formatFCFA(Number(facture?.montant_hebergement ?? 0) + Number(facture?.montant_autres ?? 0))}
-    </span>
-  </div>
-
-  {facture && Number(facture.montant_remise) > 0 ? (
-    <>
-      <div className="flex justify-between text-destructive">
-        <span>{facture.motif_remise ?? "Remise"}</span>
-        <span className="whitespace-nowrap">- {formatFCFA(facture.montant_remise)}</span>
-      </div>
-      <div className="flex justify-between font-medium">
-        <span>Total net HT</span>
-        <span>
-          {formatFCFA(
-            Number(facture.montant_hebergement) +
-              Number(facture.montant_autres) -
-              Number(facture.montant_remise),
-          )}
-        </span>
-      </div>
-    </>
-  ) : null}
-
-  {facture && Number(facture.montant_taxe) > 0 ? (
-    <div className="flex justify-between">
-      <span>Taxe de séjour</span>
-      <span className="whitespace-nowrap">{formatFCFA(facture.montant_taxe)}</span>
-    </div>
-  ) : null}
-
-  <div className="flex justify-between font-display text-lg font-bold text-red-600">
-  <span>Total TTC</span>
-  <span>{formatFCFA(facture?.montant_total ?? 0)}</span>
-</div>
-
-  {facture && Number(facture.montant_paye) > 0 ? (
-    <>
-      <div className="flex justify-between">
-        <span>Avance</span>
-        <span className="whitespace-nowrap">{formatFCFA(facture.montant_paye)}</span>
-      </div>
-      <div className="flex justify-between font-semibold text-destructive">
-        <span>Reste à payer</span>
-        <span className="whitespace-nowrap">
-          {formatFCFA(Number(facture.montant_total) - Number(facture.montant_paye))}
-        </span>
-      </div>
-    </>
-  ) : null}
-
-  <p className="pt-2">
-    Arrêter la présente facture à la somme de{" "}
-    <span className="font-semibold">
-      {nombreEnLettres(Number(facture?.montant_total ?? 0))} FRANCS CFA.
-    </span>
-  </p>
-
-  <p className="pt-4 text-right">
-  Fait à Port-Gentil, le {formatDate(today())}
-</p>
-
-<div className="mt-8 border-t pt-3 text-center text-[10px] text-muted-foreground">
-  <p className="font-semibold">LE DAYA Guest House by LDJ</p>
-  <p>Hébergements – Appartements hôtel – Restaurant - bar</p>
-  <p>BP 780 Port-Gentil / GABON - Tel : 074.87.42.33 Email : ledayaguestpog@gmail.com</p>
-  <p>RCCM : RG/POG 2021 A 15358 – N.I.F : 319220 T</p>
-  <p>
-    Identité Bancaire ORABANK : Le DAYA Guest House - compte N° 40021 02001 22873000201 Clé 63
-  </p>
-</div>
-
-</div>
+          {factureData ? <FactureDocument data={factureData} /> : null}
           <div className="no-print flex justify-end">
            <Button variant="outline" size="sm" onClick={imprimerFacture}>
   Imprimer / PDF
