@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users } from "lucide-react";
+import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users, ArrowDown, ArrowUp} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent,} from "@/components/ui/chart";
@@ -75,6 +75,52 @@ function Stat({
         to={to}
         className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
+        {contenu}
+      </Link>
+    );
+  }
+
+  return contenu;
+}
+
+function StatCard({
+  titre,
+  valeur,
+  detail,
+  icon: Icon,
+  couleur,
+  to,
+}: {
+  titre: string;
+  valeur: string;
+  detail?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  couleur: string;
+  to?: string;
+}) {
+  const contenu = (
+    <Card className="transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+      <CardContent className="flex items-start gap-3 p-4">
+        <div
+          className="flex size-10 shrink-0 items-center justify-center rounded-lg"
+          style={{ backgroundColor: couleur }}
+        >
+          <Icon className="size-5 text-white" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm text-muted-foreground">{titre}</p>
+          <p className="font-display text-2xl font-bold">{valeur}</p>
+          {detail ? (
+            <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (to) {
+    return (
+      <Link to={to} className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary">
         {contenu}
       </Link>
     );
@@ -240,15 +286,30 @@ const chartConfig = {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center gap-4 rounded-xl border bg-card p-4">
-        <div className="rounded-lg bg-white p-2">
-          <BrandLogo className="max-h-16 sm:max-h-20" />
-        </div>
-        <div className="min-w-0">
-          <p className="font-display text-lg font-semibold">LE DAYA Guest House</p>
-          <p className="text-sm text-muted-foreground italic">{SLOGAN}</p>
-        </div>
+      <div className="mb-6 overflow-hidden rounded-xl border bg-card shadow-sm">
+  <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex items-center gap-4">
+      <div className="rounded-lg bg-white p-2">
+        <BrandLogo className="max-h-16 sm:max-h-20" />
       </div>
+      <div className="min-w-0">
+        <p className="text-sm text-muted-foreground">Bienvenue,</p>
+        <p className="font-display text-2xl font-bold sm:text-3xl">
+          LE DAYA Guest House
+        </p>
+        <p className="text-sm italic text-muted-foreground">{SLOGAN}</p>
+      </div>
+    </div>
+
+    <div className="h-32 w-full overflow-hidden rounded-lg sm:h-36 sm:max-w-md">
+      <img
+        src="/images/reception-banner.jpg"
+        alt="Réception LE DAYA Guest House"
+        className="h-full w-full object-cover"
+      />
+    </div>
+  </div>
+</div
 
       <div className="mb-4 flex justify-end">
         <Select value={periode} onValueChange={setPeriode}>
@@ -268,83 +329,48 @@ const chartConfig = {
         description={`LE DAYA Guest House — situation du ${formatDate(jour)}`}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-         <Stat
-  titre="Taux d'occupation"
-  valeur={`${tauxOccupation}%`}
-  detail={`${nuitsOccupees} / ${nuitsDisponibles} nuitées`}
-  icon={BedDouble}
-  to="/chambres"
-/>
-        <Stat
-          titre={`Arrivées / départs — ${
-  periode === "jour"
-    ? "Aujourd'hui"
-    : periode === "semaine"
-      ? "Cette semaine"
-      : periode === "mois"
-        ? "Ce mois"
-        : "Cette année"
-}`}
-          valeur={`${arrivees.length} / ${departs.length}`}
-          detail="Mouvements prévus aujourd'hui"
-          icon={CalendarCheck}
-          to="/reservations"
-        />
-        <Stat
-  titre={`Recettes encaissées — ${
-    periode === "jour"
-      ? "Aujourd'hui"
-      : periode === "semaine"
-        ? "Cette semaine"
-        : periode === "mois"
-          ? "Ce mois"
-          : "Cette année"
-  }`}
-  valeur={formatFCFA(entrees)}
-  detail={`Sorties : ${formatFCFA(sorties)} — Solde net : ${formatFCFA(soldeNet)}`}
-  icon={Wallet}
-  to="/caisse"
-        />
-        <Stat
-          titre={`Dépenses — ${
-  periode === "jour"
-    ? "Aujourd'hui"
-    : periode === "semaine"
-      ? "Cette semaine"
-      : periode === "mois"
-        ? "Ce mois"
-        : "Cette année"
-}`}
-          valeur={formatFCFA(depensesPeriode)}
-          detail={`${data.depenses.length} dépense(s) sur la période`}
-          icon={TrendingDown}
-          to="/depenses"
-        />
-        <Stat
-          titre={`Taxe de séjour — ${
-  periode === "jour"
-    ? "Aujourd'hui"
-    : periode === "semaine"
-      ? "Cette semaine"
-      : periode === "mois"
-        ? "Ce mois"
-        : "Cette année"
-}`}
-          valeur={formatFCFA(taxeMois)}
-          detail={`Nuitées taxées sur la période (${data.taxes.length} enregistrement(s))`}
-          icon={Landmark}
-          to="/taxe-sejour"
-        />
-        <Stat
-          titre="Clients enregistrés"
-          valeur={String(data.clients.length)}
-          detail="Fichier clients de l'établissement"
-          icon={Users}
-          to="/clients"
-        />
-      </div>
-
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+  <StatCard
+    titre="Occupation"
+    valeur={`${occupees.size}/${totalChambres}`}
+    detail={`${totalChambres - occupees.size} chambre(s) disponible(s)`}
+    icon={BedDouble}
+    couleur="#166534"
+    to="/chambres"
+  />
+  <StatCard
+    titre="Arrivées du jour"
+    valeur={String(arrivees.length)}
+    detail={arrivees.length === 0 ? "Aucune arrivée" : "Arrivée(s) prévue(s)"}
+    icon={CalendarCheck}
+    couleur="#ea580c"
+    to="/reservations"
+  />
+  <StatCard
+    titre="Départs du jour"
+    valeur={String(departs.length)}
+    detail={departs.length === 0 ? "Aucun départ" : "Départ(s) prévu(s)"}
+    icon={CalendarCheck}
+    couleur="#9333ea"
+    to="/reservations"
+  />
+  <StatCard
+    titre="CA du jour"
+    valeur={formatFCFA(entrees)}
+    detail="Chiffre d'affaires"
+    icon={Wallet}
+    couleur="#2563eb"
+    to="/caisse"
+  />
+  <StatCard
+    titre="Réservations en cours"
+    valeur={String(enCours.length)}
+    detail={`${enCours.length} chambre(s) réservée(s)`}
+    icon={Users}
+    couleur="#16a34a"
+    to="/reservations"
+  />
+</div>
 <Card className="mt-6">
   <CardHeader>
     <CardTitle className="text-base">Évolution financière</CardTitle>
@@ -367,68 +393,163 @@ const chartConfig = {
   </CardContent>
 </Card>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">État des chambres</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {data.chambres.map((c) => {
-              const occupee = occupees.has(c.id);
-              return (
-                <div
-                  key={c.id}
-                  className="flex items-center justify-between rounded-lg border px-3 py-2"
-                >
-                  <div>
-                    <p className="text-sm font-medium">{c.nom}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {c.type} — {formatFCFA(c.prix_nuit)} / nuit
-                    </p>
-                  </div>
-                  <Badge variant={occupee ? "destructive" : "secondary"}>
-                    {occupee ? "Occupée" : "Libre"}
-                  </Badge>
-                </div>
-              );
-            })}
-            {data.chambres.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Aucune chambre enregistrée.</p>
-            ) : null}
-          </CardContent>
-        </Card>
+      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+       <Card className="lg:col-span-1">
+  <CardHeader>
+    <CardTitle className="text-base">État des chambres</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+      <span className="flex items-center gap-1.5">
+        <span className="size-2 rounded-full bg-green-600" /> Disponible
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="size-2 rounded-full bg-orange-500" /> Réservée
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="size-2 rounded-full bg-red-600" /> Occupée
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="size-2 rounded-full bg-blue-500" /> Nettoyage
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="size-2 rounded-full bg-purple-600" /> Maintenance
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="size-2 rounded-full bg-gray-400" /> Hors service
+      </span>
+    </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Prochaines arrivées</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {data.reservations
-              .filter((r) => r.date_arrivee >= jour && r.statut === "reservee")
-              .slice(0, 8)
-              .map((r) => (
-                <div
-                  key={r.id}
-                  className="flex items-center justify-between rounded-lg border px-3 py-2"
-                >
-                  <div>
-                    <p className="text-sm font-medium">
-                      {r.clients?.prenom ?? ""} {r.clients?.nom ?? "Client"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {r.chambres?.nom} — du {formatDate(r.date_arrivee)} au {" "}
-                      {formatDate(r.date_depart)}
-                    </p>
-                  </div>
-                  <Badge variant="outline">{formatFCFA(r.prix_nuit)}</Badge>
-                </div>
-              ))}
-            {data.reservations.filter((r) => r.date_arrivee >= jour && r.statut === "reservee")
-              .length === 0 ? (
-              <p className="text-sm text-muted-foreground">Aucune arrivée à venir.</p>
-            ) : null}
-          </CardContent>
-        </Card>
+    <div className="space-y-2">
+      {data.chambres.slice(0, 5).map((c) => {
+        const occupee = occupees.has(c.id);
+        const reservee = data.reservations.some(
+          (r) => r.chambre_id === c.id && r.statut === "reservee",
+        );
+        const statut = occupee ? "Occupée" : reservee ? "Réservée" : "Disponible";
+        const couleur = occupee
+          ? "text-red-600"
+          : reservee
+            ? "text-orange-500"
+            : "text-green-600";
+
+        return (
+          <div
+            key={c.id}
+            className="flex items-center justify-between rounded-lg border px-3 py-2"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium">{c.nom}</span>
+              <span className="text-xs text-muted-foreground">{c.type}</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className={`text-xs font-medium ${couleur}`}>{statut}</span>
+              <span className="text-xs text-muted-foreground">
+                {formatFCFA(c.prix_nuit)}/nuit
+              </span>
+            </div>
+          </div>
+        );
+      })}
+      {data.chambres.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Aucune chambre enregistrée.</p>
+      ) : null}
+    </div>
+
+    {data.chambres.length > 5 ? (
+      <Link
+        to="/chambres"
+        className="mt-3 block text-center text-sm text-primary hover:underline"
+      >
+        Voir toutes les chambres →
+      </Link>
+    ) : null}
+  </CardContent>
+</Card>
+
+       <Card>
+  <CardHeader>
+    <CardTitle className="text-base">Arrivées du jour</CardTitle>
+  </CardHeader>
+  <CardContent>
+    {arrivees.length === 0 ? (
+      <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+        <div className="flex size-14 items-center justify-center rounded-full bg-green-100">
+          <ArrowDown className="size-7 text-green-600" />
+        </div>
+        <p className="font-medium">Aucune arrivée prévue</p>
+        <p className="text-sm text-muted-foreground">Aucune arrivée aujourd'hui</p>
+      </div>
+    ) : (
+      <div className="space-y-2">
+        {arrivees.slice(0, 8).map((r) => (
+          <div
+            key={r.id}
+            className="flex items-center justify-between rounded-lg border px-3 py-2"
+          >
+            <div>
+              <p className="text-sm font-medium">
+                {r.clients?.prenom ?? ""} {r.clients?.nom ?? "Client"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {r.chambres?.nom} — dès {formatDate(r.date_arrivee)}
+              </p>
+            </div>
+            <Badge variant="outline">{formatFCFA(r.prix_nuit)}</Badge>
+          </div>
+        ))}
+      </div>
+    )}
+    <Link
+      to="/reservations"
+      className="mt-3 block text-center text-sm text-primary hover:underline"
+    >
+      Voir toutes les arrivées →
+    </Link>
+  </CardContent>
+</Card>
+
+<Card>
+  <CardHeader>
+    <CardTitle className="text-base">Départs du jour</CardTitle>
+  </CardHeader>
+  <CardContent>
+    {departs.length === 0 ? (
+      <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+        <div className="flex size-14 items-center justify-center rounded-full bg-orange-100">
+          <ArrowUp className="size-7 text-orange-600" />
+        </div>
+        <p className="font-medium">Aucun départ prévu</p>
+        <p className="text-sm text-muted-foreground">Aucun départ aujourd'hui</p>
+      </div>
+    ) : (
+      <div className="space-y-2">
+        {departs.slice(0, 8).map((r) => (
+          <div
+            key={r.id}
+            className="flex items-center justify-between rounded-lg border px-3 py-2"
+          >
+            <div>
+              <p className="text-sm font-medium">
+                {r.clients?.prenom ?? ""} {r.clients?.nom ?? "Client"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {r.chambres?.nom} — jusqu'au {formatDate(r.date_depart)}
+              </p>
+            </div>
+            <Badge variant="outline">{formatFCFA(r.prix_nuit)}</Badge>
+          </div>
+        ))}
+      </div>
+    )}
+    <Link
+      to="/reservations"
+      className="mt-3 block text-center text-sm text-primary hover:underline"
+    >
+      Voir tous les départs →
+    </Link>
+  </CardContent>
+</Card>
       </div>
     </div>
   );
