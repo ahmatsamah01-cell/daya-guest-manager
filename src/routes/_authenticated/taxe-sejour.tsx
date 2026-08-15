@@ -172,9 +172,24 @@ function TaxePage() {
                       {t.reverse ? "Reversée" : "À reverser"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="space-x-2 text-right whitespace-nowrap">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditId(t.id);
+                        setEditForm({
+                          date_nuitee: t.date_nuitee,
+                          nb_nuits: String(t.nb_nuits),
+                          montant_unitaire: String(t.montant_unitaire),
+                          reverse: t.reverse,
+                        });
+                      }}
+                    >
+                      Modifier
+                    </Button>
                     {!t.reverse ? (
-                      <Button size="sm" variant="outline" onClick={() => reverser.mutate(t.id)}>
+                      <Button size="sm" onClick={() => reverser.mutate(t.id)}>
                         Marquer reversée
                       </Button>
                     ) : (
