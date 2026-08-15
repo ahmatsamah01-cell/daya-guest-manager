@@ -83,6 +83,37 @@ function CaissePage() {
     },
   });
 
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    sens: "entree",
+    motif: "",
+    montant: "",
+    mode_paiement: "especes",
+    date_operation: "",
+  });
+
+  const modifier = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("caisse_operations")
+        .update({
+          sens: editForm.sens,
+          motif: editForm.motif,
+          montant: Number(editForm.montant),
+          mode_paiement: editForm.mode_paiement,
+          date_operation: new Date(editForm.date_operation).toISOString(),
+        })
+        .eq("id", editId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries();
+      setEditId(null);
+      toast.success("Opération modifiée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const ajouter = useMutation({
     mutationFn: async () => {
       const { data: u } = await supabase.auth.getUser();
