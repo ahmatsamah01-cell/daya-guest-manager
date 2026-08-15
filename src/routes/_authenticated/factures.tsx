@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
-import { DocumentHeader } from "@/components/Brand";
+import { BrandLogo } from "@/components/Brand";
 import { formatFCFA, formatDate, today } from "@/lib/format";
 import { useEtablissement } from "@/hooks/use-hotel";
 
@@ -281,11 +281,12 @@ function FacturesPage() {
             <DialogTitle>Facture {facture?.numero}</DialogTitle>
           </DialogHeader>
           <div className="print-area space-y-3 text-sm">
-  <DocumentHeader
-    titre={`Facture ${facture?.numero ?? ""}`}
-    sousTitre={facture ? formatDate(facture.date_facture) : undefined}
-    etablissement={etab}
-  />
+  <div className="mb-4 text-center">
+  <div className="mx-auto mb-3 max-w-[220px]">
+    <BrandLogo className="mx-auto max-h-32" />
+  </div>
+  <p className="italic text-muted-foreground">LE DAYA Guest House</p>
+</div>
 
   <div>
     <p>
