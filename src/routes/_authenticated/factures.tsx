@@ -236,10 +236,20 @@ function FacturesPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="space-x-2 text-right whitespace-nowrap">
-                    <Button size="sm" variant="outline" onClick={() => setDetail(f.id)}>
-                      Détail
-                    </Button>
-                    {f.statut !== "payee" ? (
+  <Button size="sm" variant="outline" onClick={() => setDetail(f.id)}>
+    Détail
+  </Button>
+  <Button
+    size="sm"
+    variant="outline"
+    onClick={() => {
+      setDetail(f.id);
+      setTimeout(() => window.print(), 400);
+    }}
+  >
+    Imprimer
+  </Button>
+  {f.statut !== "payee" ? (
                       <>
                         <Button
                           size="sm"
