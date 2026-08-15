@@ -11,6 +11,8 @@ import {
 import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent,} from "@/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/AppLayout";
 import { BrandLogo, SLOGAN } from "@/components/Brand";
