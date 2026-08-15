@@ -299,6 +299,19 @@ const reservationsProches = data.reservations.filter(
       couleur: "text-blue-500",
     });
   }
+const activiteRecente = [...data.reservations]
+    .filter((r) => r.created_at)
+    .sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))
+    .slice(0, 5)
+    .map((r) => ({
+      texte: `Réservation créée — ${r.clients?.prenom ?? ""} ${r.clients?.nom ?? "Client"} (${r.chambres?.nom ?? ""})`,
+      heure: r.created_at
+        ? new Date(r.created_at).toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "",
+    }));
   const depensesPeriode = data.depenses.reduce((s, d) => s + Number(d.montant), 0);
   const JOUR_MS = 24 * 60 * 60 * 1000;
   const debutP = new Date(dateDebut).getTime();
@@ -616,22 +629,30 @@ const reservationsProches = data.reservations.filter(
 </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Activité récente</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Aucune activité récente enregistrée.
-            </p>
-            <Link
-              to="/reservations"
-              className="block pt-1 text-center text-sm text-primary hover:underline"
-            >
-              Voir toute l'activité →
-            </Link>
-          </CardContent>
-        </Card>
-
+  <CardHeader>
+    <CardTitle className="text-base">Activité récente</CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-3">
+    {activiteRecente.length === 0 ? (
+      <p className="text-sm text-muted-foreground">
+        Aucune activité récente enregistrée.
+      </p>
+    ) : (
+      activiteRecente.map((a, i) => (
+        <div key={i} className="flex items-center justify-between text-sm">
+          <span>{a.texte}</span>
+          <span className="shrink-0 text-xs text-muted-foreground">{a.heure}</span>
+        </div>
+      ))
+    )}
+    <Link
+      to="/reservations"
+      className="block pt-1 text-center text-sm text-primary hover:underline"
+    >
+      Voir toute l'activité →
+    </Link>
+  </CardContent>
+</Card>
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Actions rapides</CardTitle>
