@@ -84,6 +84,34 @@ function nombreEnLettres(n: number): string {
 
   return resultat.trim();
 }
+function imprimerFacture() {
+  const contenu = document.querySelector(".print-area");
+  if (!contenu) return;
+  const fenetre = window.open("", "_blank", "width=900,height=1000");
+  if (!fenetre) return;
+
+  const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+    .map((el) => el.outerHTML)
+    .join("\n");
+
+  fenetre.document.write(`
+    <html>
+      <head>
+        <title>Facture</title>
+        ${styles}
+      </head>
+      <body style="padding: 32px; max-width: 800px; margin: 0 auto;">
+        <div class="print-area">${contenu.innerHTML}</div>
+      </body>
+    </html>
+  `);
+  fenetre.document.close();
+
+  fenetre.onload = () => {
+    fenetre.focus();
+    fenetre.print();
+  };
+}
 export const Route = createFileRoute("/_authenticated/factures")({
   head: () => ({
     meta: [
@@ -236,19 +264,16 @@ function FacturesPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="space-x-2 text-right whitespace-nowrap">
-  <Button size="sm" variant="outline" onClick={() => setDetail(f.id)}>
-    Détail
-  </Button>
   <Button
-    size="sm"
-    variant="outline"
-    onClick={() => {
-      setDetail(f.id);
-      setTimeout(() => window.print(), 400);
-    }}
-  >
-    Imprimer
-  </Button>
+  size="sm"
+  variant="outline"
+  onClick={() => {
+    setDetail(f.id);
+    setTimeout(() => imprimerFacture(), 600);
+  }}
+>
+  Imprimer
+</Button>
   {f.statut !== "payee" ? (
                       <>
                         <Button
@@ -401,9 +426,9 @@ function FacturesPage() {
 
 </div>
           <div className="no-print flex justify-end">
-            <Button variant="outline" size="sm" onClick={() => window.print()}>
-              Imprimer / PDF
-            </Button>
+           <Button variant="outline" size="sm" onClick={imprimerFacture}>
+  Imprimer / PDF
+</Button>
           </div>
         </DialogContent>
       </Dialog>
