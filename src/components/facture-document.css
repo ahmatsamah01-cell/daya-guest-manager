@@ -106,3 +106,45 @@
   font-weight: bold;
   text-align: right;
 }
+
+.facture-espace-haut {
+  margin-top: 16pt;
+}
+
+.facture-bleu-cheque {
+  color: #0070c0;
+}
+
+.facture-date {
+  text-align: right;
+  margin-top: 20pt;
+}
+
+.facture-logo-bas {
+  width: 130.08pt;
+  height: 77.76pt;
+  margin-left: auto;
+  margin-top: 8pt;
+}
+.facture-logo-bas img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.facture-pied {
+  position: absolute;
+  bottom: 30pt;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9.5pt;
+}
+
+.facture-pied-titre {
+  font-weight: bold;
+}
+
+.facture-tirets {
+  color: #0070c0;
+}
