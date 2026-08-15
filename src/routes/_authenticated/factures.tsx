@@ -257,6 +257,59 @@ function FacturesPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!remiseFacture} onOpenChange={(o) => !o && setRemiseFacture(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Appliquer une réduction</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              appliquerRemise.mutate();
+            }}
+          >
+            <div className="space-y-2">
+              <Label>Type de réduction</Label>
+              <Select
+                value={remiseForm.type}
+                onValueChange={(v) => setRemiseForm({ ...remiseForm, type: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="montant">Montant fixe (FCFA)</SelectItem>
+                  <SelectItem value="pourcentage">Pourcentage (%)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Valeur</Label>
+              <Input
+                type="number"
+                min="0"
+                required
+                value={remiseForm.valeur}
+                onChange={(e) => setRemiseForm({ ...remiseForm, valeur: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Motif (facultatif)</Label>
+              <Input
+                value={remiseForm.motif}
+                onChange={(e) => setRemiseForm({ ...remiseForm, motif: e.target.value })}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={appliquerRemise.isPending}>
+                Appliquer
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
