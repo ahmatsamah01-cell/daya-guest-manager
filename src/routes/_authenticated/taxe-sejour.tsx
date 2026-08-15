@@ -8,6 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
 import { formatFCFA, formatDate, today } from "@/lib/format";
@@ -48,6 +55,39 @@ function TaxePage() {
       if (error) throw error;
       return data;
     },
+  });
+
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    date_nuitee: today(),
+    nb_nuits: "1",
+    montant_unitaire: String(montantUnitaire),
+    reverse: false,
+  });
+
+  const modifier = useMutation({
+    mutationFn: async () => {
+      const nuits = Math.max(1, Number(editForm.nb_nuits) || 1);
+      const unitaire = Number(editForm.montant_unitaire) || 0;
+      const { error } = await supabase
+        .from("taxes_sejour")
+        .update({
+          date_nuitee: editForm.date_nuitee,
+          nb_nuits: nuits,
+          montant_unitaire: unitaire,
+          montant_total: nuits * unitaire,
+          reverse: editForm.reverse,
+          date_reversement: editForm.reverse ? today() : null,
+        })
+        .eq("id", editId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries();
+      setEditId(null);
+      toast.success("Taxe modifiée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const reverser = useMutation({
@@ -139,9 +179,24 @@ function TaxePage() {
                       {t.reverse ? "Reversée" : "À reverser"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="space-x-2 text-right whitespace-nowrap">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditId(t.id);
+                        setEditForm({
+                          date_nuitee: t.date_nuitee,
+                          nb_nuits: String(t.nb_nuits),
+                          montant_unitaire: String(t.montant_unitaire),
+                          reverse: t.reverse,
+                        });
+                      }}
+                    >
+                      Modifier
+                    </Button>
                     {!t.reverse ? (
-                      <Button size="sm" variant="outline" onClick={() => reverser.mutate(t.id)}>
+                      <Button size="sm" onClick={() => reverser.mutate(t.id)}>
                         Marquer reversée
                       </Button>
                     ) : (
@@ -163,6 +218,75 @@ function TaxePage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier la taxe de séjour</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              modifier.mutate();
+            }}
+          >
+            <div className="space-y-2">
+              <Label>Date de la première nuitée</Label>
+              <Input
+                type="date"
+                required
+                value={editForm.date_nuitee}
+                onChange={(e) => setEditForm({ ...editForm, date_nuitee: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Nombre de nuitées</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  required
+                  value={editForm.nb_nuits}
+                  onChange={(e) => setEditForm({ ...editForm, nb_nuits: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Montant par nuitée (FCFA)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  required
+                  value={editForm.montant_unitaire}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, montant_unitaire: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={editForm.reverse}
+                onChange={(e) => setEditForm({ ...editForm, reverse: e.target.checked })}
+              />
+              Taxe reversée
+            </label>
+            <p className="text-sm text-muted-foreground">
+              Total :{" "}
+              {formatFCFA(
+                Math.max(1, Number(editForm.nb_nuits) || 1) *
+                  (Number(editForm.montant_unitaire) || 0),
+              )}
+            </p>
+            <DialogFooter>
+              <Button type="submit" disabled={modifier.isPending}>
+                Enregistrer les modifications
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

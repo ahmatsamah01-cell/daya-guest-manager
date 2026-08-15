@@ -9,9 +9,19 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
 import { DocumentHeader } from "@/components/Brand";
@@ -232,8 +242,18 @@ function FacturesPage() {
                 </div>
               ))}
             </div>
+            {facture && Number(facture.montant_remise) > 0 ? (
+              <div className="flex justify-between text-destructive">
+                <span>
+                  Remise{facture.motif_remise ? ` — ${facture.motif_remise}` : ""}
+                </span>
+                <span className="whitespace-nowrap">
+                  - {formatFCFA(facture.montant_remise)}
+                </span>
+              </div>
+            ) : null}
             <div className="flex justify-between font-display text-lg font-semibold">
-              <span>Total</span>
+              <span>Net à payer</span>
               <span>{formatFCFA(facture?.montant_total ?? 0)}</span>
             </div>
             <p className="pt-2 text-[10px] text-muted-foreground">
@@ -245,6 +265,59 @@ function FacturesPage() {
               Imprimer / PDF
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!remiseFacture} onOpenChange={(o) => !o && setRemiseFacture(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Appliquer une réduction</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              appliquerRemise.mutate();
+            }}
+          >
+            <div className="space-y-2">
+              <Label>Type de réduction</Label>
+              <Select
+                value={remiseForm.type}
+                onValueChange={(v) => setRemiseForm({ ...remiseForm, type: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="montant">Montant fixe (FCFA)</SelectItem>
+                  <SelectItem value="pourcentage">Pourcentage (%)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Valeur</Label>
+              <Input
+                type="number"
+                min="0"
+                required
+                value={remiseForm.valeur}
+                onChange={(e) => setRemiseForm({ ...remiseForm, valeur: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Motif (facultatif)</Label>
+              <Input
+                value={remiseForm.motif}
+                onChange={(e) => setRemiseForm({ ...remiseForm, motif: e.target.value })}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={appliquerRemise.isPending}>
+                Appliquer
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

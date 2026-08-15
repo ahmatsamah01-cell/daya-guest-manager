@@ -127,6 +127,45 @@ function ReservationsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    client_id: "",
+    chambre_id: "",
+    date_arrivee: "",
+    date_depart: "",
+    nb_personnes: "1",
+    prix_nuit: "",
+    taxe_nuit: "",
+    statut: "reservee",
+    notes: "",
+  });
+
+  const modifier = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("reservations")
+        .update({
+          client_id: editForm.client_id,
+          chambre_id: editForm.chambre_id,
+          date_arrivee: editForm.date_arrivee,
+          date_depart: editForm.date_depart,
+          nb_personnes: Number(editForm.nb_personnes),
+          prix_nuit: Number(editForm.prix_nuit),
+          taxe_nuit: Number(editForm.taxe_nuit),
+          statut: editForm.statut,
+          notes: editForm.notes || null,
+        })
+        .eq("id", editId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries();
+      setEditId(null);
+      toast.success("Réservation modifiée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const changerStatut = useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: string }) => {
       const { error } = await supabase.from("reservations").update({ statut }).eq("id", id);
@@ -375,6 +414,26 @@ function ReservationsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="space-x-2 text-right whitespace-nowrap">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditId(r.id);
+                          setEditForm({
+                            client_id: r.client_id,
+                            chambre_id: r.chambre_id,
+                            date_arrivee: r.date_arrivee,
+                            date_depart: r.date_depart,
+                            nb_personnes: String(r.nb_personnes),
+                            prix_nuit: String(r.prix_nuit),
+                            taxe_nuit: String(r.taxe_nuit),
+                            statut: r.statut,
+                            notes: r.notes ?? "",
+                          });
+                        }}
+                      >
+                        Modifier
+                      </Button>
                       {r.statut === "reservee" ? (
                         <>
                           <Button
@@ -415,6 +474,135 @@ function ReservationsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier la réservation</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              modifier.mutate();
+            }}
+          >
+            <div className="space-y-2">
+              <Label>Client</Label>
+              <Select
+                value={editForm.client_id}
+                onValueChange={(v) => setEditForm({ ...editForm, client_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(clients ?? []).map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.prenom} {c.nom}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Chambre</Label>
+              <Select
+                value={editForm.chambre_id}
+                onValueChange={(v) => setEditForm({ ...editForm, chambre_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chambre" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(chambres ?? []).map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.nom} — {formatFCFA(c.prix_nuit)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Arrivée</Label>
+                <Input
+                  type="date"
+                  required
+                  value={editForm.date_arrivee}
+                  onChange={(e) => setEditForm({ ...editForm, date_arrivee: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Départ</Label>
+                <Input
+                  type="date"
+                  required
+                  value={editForm.date_depart}
+                  onChange={(e) => setEditForm({ ...editForm, date_depart: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Personnes</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={editForm.nb_personnes}
+                  onChange={(e) => setEditForm({ ...editForm, nb_personnes: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Prix / nuit (FCFA)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={editForm.prix_nuit}
+                  onChange={(e) => setEditForm({ ...editForm, prix_nuit: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Taxe / nuitée (FCFA)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={editForm.taxe_nuit}
+                  onChange={(e) => setEditForm({ ...editForm, taxe_nuit: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Statut</Label>
+                <Select
+                  value={editForm.statut}
+                  onValueChange={(v) => setEditForm({ ...editForm, statut: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(STATUTS).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>
+                        {v}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Input
+                value={editForm.notes}
+                onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={modifier.isPending}>
+                Enregistrer les modifications
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
