@@ -12,6 +12,7 @@ import {
   Landmark,
   BarChart3,
   Settings,
+  Bell, 
   Menu,
   LogOut,
 } from "lucide-react";
@@ -116,8 +117,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </Sheet>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="no-print sticky top-0 z-30 flex items-center gap-3 border-b bg-card/80 px-4 py-2 backdrop-blur lg:hidden">
-          <Button variant="outline" size="icon" onClick={() => setOpen(true)}>
+        <header className="no-print sticky top-0 z-30 flex items - center items-centerj justify-between gap-3 border-b bg-card/80 px-4 py-2 backdrop-blur">
+          <Button variant="outline" size="icon" onClick={() => setOpen(true)} className="lg:hidden">
             <Menu className="size-5" />
           </Button>
           <div className="flex min-w-0 items-center gap-2">
@@ -130,6 +131,34 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
+
+<span className="hidden text-sm text-muted-foreground sm:block">
+  {new Date().toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })}
+</span>
+
+<Button variant="ghost" size="icon" className="relative">
+  <Bell className="size-5" />
+  <span className="absolute right-1 top-1 size-2 rounded-full bg-destructive" />
+</Button>
+
+<div className="hidden items-center gap-2 sm:flex">
+  <div className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+    {(role?.email?.[0] ?? "U").toUpperCase()}
+  </div>
+  <div className="hidden lg:block">
+    <p className="text-sm font-medium">{role?.email ?? "Utilisateur"}</p>
+    <p className="text-xs text-muted-foreground">
+      {role?.roles?.join(", ") || "—"}
+    </p>
+  </div>
+</div>
+
+
   );
 }
 
