@@ -83,6 +83,39 @@ function DepensesPage() {
     },
   });
 
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    date_depense: today(),
+    categorie: "Achats",
+    libelle: "",
+    montant: "",
+    mode_paiement: "especes",
+    fournisseur: "",
+  });
+
+  const modifier = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("depenses")
+        .update({
+          date_depense: editForm.date_depense,
+          categorie: editForm.categorie,
+          libelle: editForm.libelle,
+          montant: Number(editForm.montant),
+          mode_paiement: editForm.mode_paiement,
+          fournisseur: editForm.fournisseur || null,
+        })
+        .eq("id", editId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries();
+      setEditId(null);
+      toast.success("Dépense modifiée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const creer = useMutation({
     mutationFn: async () => {
       const { data: u } = await supabase.auth.getUser();
