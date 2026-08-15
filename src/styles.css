@@ -151,6 +151,11 @@
   }
 }
 
+@page {
+  size: A4;
+  margin: 2cm;
+}
+
 @media print {
   .no-print {
     display: none !important;
