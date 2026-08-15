@@ -101,6 +101,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { data: role } = useMonRole();
 
   return (
     <div className="min-h-screen bg-background lg:flex">
