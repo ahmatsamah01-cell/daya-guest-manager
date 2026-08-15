@@ -25,8 +25,6 @@ export type FactureDocumentData = {
   remise?: { label: string; montant: number };
   avance?: number;
   totalGeneral: number;
-  avance?: number;
-  totalGeneral: number;
   chequeBeneficiaire?: string;
   ville: string;
   dateEmission: string; // déjà formatée, ex: "17 juillet 2026"
@@ -282,8 +280,6 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
         </>
       ) : null}
       </div>
-
-      <p className="facture-date">
 
       <p className="facture-date">
         Fait à {data.ville}, le {data.dateEmission}
