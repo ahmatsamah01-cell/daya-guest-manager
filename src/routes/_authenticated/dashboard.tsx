@@ -184,7 +184,30 @@ const tauxOccupation =
   const sorties = data.operations
     .filter((o) => o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
-  const depensesJour = data.depenses.reduce((s, d) => s + Number(d.montant), 0);
+  const soldeNet = entrees - sorties;
+  const graphiqueFinancier = data.operations.reduce(
+  (acc, o) => {
+    const date = o.date_operation.slice(0, 10);
+    const montant = Number(o.montant);
+
+    if (!acc[date]) {
+      acc[date] = { date, recettes: 0, sorties: 0 };
+    }
+
+    if (o.sens === "entree") {
+      acc[date].recettes += montant;
+    } else {
+      acc[date].sorties += montant;
+    }
+
+    return acc;
+  },
+  {} as Record<string, { date: string; recettes: number; sorties: number }>,
+);
+  const donneesGraphique = Object.values(graphiqueFinancier).sort(
+  (a, b) => a.date.localeCompare(b.date),
+);
+  const depensesPeriode = data.depenses.reduce((s, d) => s + Number(d.montant), 0);
   const JOUR_MS = 24 * 60 * 60 * 1000;
   const debutP = new Date(dateDebut).getTime();
   const finP = new Date(jour).getTime() + JOUR_MS;
@@ -257,19 +280,19 @@ const tauxOccupation =
           to="/reservations"
         />
         <Stat
-          titre={`Recettes encaissées — ${
-  periode === "jour"
-    ? "Aujourd'hui"
-    : periode === "semaine"
-      ? "Cette semaine"
-      : periode === "mois"
-        ? "Ce mois"
-        : "Cette année"
-}`}
-          valeur={formatFCFA(entrees)}
-          detail={`Sorties de caisse : ${formatFCFA(sorties)}`}
-          icon={Wallet}
-          to="/caisse"
+  titre={`Recettes encaissées — ${
+    periode === "jour"
+      ? "Aujourd'hui"
+      : periode === "semaine"
+        ? "Cette semaine"
+        : periode === "mois"
+          ? "Ce mois"
+          : "Cette année"
+  }`}
+  valeur={formatFCFA(entrees)}
+  detail={`Sorties : ${formatFCFA(sorties)} — Solde net : ${formatFCFA(soldeNet)}`}
+  icon={Wallet}
+  to="/caisse"
         />
         <Stat
           titre={`Dépenses — ${
@@ -281,8 +304,8 @@ const tauxOccupation =
         ? "Ce mois"
         : "Cette année"
 }`}
-          valeur={formatFCFA(depensesJour)}
-          detail={`${data.depenses.length} dépense(s) enregistrée(s)`}
+          valeur={formatFCFA(depensesPeriode)}
+          detail={`${data.depenses.length} dépense(s) sur la période`}
           icon={TrendingDown}
           to="/depenses"
         />
