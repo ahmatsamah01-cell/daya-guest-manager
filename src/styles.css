@@ -165,15 +165,16 @@
     display: none !important;
   }
 
+  [data-radix-dialog-overlay] {
+    display: none !important;
+  }
+
   [data-radix-dialog-content] {
-    position: static !important;
-    transform: none !important;
-    inset: auto !important;
-    max-width: none !important;
-    max-height: none !important;
-    width: 100% !important;
-    box-shadow: none !important;
-    border: none !important;
+    display: contents !important;
+  }
+
+  [data-radix-dialog-content][data-state="closed"] {
+    display: none !important;
   }
 
   body:has(.print-area) * {
