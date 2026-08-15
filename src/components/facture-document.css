@@ -1,6 +1,6 @@
 .facture-a4 {
   width: 595.22pt;
-  min-height: 842pt;
+  height: 842pt;
   background: #ffffff;
   color: #000099;
   font-family: "Calibri", "Carlito", Arial, sans-serif;
@@ -9,6 +9,12 @@
   padding: 35.4pt 70.8pt;
   box-sizing: border-box;
   margin: 0 auto;
+  overflow: hidden;
+}
+
+.facture-corps {
+  max-height: 500pt;
+  overflow: hidden;
 }
 
 .facture-logo-top {
@@ -116,16 +122,22 @@
 }
 
 .facture-date {
+  position: absolute;
+  top: 585pt;
+  right: 70.8pt;
   text-align: right;
-  margin-top: 20pt;
 }
 
-.facture-logo-bas {
-  width: 130.08pt;
-  height: 77.76pt;
-  margin-left: auto;
-  margin-top: 8pt;
+.facture-pied {
+  position: absolute;
+  top: 713pt;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9.5pt;
+  padding: 0 20pt;
 }
+
 .facture-logo-bas img {
   width: 100%;
   height: 100%;
