@@ -1,0 +1,56 @@
+.facture-a4 {
+  width: 595.22pt;
+  min-height: 842pt;
+  background: #ffffff;
+  color: #000099;
+  font-family: "Calibri", "Carlito", Arial, sans-serif;
+  font-size: 11.04pt;
+  position: relative;
+  padding: 35.4pt 70.8pt;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+.facture-logo-top {
+  width: 175.56pt;
+  height: 87.72pt;
+  margin: 0 auto 24pt auto;
+  display: block;
+}
+.facture-logo-top img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.facture-titre-etab {
+  font-style: italic;
+  font-weight: bold;
+  margin: 0 0 18pt 0;
+}
+
+.facture-ligne {
+  margin: 0 0 4pt 0;
+}
+
+.facture-underline {
+  text-decoration: underline;
+}
+
+.facture-bold {
+  font-weight: bold;
+}
+
+.facture-rouge {
+  color: #ff0000;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  .facture-a4 {
+    margin: 0;
+  }
+}
