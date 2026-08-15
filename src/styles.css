@@ -161,6 +161,14 @@
     display: none !important;
   }
 
+[role="dialog"] {
+    position: static !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    max-height: none !important;
+  }
+
   body:has(.print-area) * {
     visibility: hidden;
   }
