@@ -376,8 +376,19 @@ function FacturesPage() {
   </p>
 
   <p className="pt-4 text-right">
-    Fait à Port-Gentil, le {formatDate(today())}
+  Fait à Port-Gentil, le {formatDate(today())}
+</p>
+
+<div className="mt-8 border-t pt-3 text-center text-[10px] text-muted-foreground">
+  <p className="font-semibold">LE DAYA Guest House by LDJ</p>
+  <p>Hébergements – Appartements hôtel – Restaurant - bar</p>
+  <p>BP 780 Port-Gentil / GABON - Tel : 074.87.42.33 Email : ledayaguestpog@gmail.com</p>
+  <p>RCCM : RG/POG 2021 A 15358 – N.I.F : 319220 T</p>
+  <p>
+    Identité Bancaire ORABANK : Le DAYA Guest House - compte N° 40021 02001 22873000201 Clé 63
   </p>
+</div>
+
 </div>
           <div className="no-print flex justify-end">
             <Button variant="outline" size="sm" onClick={() => window.print()}>
