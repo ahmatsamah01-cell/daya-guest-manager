@@ -127,6 +127,14 @@ function ReservationsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+const [facturerResa, setFacturerResa] = useState<Resa | null>(null);
+  const [facturerForm, setFacturerForm] = useState({
+    avance: "",
+    buanderie: "",
+    remiseType: "montant",
+    remiseValeur: "",
+  });
+
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     client_id: "",
@@ -178,13 +186,31 @@ function ReservationsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  type Resa = NonNullable<typeof reservations>[number];
+type Resa = NonNullable<ReturnType<typeof useQuery<{ id: string }[]>>["data"]>[number];
 
   const cloturer = useMutation({
-    mutationFn: async (r: Resa) => {
+    mutationFn: async ({
+      r,
+      avance,
+      buanderie,
+      remiseType,
+      remiseValeur,
+    }: {
+      r: Resa;
+      avance: number;
+      buanderie: number;
+      remiseType: string;
+      remiseValeur: number;
+    }) => {
       const nuits = nbNuits(r.date_arrivee, r.date_depart);
       const hebergement = nuits * Number(r.prix_nuit);
       const taxe = nuits * Number(r.taxe_nuit);
+      const baseHT = hebergement + buanderie;
+      const remise =
+        remiseType === "pourcentage" ? Math.round((baseHT * remiseValeur) / 100) : remiseValeur;
+      const totalNetHT = baseHT - remise;
+      const totalTTC = totalNetHT + taxe;
+
       const { count } = await supabase
         .from("factures")
         .select("id", { count: "exact", head: true });
@@ -197,15 +223,21 @@ function ReservationsPage() {
           numero,
           reservation_id: r.id,
           client_id: r.client_id,
+          date_facture: today(),
           montant_hebergement: hebergement,
           montant_taxe: taxe,
-          montant_total: hebergement + taxe,
+          montant_autres: buanderie,
+          montant_remise: remise,
+          motif_remise:
+            remise > 0 ? (remiseType === "pourcentage" ? `Remise ${remiseValeur}%` : "Remise") : null,
+          montant_paye: avance,
+          montant_total: totalTTC,
         })
         .select()
         .single();
       if (eFacture) throw eFacture;
 
-      const { error: eLignes } = await supabase.from("facture_lignes").insert([
+      const lignes = [
         {
           facture_id: facture.id,
           libelle: `Hébergement ${r.chambres?.nom ?? ""} — ${nuits} nuit(s)`,
@@ -213,25 +245,42 @@ function ReservationsPage() {
           prix_unitaire: Number(r.prix_nuit),
           montant: hebergement,
         },
-        {
+      ];
+
+      if (buanderie > 0) {
+        lignes.push({
+          facture_id: facture.id,
+          libelle: "Service buanderie",
+          quantite: 1,
+          prix_unitaire: buanderie,
+          montant: buanderie,
+        });
+      }
+
+      if (taxe > 0) {
+        lignes.push({
           facture_id: facture.id,
           libelle: `Taxe de séjour — ${nuits} nuitée(s)`,
           quantite: nuits,
           prix_unitaire: Number(r.taxe_nuit),
           montant: taxe,
-        },
-      ]);
+        });
+      }
+
+      const { error: eLignes } = await supabase.from("facture_lignes").insert(lignes);
       if (eLignes) throw eLignes;
 
-      const { error: eTaxe } = await supabase.from("taxes_sejour").insert({
-        etablissement_id: r.etablissement_id,
-        reservation_id: r.id,
-        date_nuitee: r.date_arrivee,
-        nb_nuits: nuits,
-        montant_unitaire: Number(r.taxe_nuit),
-        montant_total: taxe,
-      });
-      if (eTaxe) throw eTaxe;
+      if (taxe > 0) {
+        const { error: eTaxe } = await supabase.from("taxes_sejour").insert({
+          etablissement_id: r.etablissement_id,
+          reservation_id: r.id,
+          date_nuitee: r.date_arrivee,
+          nb_nuits: nuits,
+          montant_unitaire: Number(r.taxe_nuit),
+          montant_total: taxe,
+        });
+        if (eTaxe) throw eTaxe;
+      }
 
       const { error: eResa } = await supabase
         .from("reservations")
@@ -242,6 +291,8 @@ function ReservationsPage() {
     },
     onSuccess: (numero) => {
       qc.invalidateQueries();
+      setFacturerResa(null);
+      setFacturerForm({ avance: "", buanderie: "", remiseType: "montant", remiseValeur: "" });
       toast.success(`Séjour clôturé — facture ${numero} générée.`);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -455,10 +506,16 @@ function ReservationsPage() {
                         </>
                       ) : null}
                       {r.statut === "en_cours" ? (
-                        <Button size="sm" onClick={() => cloturer.mutate(r)}>
-                          Check-out & facturer
-                        </Button>
-                      ) : null}
+  <Button
+    size="sm"
+    onClick={() => {
+      setFacturerResa(r);
+      setFacturerForm({ avance: "", buanderie: "", remiseType: "montant", remiseValeur: "" });
+    }}
+  >
+    Check-out & facturer
+  </Button>
+) : null}
                     </TableCell>
                   </TableRow>
                 );
@@ -598,6 +655,88 @@ function ReservationsPage() {
             <DialogFooter>
               <Button type="submit" disabled={modifier.isPending}>
                 Enregistrer les modifications
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!facturerResa} onOpenChange={(o) => !o && setFacturerResa(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Check-out & facturation</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!facturerResa) return;
+              cloturer.mutate({
+                r: facturerResa,
+                avance: Number(facturerForm.avance) || 0,
+                buanderie: Number(facturerForm.buanderie) || 0,
+                remiseType: facturerForm.remiseType,
+                remiseValeur: Number(facturerForm.remiseValeur) || 0,
+              });
+            }}
+          >
+            <p className="text-sm text-muted-foreground">
+              {facturerResa?.clients?.prenom} {facturerResa?.clients?.nom} —{" "}
+              {facturerResa?.chambres?.nom}
+            </p>
+
+            <div className="space-y-2">
+              <Label>Service buanderie (FCFA) — laisser vide si aucun</Label>
+              <Input
+                type="number"
+                min="0"
+                value={facturerForm.buanderie}
+                onChange={(e) => setFacturerForm({ ...facturerForm, buanderie: e.target.value })}
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Type de remise</Label>
+                <Select
+                  value={facturerForm.remiseType}
+                  onValueChange={(v) => setFacturerForm({ ...facturerForm, remiseType: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="montant">Montant fixe (FCFA)</SelectItem>
+                    <SelectItem value="pourcentage">Pourcentage (%)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Valeur de la remise — laisser vide si aucune</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={facturerForm.remiseValeur}
+                  onChange={(e) =>
+                    setFacturerForm({ ...facturerForm, remiseValeur: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Avance déjà versée (FCFA) — laisser vide si aucune</Label>
+              <Input
+                type="number"
+                min="0"
+                value={facturerForm.avance}
+                onChange={(e) => setFacturerForm({ ...facturerForm, avance: e.target.value })}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="submit" disabled={cloturer.isPending}>
+                Clôturer et générer la facture
               </Button>
             </DialogFooter>
           </form>
