@@ -69,7 +69,53 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
         <span className="facture-rouge">12h00</span>
       </p>
 
-      {/* Les sections suivantes (tableau, totaux, pied de page) arrivent aux prochaines étapes */}
-    </div>
-  );
-}
+     <table className="facture-tableau">
+        <colgroup>
+          <col style={{ width: "34%" }} />
+          <col style={{ width: "13%" }} />
+          <col style={{ width: "17%" }} />
+          <col style={{ width: "18%" }} />
+          <col style={{ width: "18%" }} />
+        </colgroup>
+        <thead>
+          <tr className="facture-entete-bandeau">
+            <th className="facture-th-gauche">Périodes du {data.periodeLabel}</th>
+            <th>Nuitées</th>
+            <th>N° Chambres</th>
+            <th>PRIX. U</th>
+            <th>PRIX. T</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colSpan={5} className="facture-bold facture-section-titre">
+              Hébergements
+            </td>
+          </tr>
+          {data.lignesHebergement.map((l, i) => (
+            <tr key={i}>
+              <td>{l.periode}</td>
+              <td className="facture-centre">{l.nuitees}</td>
+              <td className="facture-centre">{l.chambre}</td>
+              <td className="facture-droite">{formatXAF(l.prixUnitaire)}</td>
+              <td className="facture-droite">{formatXAF(l.prixTotal)}</td>
+            </tr>
+          ))}
+          {data.reliquat && data.reliquat > 0 ? (
+            <tr>
+              <td>Reliquat</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td className="facture-droite">{formatXAF(data.reliquat)}</td>
+            </tr>
+          ) : null}
+          <tr>
+            <td className="facture-bold">{data.clientNom}</td>
+            <td></td>
+            <td></td>
+            <td className="facture-total-label">TOTAL 1</td>
+            <td className="facture-total-valeur">{formatXAF(data.totalHebergement)}</td>
+          </tr>
+        </tbody>
+      </table>
