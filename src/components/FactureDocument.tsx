@@ -40,6 +40,63 @@ export type FactureDocumentData = {
   logoUrl: string;
 };
 
+const UNITES_F = [
+  "", "UN", "DEUX", "TROIS", "QUATRE", "CINQ", "SIX", "SEPT", "HUIT", "NEUF",
+  "DIX", "ONZE", "DOUZE", "TREIZE", "QUATORZE", "QUINZE", "SEIZE", "DIX-SEPT", "DIX-HUIT", "DIX-NEUF",
+];
+const DIZAINES_F = [
+  "", "", "VINGT", "TRENTE", "QUARANTE", "CINQUANTE", "SOIXANTE", "SOIXANTE-DIX", "QUATRE-VINGT", "QUATRE-VINGT-DIX",
+];
+
+function nombreEnLettresFacture(n: number): string {
+  if (n === 0) return "ZÉRO FRANC CFA.";
+
+  function trois(n: number): string {
+    const c = Math.floor(n / 100);
+    const r = n % 100;
+    let s = "";
+    if (c > 0) s += (c > 1 ? UNITES_F[c] + " " : "") + "CENT" + (c > 1 && r === 0 ? "S" : "") + " ";
+    if (r > 0) {
+      if (r < 20) {
+        s += UNITES_F[r];
+      } else {
+        const d = Math.floor(r / 10);
+        const u = r % 10;
+        if (d === 7 || d === 9) {
+          s += DIZAINES_F[d - 1] + "-" + UNITES_F[10 + u];
+        } else {
+          s += DIZAINES_F[d] + (u > 0 ? (u === 1 && d !== 8 ? "-ET-UN" : "-" + UNITES_F[u]) : d === 8 ? "S" : "");
+        }
+      }
+    }
+    return s.trim();
+  }
+
+  const tranches = [
+    { valeur: 1_000_000_000, mot: "MILLIARD" },
+    { valeur: 1_000_000, mot: "MILLION" },
+    { valeur: 1_000, mot: "MILLE" },
+  ];
+
+  let reste = Math.round(n);
+  let resultat = "";
+
+  for (const { valeur, mot } of tranches) {
+    const q = Math.floor(reste / valeur);
+    if (q > 0) {
+      const prefixe = valeur === 1000 && q === 1 ? "" : trois(q) + " ";
+      resultat += prefixe + mot + (q > 1 && mot !== "MILLE" ? "S" : "") + " ";
+      reste %= valeur;
+    }
+  }
+
+  if (reste > 0) {
+    resultat += trois(reste);
+  }
+
+  return resultat.trim() + " FRANCS CFA.";
+}
+
 function formatXAF(n: number): string {
   return Math.round(n).toLocaleString("fr-FR").replace(/\s/g, ".") + " XAF";
 }
