@@ -551,6 +551,88 @@ const chartConfig = {
   </CardContent>
 </Card>
       </div>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Alertes</CardTitle>
+            <Badge variant="destructive">3</Badge>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-start gap-2 text-sm">
+              <CalendarCheck className="mt-0.5 size-4 shrink-0 text-orange-500" />
+              <span>Chambre réservée prochainement</span>
+            </div>
+            <div className="flex items-start gap-2 text-sm">
+              <ArrowDown className="mt-0.5 size-4 shrink-0 text-blue-500" />
+              <span>Aucune arrivée prévue aujourd'hui</span>
+            </div>
+            <div className="flex items-start gap-2 text-sm">
+              <ArrowUp className="mt-0.5 size-4 shrink-0 text-blue-500" />
+              <span>Aucun départ prévu aujourd'hui</span>
+            </div>
+            <Link
+              to="/reservations"
+              className="block pt-1 text-center text-sm text-primary hover:underline"
+            >
+              Voir toutes les alertes →
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Activité récente</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Aucune activité récente enregistrée.
+            </p>
+            <Link
+              to="/reservations"
+              className="block pt-1 text-center text-sm text-primary hover:underline"
+            >
+              Voir toute l'activité →
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Actions rapides</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-2">
+            <Link
+              to="/reservations"
+              className="flex flex-col items-center gap-1 rounded-lg border px-2 py-3 text-center text-xs hover:bg-accent"
+            >
+              <CalendarCheck className="size-4" />
+              Nouvelle réservation
+            </Link>
+            <Link
+              to="/clients"
+              className="flex flex-col items-center gap-1 rounded-lg border px-2 py-3 text-center text-xs hover:bg-accent"
+            >
+              <Users className="size-4" />
+              Nouveau client
+            </Link>
+            <Link
+              to="/caisse"
+              className="flex flex-col items-center gap-1 rounded-lg border px-2 py-3 text-center text-xs hover:bg-accent"
+            >
+              <Wallet className="size-4" />
+              Encaissement
+            </Link>
+            <Link
+              to="/depenses"
+              className="flex flex-col items-center gap-1 rounded-lg border px-2 py-3 text-center text-xs hover:bg-accent"
+            >
+              <TrendingDown className="size-4" />
+              Nouvelle dépense
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
