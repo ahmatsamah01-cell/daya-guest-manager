@@ -127,6 +127,45 @@ function ReservationsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    client_id: "",
+    chambre_id: "",
+    date_arrivee: "",
+    date_depart: "",
+    nb_personnes: "1",
+    prix_nuit: "",
+    taxe_nuit: "",
+    statut: "reservee",
+    notes: "",
+  });
+
+  const modifier = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("reservations")
+        .update({
+          client_id: editForm.client_id,
+          chambre_id: editForm.chambre_id,
+          date_arrivee: editForm.date_arrivee,
+          date_depart: editForm.date_depart,
+          nb_personnes: Number(editForm.nb_personnes),
+          prix_nuit: Number(editForm.prix_nuit),
+          taxe_nuit: Number(editForm.taxe_nuit),
+          statut: editForm.statut,
+          notes: editForm.notes || null,
+        })
+        .eq("id", editId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries();
+      setEditId(null);
+      toast.success("Réservation modifiée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const changerStatut = useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: string }) => {
       const { error } = await supabase.from("reservations").update({ statut }).eq("id", id);
