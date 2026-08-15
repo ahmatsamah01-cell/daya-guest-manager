@@ -229,3 +229,50 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
           ) : null}
         </tbody>
       </table>
+
+      <p className="facture-ligne facture-espace-haut">
+        Arrêter la présente facture à la somme de{" "}
+        <span className="facture-bold">{nombreEnLettresFacture(data.totalGeneral)}</span>
+      </p>
+
+      {data.chequeBeneficiaire ? (
+        <>
+          <p className="facture-bold facture-ligne">
+            EN CAS DE PAIEMENT PAR CHEQUE, VEUILLEZ LE LIBELLER AU NOM DE :
+          </p>
+          <p className="facture-bold facture-bleu-cheque facture-ligne">
+            {data.chequeBeneficiaire}
+          </p>
+        </>
+      ) : null}
+
+      <p className="facture-date">
+        Fait à {data.ville}, le {data.dateEmission}
+      </p>
+
+      <div className="facture-logo-bas">
+        <img src={data.logoUrl} alt="Le Daya Guest House" />
+      </div>
+
+      <div className="facture-pied">
+        <p className="facture-pied-titre">
+          <span className="facture-tirets">------------------------------------------------</span>{" "}
+          <span className="facture-rouge">{data.etablissement.nom} by LDJ</span>{" "}
+          <span className="facture-tirets">---------------------------------------------</span>
+        </p>
+        <p>Hébergements – Appartements hôtel – Restaurant - bar</p>
+        <p>
+          BP 780 {data.ville} / GABON - Tel : {data.etablissement.telephone} Email :{" "}
+          {data.etablissement.email}
+        </p>
+        <p>
+          RCCM : {data.etablissement.rccm} – N.I.F : {data.etablissement.nif}
+        </p>
+        <p>
+          Identité Bancaire {data.etablissement.banque} - compte N° {data.etablissement.compte}{" "}
+          Clé {data.etablissement.cle}
+        </p>
+      </div>
+    </div>
+  );
+}
