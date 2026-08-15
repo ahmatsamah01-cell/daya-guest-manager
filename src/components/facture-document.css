@@ -86,6 +86,11 @@
   text-align: center;
 }
 
+.facture-total-general td {
+  background-color: #d9d9d9;
+  height: 13.44pt;
+}
+
 .facture-droite {
   text-align: right;
 }
