@@ -20,6 +20,8 @@ export type FactureDocumentData = {
   reliquat?: number;
   totalHebergement: number;
   buanderie?: LigneBuanderie;
+  remise?: { label: string; montant: number };
+  avance?: number;
   totalGeneral: number;
   chequeBeneficiaire?: string;
   ville: string;
@@ -117,5 +119,56 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
             <td className="facture-total-label">TOTAL 1</td>
             <td className="facture-total-valeur">{formatXAF(data.totalHebergement)}</td>
           </tr>
+
+          {data.buanderie && data.buanderie.total > 0 ? (
+            <>
+              <tr>
+                <td colSpan={3}>Buanderie</td>
+                <td colSpan={2} className="facture-droite">
+                  {data.buanderie.detail}
+                </td>
+              </tr>
+              <tr>
+                <td className="facture-bold">{data.clientNom}</td>
+                <td></td>
+                <td></td>
+                <td className="facture-total-label">TOTAL</td>
+                <td className="facture-total-valeur">{formatXAF(data.buanderie.total)}</td>
+              </tr>
+            </>
+          ) : null}
+
+          {data.remise && data.remise.montant > 0 ? (
+            <tr>
+              <td colSpan={4}>{data.remise.label}</td>
+              <td className="facture-droite">- {formatXAF(data.remise.montant)}</td>
+            </tr>
+          ) : null}
+
+          <tr className="facture-total-general">
+            <td colSpan={4} className="facture-bold facture-rouge">
+              Total
+            </td>
+            <td className="facture-bold facture-rouge facture-droite">
+              {formatXAF(data.totalGeneral)}
+            </td>
+          </tr>
+
+          {data.avance && data.avance > 0 ? (
+            <>
+              <tr>
+                <td colSpan={4}>Avance</td>
+                <td className="facture-droite">{formatXAF(data.avance)}</td>
+              </tr>
+              <tr>
+                <td colSpan={4} className="facture-bold facture-rouge">
+                  Reste à payer
+                </td>
+                <td className="facture-bold facture-rouge facture-droite">
+                  {formatXAF(data.totalGeneral - data.avance)}
+                </td>
+              </tr>
+            </>
+          ) : null}
         </tbody>
       </table>
