@@ -272,6 +272,7 @@ function CaissePage() {
                 <TableHead>Mode</TableHead>
                 <TableHead>Sens</TableHead>
                 <TableHead className="text-right">Montant</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -290,11 +291,31 @@ function CaissePage() {
                   <TableCell className="text-right whitespace-nowrap">
                     {formatFCFA(o.montant)}
                   </TableCell>
+                  <TableCell className="text-right whitespace-nowrap">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditId(o.id);
+                        setEditForm({
+                          sens: o.sens,
+                          motif: o.motif,
+                          montant: String(o.montant),
+                          mode_paiement: o.mode_paiement,
+                          date_operation: new Date(o.date_operation)
+                            .toISOString()
+                            .slice(0, 16),
+                        });
+                      }}
+                    >
+                      Modifier
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
               {(operations ?? []).length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                     Aucune opération sur la période.
                   </TableCell>
                 </TableRow>
@@ -303,6 +324,86 @@ function CaissePage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier l'opération</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              modifier.mutate();
+            }}
+          >
+            <div className="space-y-2">
+              <Label>Date et heure</Label>
+              <Input
+                type="datetime-local"
+                required
+                value={editForm.date_operation}
+                onChange={(e) => setEditForm({ ...editForm, date_operation: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Sens</Label>
+              <Select
+                value={editForm.sens}
+                onValueChange={(v) => setEditForm({ ...editForm, sens: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="entree">Entrée</SelectItem>
+                  <SelectItem value="sortie">Sortie</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Motif</Label>
+              <Input
+                required
+                value={editForm.motif}
+                onChange={(e) => setEditForm({ ...editForm, motif: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Montant (FCFA)</Label>
+              <Input
+                type="number"
+                min="0"
+                required
+                value={editForm.montant}
+                onChange={(e) => setEditForm({ ...editForm, montant: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Mode de paiement</Label>
+              <Select
+                value={editForm.mode_paiement}
+                onValueChange={(v) => setEditForm({ ...editForm, mode_paiement: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="especes">Espèces</SelectItem>
+                  <SelectItem value="mobile_money">Mobile money</SelectItem>
+                  <SelectItem value="virement">Virement</SelectItem>
+                  <SelectItem value="carte">Carte bancaire</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={modifier.isPending}>
+                Enregistrer les modifications
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
