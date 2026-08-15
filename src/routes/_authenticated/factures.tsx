@@ -25,7 +25,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
 import { DocumentHeader } from "@/components/Brand";
-import { formatFCFA, formatDate } from "@/lib/format";
+import { formatFCFA, formatDate, today } from "@/lib/format";
 import { useEtablissement } from "@/hooks/use-hotel";
 
 const UNITES = [
@@ -281,41 +281,103 @@ function FacturesPage() {
             <DialogTitle>Facture {facture?.numero}</DialogTitle>
           </DialogHeader>
           <div className="print-area space-y-3 text-sm">
-            <DocumentHeader
-              titre={`Facture ${facture?.numero ?? ""}`}
-              sousTitre={facture ? formatDate(facture.date_facture) : undefined}
-              etablissement={etab}
-            />
-            <p className="text-muted-foreground">
-              {facture?.clients?.prenom} {facture?.clients?.nom} —{" "}
-              {facture ? formatDate(facture.date_facture) : ""}
-            </p>
-            <div className="divide-y rounded-lg border">
-              {(lignes ?? []).map((l) => (
-                <div key={l.id} className="flex justify-between gap-4 p-3">
-                  <span>{l.libelle}</span>
-                  <span className="whitespace-nowrap">{formatFCFA(l.montant)}</span>
-                </div>
-              ))}
-            </div>
-            {facture && Number(facture.montant_remise) > 0 ? (
-              <div className="flex justify-between text-destructive">
-                <span>
-                  Remise{facture.motif_remise ? ` — ${facture.motif_remise}` : ""}
-                </span>
-                <span className="whitespace-nowrap">
-                  - {formatFCFA(facture.montant_remise)}
-                </span>
-              </div>
-            ) : null}
-            <div className="flex justify-between font-display text-lg font-semibold">
-              <span>Net à payer</span>
-              <span>{formatFCFA(facture?.montant_total ?? 0)}</span>
-            </div>
-            <p className="pt-2 text-[10px] text-muted-foreground">
-              Document généré par LE DAYA Hotel Manager.
-            </p>
-          </div>
+  <DocumentHeader
+    titre={`Facture ${facture?.numero ?? ""}`}
+    sousTitre={facture ? formatDate(facture.date_facture) : undefined}
+    etablissement={etab}
+  />
+
+  <div>
+    <p>
+      <span className="underline">Client</span> :{" "}
+      <span className="font-semibold">
+        {facture?.clients?.prenom} {facture?.clients?.nom}
+      </span>
+    </p>
+    <p className="font-semibold">Facture hébergements N°{facture?.numero}</p>
+  </div>
+
+  <p className="text-xs text-muted-foreground">
+    Les arrivées se font tous les jours entre 13h30 et 20h00
+    <br />
+    Les départs se font tous les jours au plus tard à 12h00
+  </p>
+
+  <div className="divide-y rounded-lg border">
+    {(lignes ?? [])
+      .filter((l) => !l.libelle.startsWith("Taxe de séjour"))
+      .map((l) => (
+        <div key={l.id} className="flex justify-between gap-4 p-3">
+          <span>{l.libelle}</span>
+          <span className="whitespace-nowrap">{formatFCFA(l.montant)}</span>
+        </div>
+      ))}
+  </div>
+
+  <div className="flex justify-between font-medium">
+    <span>Total HT</span>
+    <span>
+      {formatFCFA(Number(facture?.montant_hebergement ?? 0) + Number(facture?.montant_autres ?? 0))}
+    </span>
+  </div>
+
+  {facture && Number(facture.montant_remise) > 0 ? (
+    <>
+      <div className="flex justify-between text-destructive">
+        <span>{facture.motif_remise ?? "Remise"}</span>
+        <span className="whitespace-nowrap">- {formatFCFA(facture.montant_remise)}</span>
+      </div>
+      <div className="flex justify-between font-medium">
+        <span>Total net HT</span>
+        <span>
+          {formatFCFA(
+            Number(facture.montant_hebergement) +
+              Number(facture.montant_autres) -
+              Number(facture.montant_remise),
+          )}
+        </span>
+      </div>
+    </>
+  ) : null}
+
+  {facture && Number(facture.montant_taxe) > 0 ? (
+    <div className="flex justify-between">
+      <span>Taxe de séjour</span>
+      <span className="whitespace-nowrap">{formatFCFA(facture.montant_taxe)}</span>
+    </div>
+  ) : null}
+
+  <div className="flex justify-between font-display text-lg font-semibold">
+    <span>Total TTC</span>
+    <span>{formatFCFA(facture?.montant_total ?? 0)}</span>
+  </div>
+
+  {facture && Number(facture.montant_paye) > 0 ? (
+    <>
+      <div className="flex justify-between">
+        <span>Avance</span>
+        <span className="whitespace-nowrap">{formatFCFA(facture.montant_paye)}</span>
+      </div>
+      <div className="flex justify-between font-semibold text-destructive">
+        <span>Reste à payer</span>
+        <span className="whitespace-nowrap">
+          {formatFCFA(Number(facture.montant_total) - Number(facture.montant_paye))}
+        </span>
+      </div>
+    </>
+  ) : null}
+
+  <p className="pt-2">
+    Arrêter la présente facture à la somme de{" "}
+    <span className="font-semibold">
+      {nombreEnLettres(Number(facture?.montant_total ?? 0))} FRANCS CFA.
+    </span>
+  </p>
+
+  <p className="pt-4 text-right">
+    Fait à Port-Gentil, le {formatDate(today())}
+  </p>
+</div>
           <div className="no-print flex justify-end">
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               Imprimer / PDF
