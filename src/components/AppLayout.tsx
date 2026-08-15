@@ -145,10 +145,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
             })}
           </span>
 
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="size-5" />
-            <span className="absolute right-1 top-1 size-2 rounded-full bg-destructive" />
-          </Button>
+          <Button variant="ghost" size="icon" className="relative" asChild>
+  <Link to="/notifications">
+    <Bell className="size-5" />
+    <span className="absolute right-1 top-1 size-2 rounded-full bg-destructive" />
+  </Link>
+</Button>
 
           <div className="hidden items-center gap-2 sm:flex">
             <div className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
