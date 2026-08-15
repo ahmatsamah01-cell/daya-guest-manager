@@ -50,6 +50,39 @@ function TaxePage() {
     },
   });
 
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    date_nuitee: today(),
+    nb_nuits: "1",
+    montant_unitaire: String(montantUnitaire),
+    reverse: false,
+  });
+
+  const modifier = useMutation({
+    mutationFn: async () => {
+      const nuits = Math.max(1, Number(editForm.nb_nuits) || 1);
+      const unitaire = Number(editForm.montant_unitaire) || 0;
+      const { error } = await supabase
+        .from("taxes_sejour")
+        .update({
+          date_nuitee: editForm.date_nuitee,
+          nb_nuits: nuits,
+          montant_unitaire: unitaire,
+          montant_total: nuits * unitaire,
+          reverse: editForm.reverse,
+          date_reversement: editForm.reverse ? today() : null,
+        })
+        .eq("id", editId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries();
+      setEditId(null);
+      toast.success("Taxe modifiée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const reverser = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
