@@ -265,6 +265,40 @@ const chartConfig = {
     color: "hsl(var(--destructive))",
   },
 };
+const reservationsProches = data.reservations.filter(
+    (r) =>
+      r.statut === "reservee" &&
+      r.date_arrivee > jour &&
+      r.date_arrivee <= new Date(new Date(jour).getTime() + 3 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10),
+  );
+
+  const alertes: { texte: string; icon: typeof CalendarCheck; couleur: string }[] = [];
+
+  reservationsProches.forEach((r) => {
+    alertes.push({
+      texte: `Chambre ${r.chambres?.nom ?? ""} réservée du ${formatDate(r.date_arrivee)} au ${formatDate(r.date_depart)}`,
+      icon: CalendarCheck,
+      couleur: "text-orange-500",
+    });
+  });
+
+  if (arrivees.length === 0) {
+    alertes.push({
+      texte: "Aucune arrivée prévue aujourd'hui",
+      icon: ArrowDown,
+      couleur: "text-blue-500",
+    });
+  }
+
+  if (departs.length === 0) {
+    alertes.push({
+      texte: "Aucun départ prévu aujourd'hui",
+      icon: ArrowUp,
+      couleur: "text-blue-500",
+    });
+  }
   const depensesPeriode = data.depenses.reduce((s, d) => s + Number(d.montant), 0);
   const JOUR_MS = 24 * 60 * 60 * 1000;
   const debutP = new Date(dateDebut).getTime();
@@ -556,32 +590,30 @@ const chartConfig = {
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Alertes</CardTitle>
-            <Badge variant="destructive">3</Badge>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-2 text-sm">
-              <CalendarCheck className="mt-0.5 size-4 shrink-0 text-orange-500" />
-              <span>Chambre réservée prochainement</span>
-            </div>
-            <div className="flex items-start gap-2 text-sm">
-              <ArrowDown className="mt-0.5 size-4 shrink-0 text-blue-500" />
-              <span>Aucune arrivée prévue aujourd'hui</span>
-            </div>
-            <div className="flex items-start gap-2 text-sm">
-              <ArrowUp className="mt-0.5 size-4 shrink-0 text-blue-500" />
-              <span>Aucun départ prévu aujourd'hui</span>
-            </div>
-            <Link
-              to="/reservations"
-              className="block pt-1 text-center text-sm text-primary hover:underline"
-            >
-              Voir toutes les alertes →
-            </Link>
-          </CardContent>
-        </Card>
+       <Card>
+  <CardHeader className="flex flex-row items-center justify-between">
+    <CardTitle className="text-base">Alertes</CardTitle>
+    <Badge variant="destructive">{alertes.length}</Badge>
+  </CardHeader>
+  <CardContent className="space-y-3">
+    {alertes.length === 0 ? (
+      <p className="text-sm text-muted-foreground">Aucune alerte pour le moment.</p>
+    ) : (
+      alertes.map((a, i) => (
+        <div key={i} className="flex items-start gap-2 text-sm">
+          <a.icon className={`mt-0.5 size-4 shrink-0 ${a.couleur}`} />
+          <span>{a.texte}</span>
+        </div>
+      ))
+    )}
+    <Link
+      to="/reservations"
+      className="block pt-1 text-center text-sm text-primary hover:underline"
+    >
+      Voir toutes les alertes →
+    </Link>
+  </CardContent>
+</Card>
 
         <Card>
           <CardHeader>
