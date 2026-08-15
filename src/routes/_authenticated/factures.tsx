@@ -232,8 +232,18 @@ function FacturesPage() {
                 </div>
               ))}
             </div>
+            {facture && Number(facture.montant_remise) > 0 ? (
+              <div className="flex justify-between text-destructive">
+                <span>
+                  Remise{facture.motif_remise ? ` — ${facture.motif_remise}` : ""}
+                </span>
+                <span className="whitespace-nowrap">
+                  - {formatFCFA(facture.montant_remise)}
+                </span>
+              </div>
+            ) : null}
             <div className="flex justify-between font-display text-lg font-semibold">
-              <span>Total</span>
+              <span>Net à payer</span>
               <span>{formatFCFA(facture?.montant_total ?? 0)}</span>
             </div>
             <p className="pt-2 text-[10px] text-muted-foreground">
