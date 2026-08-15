@@ -161,12 +161,10 @@
     display: none !important;
   }
 
-[role="dialog"] {
+.fixed {
     position: static !important;
+    inset: auto !important;
     transform: none !important;
-    top: auto !important;
-    left: auto !important;
-    max-height: none !important;
   }
 
   body:has(.print-area) * {
