@@ -301,12 +301,13 @@ const chartConfig = {
       </div>
     </div>
 
-    <div className="h-32 w-full overflow-hidden rounded-lg sm:h-36 sm:max-w-md">
-      <img
-        src="/images/reception-banner.jpg"
-        alt="Réception LE DAYA Guest House"
-        className="h-full w-full object-cover"
-      />
+    <div className="relative h-32 w-full overflow-hidden rounded-lg bg-gradient-to-br from-red-900 via-red-800 to-stone-900 sm:h-36 sm:max-w-md">
+  <div className="absolute inset-0 flex items-center justify-center">
+    <div className="flex flex-col items-center gap-2 text-white/90">
+      <BedDouble className="size-10" />
+      <span className="text-xs font-medium uppercase tracking-wide">
+        Réception
+      </span>
     </div>
   </div>
 </div>
