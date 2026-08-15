@@ -1,3 +1,4 @@
+import "./facture-document.css";
 export type LigneHebergement = {
   periode: string;
   nuitees: number | string;
