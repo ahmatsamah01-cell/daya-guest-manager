@@ -290,7 +290,7 @@ function FacturesPage() {
           <DialogHeader className="no-print">
             <DialogTitle>Facture {facture?.numero}</DialogTitle>
           </DialogHeader>
-          <div className="print-area space-y-3 text-sm">
+          <div className="print-area space-y-3 text-sm text-blue-950">
   <div className="mb-4 text-center">
   <div className="mx-auto mb-3 max-w-[220px]">
     <BrandLogo className="mx-auto max-h-32" />
