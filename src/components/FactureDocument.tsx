@@ -20,7 +20,11 @@ export type FactureDocumentData = {
   reliquat?: number;
   totalHebergement: number;
   buanderie?: LigneBuanderie;
+  lignesDayUse?: LigneHebergement[];
+  totalDayUse?: number;
   remise?: { label: string; montant: number };
+  avance?: number;
+  totalGeneral: number;
   avance?: number;
   totalGeneral: number;
   chequeBeneficiaire?: string;
@@ -104,6 +108,7 @@ function formatXAF(n: number): string {
 export function FactureDocument({ data }: { data: FactureDocumentData }) {
   return (
     <div className="facture-a4">
+      <div className="facture-corps">
       <div className="facture-logo-top">
         <img src={data.logoUrl} alt="Le Daya Guest House" />
       </div>
@@ -176,7 +181,38 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
             <td className="facture-total-label">TOTAL 1</td>
             <td className="facture-total-valeur">{formatXAF(data.totalHebergement)}</td>
           </tr>
-
+{data.lignesDayUse && data.lignesDayUse.length > 0 ? (
+            <>
+              <tr>
+                <td colSpan={5}>&nbsp;</td>
+              </tr>
+              {data.lignesDayUse.map((l, i) => (
+                <tr key={`dayuse-${i}`}>
+                  <td>DAY USE</td>
+                  <td className="facture-centre">{l.periode}</td>
+                  <td className="facture-centre">{l.chambre}</td>
+                  <td className="facture-droite">{formatXAF(l.prixUnitaire)}</td>
+                  <td className="facture-droite">{formatXAF(l.prixTotal)}</td>
+                </tr>
+              ))}
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td className="facture-total-label">TOTAL 2</td>
+                <td className="facture-total-valeur">{formatXAF(data.totalDayUse ?? 0)}</td>
+              </tr>
+              <tr>
+                <td className="facture-bold">{data.clientNom}</td>
+                <td></td>
+                <td></td>
+                <td className="facture-total-label">TOTAL 1 + 2</td>
+                <td className="facture-total-valeur">
+                  {formatXAF(data.totalHebergement + (data.totalDayUse ?? 0))}
+                </td>
+              </tr>
+            </>
+          ) : null}
           {data.buanderie && data.buanderie.total > 0 ? (
             <>
               <tr>
@@ -245,6 +281,9 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
           </p>
         </>
       ) : null}
+      </div>
+
+      <p className="facture-date">
 
       <p className="facture-date">
         Fait à {data.ville}, le {data.dateEmission}
