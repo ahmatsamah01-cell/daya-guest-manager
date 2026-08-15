@@ -51,12 +51,12 @@ function Stat({
   to?: string;
 }) {
   const contenu = (
-    <Card className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {titre}
         </CardTitle>
-        <Icon className="size-4 text-primary" />
+        <Icon className="size-5 text-primary transition-transform group-hover:scale-110" />
       </CardHeader>
 
       <CardContent>
@@ -209,6 +209,16 @@ const tauxOccupation =
   const donneesGraphique = Object.values(graphiqueFinancier).sort(
   (a, b) => a.date.localeCompare(b.date),
 );
+const chartConfig = {
+  recettes: {
+    label: "Recettes",
+    color: "hsl(var(--primary))",
+  },
+  sorties: {
+    label: "Sorties",
+    color: "hsl(var(--destructive))",
+  },
+};
   const depensesPeriode = data.depenses.reduce((s, d) => s + Number(d.montant), 0);
   const JOUR_MS = 24 * 60 * 60 * 1000;
   const debutP = new Date(dateDebut).getTime();
@@ -260,12 +270,12 @@ const tauxOccupation =
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
          <Stat
-  titre="Occupation"
+  titre="Taux d'occupation"
   valeur={`${tauxOccupation}%`}
-  detail={`${nuitsOccupees} nuitées occupées sur ${nuitsDisponibles} disponibles`}
+  detail={`${nuitsOccupees} / ${nuitsDisponibles} nuitées`}
   icon={BedDouble}
-  to="/chambres"   
-        />
+  to="/chambres"
+/>
         <Stat
           titre={`Arrivées / départs — ${
   periode === "jour"
@@ -334,6 +344,28 @@ const tauxOccupation =
           to="/clients"
         />
       </div>
+
+<Card className="mt-6">
+  <CardHeader>
+    <CardTitle className="text-base">Évolution financière</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <ChartContainer config={chartConfig} className="h-[300px] w-full">
+      <BarChart data={donneesGraphique}>
+        <CartesianGrid vertical={false} />
+        <XAxis
+          dataKey="date"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+        />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <Bar dataKey="recettes" fill="var(--color-recettes)" radius={4} />
+        <Bar dataKey="sorties" fill="var(--color-sorties)" radius={4} />
+      </BarChart>
+    </ChartContainer>
+  </CardContent>
+</Card>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card>
