@@ -299,6 +299,41 @@ const reservationsProches = data.reservations.filter(
       couleur: "text-blue-500",
     });
   }
+data.operations
+    .filter((o) => o.sens === "entree" && o.date_operation.slice(0, 10) === jour)
+    .forEach((o) => {
+      alertes.push({
+        texte: `Encaissement du jour : ${formatFCFA(Number(o.montant))}${o.description ? " — " + o.description : ""}`,
+        icon: Wallet,
+        couleur: "text-blue-600",
+      });
+    });
+
+  data.depenses
+    .filter((d) => d.date_depense === jour)
+    .forEach((d) => {
+      alertes.push({
+        texte: `Dépense du jour : ${formatFCFA(Number(d.montant))}${d.description ? " — " + d.description : ""}`,
+        icon: TrendingDown,
+        couleur: "text-red-500",
+      });
+    });
+
+  arrivees.forEach((r) => {
+    alertes.push({
+      texte: `Check-in prévu : ${r.clients?.prenom ?? ""} ${r.clients?.nom ?? "Client"} — ${r.chambres?.nom ?? ""}`,
+      icon: ArrowDown,
+      couleur: "text-green-600",
+    });
+  });
+
+  departs.forEach((r) => {
+    alertes.push({
+      texte: `Check-out prévu : ${r.clients?.prenom ?? ""} ${r.clients?.nom ?? "Client"} — ${r.chambres?.nom ?? ""}`,
+      icon: ArrowUp,
+      couleur: "text-orange-600",
+    });
+  });
 const activiteRecente = [...data.reservations]
     .filter((r) => r.created_at)
     .sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))
