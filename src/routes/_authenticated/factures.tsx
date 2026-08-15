@@ -358,10 +358,10 @@ function FacturesPage() {
     </div>
   ) : null}
 
-  <div className="flex justify-between font-display text-lg font-semibold">
-    <span>Total TTC</span>
-    <span>{formatFCFA(facture?.montant_total ?? 0)}</span>
-  </div>
+  <div className="flex justify-between font-display text-lg font-bold text-red-600">
+  <span>Total TTC</span>
+  <span>{formatFCFA(facture?.montant_total ?? 0)}</span>
+</div>
 
   {facture && Number(facture.montant_paye) > 0 ? (
     <>
