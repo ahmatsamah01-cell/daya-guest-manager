@@ -211,6 +211,75 @@ function TaxePage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier la taxe de séjour</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              modifier.mutate();
+            }}
+          >
+            <div className="space-y-2">
+              <Label>Date de la première nuitée</Label>
+              <Input
+                type="date"
+                required
+                value={editForm.date_nuitee}
+                onChange={(e) => setEditForm({ ...editForm, date_nuitee: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Nombre de nuitées</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  required
+                  value={editForm.nb_nuits}
+                  onChange={(e) => setEditForm({ ...editForm, nb_nuits: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Montant par nuitée (FCFA)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  required
+                  value={editForm.montant_unitaire}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, montant_unitaire: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={editForm.reverse}
+                onChange={(e) => setEditForm({ ...editForm, reverse: e.target.checked })}
+              />
+              Taxe reversée
+            </label>
+            <p className="text-sm text-muted-foreground">
+              Total :{" "}
+              {formatFCFA(
+                Math.max(1, Number(editForm.nb_nuits) || 1) *
+                  (Number(editForm.montant_unitaire) || 0),
+              )}
+            </p>
+            <DialogFooter>
+              <Button type="submit" disabled={modifier.isPending}>
+                Enregistrer les modifications
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
