@@ -319,6 +319,7 @@ function DepensesPage() {
                 <TableHead>Fournisseur</TableHead>
                 <TableHead>Mode</TableHead>
                 <TableHead className="text-right">Montant</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -332,11 +333,30 @@ function DepensesPage() {
                   <TableCell className="text-right whitespace-nowrap">
                     {formatFCFA(d.montant)}
                   </TableCell>
+                  <TableCell className="text-right whitespace-nowrap">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditId(d.id);
+                        setEditForm({
+                          date_depense: d.date_depense,
+                          categorie: d.categorie,
+                          libelle: d.libelle,
+                          montant: String(d.montant),
+                          mode_paiement: d.mode_paiement,
+                          fournisseur: d.fournisseur ?? "",
+                        });
+                      }}
+                    >
+                      Modifier
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
               {(depenses ?? []).length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                     Aucune dépense sur ce mois.
                   </TableCell>
                 </TableRow>
@@ -345,6 +365,100 @@ function DepensesPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier la dépense</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              modifier.mutate();
+            }}
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <Input
+                  type="date"
+                  required
+                  value={editForm.date_depense}
+                  onChange={(e) => setEditForm({ ...editForm, date_depense: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Catégorie</Label>
+                <Select
+                  value={editForm.categorie}
+                  onValueChange={(v) => setEditForm({ ...editForm, categorie: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Libellé</Label>
+              <Input
+                required
+                value={editForm.libelle}
+                onChange={(e) => setEditForm({ ...editForm, libelle: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Montant (FCFA)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  required
+                  value={editForm.montant}
+                  onChange={(e) => setEditForm({ ...editForm, montant: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Mode de paiement</Label>
+                <Select
+                  value={editForm.mode_paiement}
+                  onValueChange={(v) => setEditForm({ ...editForm, mode_paiement: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="especes">Espèces</SelectItem>
+                    <SelectItem value="mobile_money">Mobile money</SelectItem>
+                    <SelectItem value="virement">Virement</SelectItem>
+                    <SelectItem value="carte">Carte bancaire</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Fournisseur</Label>
+              <Input
+                value={editForm.fournisseur}
+                onChange={(e) => setEditForm({ ...editForm, fournisseur: e.target.value })}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={modifier.isPending}>
+                Enregistrer les modifications
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
