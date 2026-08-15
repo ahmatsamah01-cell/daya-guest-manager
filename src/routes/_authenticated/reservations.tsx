@@ -414,6 +414,26 @@ function ReservationsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="space-x-2 text-right whitespace-nowrap">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditId(r.id);
+                          setEditForm({
+                            client_id: r.client_id,
+                            chambre_id: r.chambre_id,
+                            date_arrivee: r.date_arrivee,
+                            date_depart: r.date_depart,
+                            nb_personnes: String(r.nb_personnes),
+                            prix_nuit: String(r.prix_nuit),
+                            taxe_nuit: String(r.taxe_nuit),
+                            statut: r.statut,
+                            notes: r.notes ?? "",
+                          });
+                        }}
+                      >
+                        Modifier
+                      </Button>
                       {r.statut === "reservee" ? (
                         <>
                           <Button
