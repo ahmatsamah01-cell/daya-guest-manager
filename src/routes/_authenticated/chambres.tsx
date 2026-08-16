@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, BedDouble, Users2, LayoutGrid, List } from "lucide-react";
+import { Plus, Pencil, Trash2, BedDouble, Users2, LayoutGrid, Liste, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,7 @@ type Form = {
   capacite: string;
   statut: string;
   description: string;
+  photo_url: string;
 };
 
 const vide: Form = {
@@ -61,6 +62,7 @@ const vide: Form = {
   capacite: "2",
   statut: "libre",
   description: "",
+  photo_url: "", 
 };
 
 function ChambresPage() {
@@ -70,6 +72,28 @@ function ChambresPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Form>(vide);
   const [vue, setVue] = useState<"grille" | "tableau">("grille");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const chemin = `${Date.now()}-${file.name}`;
+      const { error: eUpload } = await supabase.storage
+        .from("chambres")
+        .upload(chemin, file, { upsert: true });
+      if (eUpload) throw eUpload;
+      const { data: publicUrlData } = supabase.storage.from("chambres").getPublicUrl(chemin);
+      setForm((f) => ({ ...f, photo_url: publicUrlData.publicUrl }));
+      toast.success("Photo ajoutée.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur d'upload.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
 
   const { data: chambres } = useQuery({
     queryKey: ["chambres"],
@@ -90,6 +114,7 @@ function ChambresPage() {
         capacite: Number(f.capacite),
         statut: f.statut,
         description: f.description || null,
+        photo_url: f.photo_url || null, 
       };
       const { error } = f.id
         ? await supabase.from("chambres").update(payload).eq("id", f.id)
@@ -146,6 +171,36 @@ function ChambresPage() {
                   enregistrer.mutate(form);
                 }}
               >
+                <div className="space-y-2">
+                  <Label>Photo</Label>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-16 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-red-900 to-stone-900">
+                      {form.photo_url ? (
+                        <img src={form.photo_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <BedDouble className="size-6 text-white/60" />
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploadingPhoto}
+                    >
+                      <Camera className="size-3.5" />
+                      {uploadingPhoto ? "Envoi…" : "Choisir une photo"}
+                    </Button>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handlePhotoChange}
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label>Nom / numéro</Label>
                   <Input
@@ -249,10 +304,14 @@ function ChambresPage() {
             return (
               <Card key={c.id} className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
                 <div className="relative h-32 w-full overflow-hidden bg-gradient-to-br from-red-900 via-red-800 to-stone-900">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <BedDouble className="size-10 text-white/70" />
-                  </div>
-                  <span
+                  {c.photo_url ? (
+                    <img src={c.photo_url} alt={c.nom} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <BedDouble className="size-10 text-white/70" />
+                    </div>
+                  )}
+</span>
                     className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${statutStyle.badge}`}
                   >
                     {statutStyle.label}
@@ -343,14 +402,15 @@ function ChambresPage() {
                         size="icon"
                         onClick={() => {
                           setForm({
-                            id: c.id,
-                            nom: c.nom,
-                            type: c.type,
-                            prix_nuit: String(c.prix_nuit),
-                            capacite: String(c.capacite),
-                            statut: c.statut,
-                            description: c.description ?? "",
-                          });
+                          id: c.id,
+                          nom: c.nom,
+                          type: c.type,
+                          prix_nuit: String(c.prix_nuit),
+                          capacite: String(c.capacite),
+                          statut: c.statut,
+                          description: c.description ?? "",
+                          photo_url: c.photo_url ?? "",
+                        });
                           setOpen(true);
                         }}
                       >
