@@ -202,16 +202,6 @@ function ClientsPage() {
       }
     },
   });
-    onError: (e: Error) => {
-      if (e.message.includes("foreign key") || e.message.includes("violates")) {
-        toast.error("Impossible de supprimer : ce client a des réservations enregistrées.");
-      } else {
-        toast.error(e.message);
-  });
-  const filtres = (clients ?? []).filter((c) =>
-    `${c.nom} ${c.prenom ?? ""} ${c.telephone ?? ""}`.toLowerCase().includes(recherche.toLowerCase()),
-  );
-
   const statsHistorique = (sejours ?? []).reduce(
     (acc, s) => {
       const n = nbNuits(s.date_arrivee, s.date_depart);
