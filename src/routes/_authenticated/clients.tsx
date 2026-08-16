@@ -194,7 +194,13 @@ function ClientsPage() {
       qc.invalidateQueries({ queryKey: ["clients"] });
       toast.success("Client supprimé.");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      if (e.message.includes("foreign key") || e.message.includes("violates")) {
+        toast.error("Impossible de supprimer : ce client a des réservations enregistrées.");
+      } else {
+        toast.error(e.message);
+      }
+    },
   });
 
   const filtres = (clients ?? []).filter((c) =>
