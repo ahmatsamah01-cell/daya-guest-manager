@@ -12,7 +12,7 @@ import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users, ArrowD
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent,} from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, XAxis, Pie, PieChart, Cell } from "recharts";
+import { CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Area, AreaChart } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/AppLayout";
 import { BrandLogo, SLOGAN } from "@/components/Brand";
@@ -152,6 +152,7 @@ function Dashboard() {
   const jour = today();
   const [periode, setPeriode] = useState("jour");
   const [rapportPeriode, setRapportPeriode] = useState("mois_actuel");
+  const [evolutionVue, setEvolutionVue] = useState<"mois" | "annee">("mois");
 
   const dateDebut =
     periode === "semaine"
@@ -193,7 +194,24 @@ function Dashboard() {
     },
   });
 
-
+const { data: evolutionData } = useQuery({
+    queryKey: ["evolution-ca", evolutionVue, jour],
+    queryFn: async () => {
+      const depuis =
+        evolutionVue === "mois"
+          ? new Date(new Date(jour).getFullYear(), new Date(jour).getMonth() - 11, 1)
+              .toISOString()
+              .slice(0, 10)
+          : `${new Date(jour).getFullYear() - 5}-01-01`;
+      const { data, error } = await supabase
+        .from("caisse_operations")
+        .select("montant, date_operation")
+        .eq("sens", "entree")
+        .gte("date_operation", `${depuis}T00:00:00`);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
   if (isLoading || !data) {
     return <p className="text-sm text-muted-foreground">Chargement…</p>;
   }
@@ -370,6 +388,21 @@ const donneesDonut = [
   { name: "Réservée", value: reservees, couleur: "#f97316" },
   { name: "Occupée", value: occupees.size, couleur: "#dc2626" },
 ].filter((d) => d.value > 0);
+const groupesCA: Record<string, number> = {};
+(evolutionData ?? []).forEach((o) => {
+  const d = o.date_operation.slice(0, 10);
+  const cle = evolutionVue === "mois" ? d.slice(0, 7) : d.slice(0, 4);
+  groupesCA[cle] = (groupesCA[cle] ?? 0) + Number(o.montant);
+});
+const evolutionCA = Object.entries(groupesCA)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([cle, montant]) => ({
+    label:
+      evolutionVue === "mois"
+        ? new Date(`${cle}-01`).toLocaleDateString("fr-FR", { month: "short", year: "2-digit" })
+        : cle,
+    montant,
+  }));
 const reservationsProches = data.reservations.filter(
     (r) =>
       r.statut === "reservee" &&
@@ -566,27 +599,58 @@ const activiteRecente = [...data.reservations]
     variation={varEnCours}
   />
 </div>
-<Card className="mt-6">
-  <CardHeader>
-    <CardTitle className="text-base">Évolution financière</CardTitle>
+<Card className="mt-6 overflow-hidden border-none bg-gradient-to-br from-card via-card to-primary/5 shadow-md">
+  <CardHeader className="flex flex-row items-center justify-between">
+    <CardTitle className="text-base">Évolution du chiffre d'affaires</CardTitle>
+    <Select value={evolutionVue} onValueChange={(v) => setEvolutionVue(v as "mois" | "annee")}>
+      <SelectTrigger className="w-[140px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="mois">Par mois</SelectItem>
+        <SelectItem value="annee">Par année</SelectItem>
+      </SelectContent>
+    </Select>
   </CardHeader>
   <CardContent>
-    <ChartContainer config={chartConfig} className="h-[300px] w-full">
-      <BarChart data={donneesGraphique}>
-        <CartesianGrid vertical={false} />
-        <XAxis
-          dataKey="date"
+    <ChartContainer config={{ montant: { label: "CA", color: "#dc2626" } }} className="h-[280px] w-full">
+      <AreaChart data={evolutionCA} margin={{ left: 0, right: 12, top: 12, bottom: 0 }}>
+        <defs>
+          <linearGradient id="caGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#dc2626" stopOpacity={0.5} />
+            <stop offset="100%" stopColor="#dc2626" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
+        <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+        <YAxis
           tickLine={false}
           axisLine={false}
-          tickMargin={8}
+          tickFormatter={(v) => `${Math.round(Number(v) / 1000)}k`}
+          fontSize={12}
+          width={40}
         />
-        <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="recettes" fill="var(--color-recettes)" radius={4} />
-        <Bar dataKey="sorties" fill="var(--color-sorties)" radius={4} />
-      </BarChart>
+        <ChartTooltip
+          content={<ChartTooltipContent formatter={(value) => formatFCFA(Number(value))} />}
+        />
+        <Area
+          type="monotone"
+          dataKey="montant"
+          stroke="#dc2626"
+          strokeWidth={3}
+          fill="url(#caGradient)"
+          animationDuration={900}
+          dot={{ r: 4, fill: "#dc2626", strokeWidth: 0 }}
+          activeDot={{ r: 6 }}
+        />
+      </AreaChart>
     </ChartContainer>
+    {evolutionCA.length === 0 ? (
+      <p className="mt-2 text-center text-sm text-muted-foreground">
+        Aucune donnée pour cette période.
+      </p>
+    ) : null}
   </CardContent>
-
 </Card>
 <Card className="mt-6 overflow-hidden border-none bg-gradient-to-br from-card to-muted/50 shadow-md">
   <CardHeader className="flex flex-row items-center justify-between">
