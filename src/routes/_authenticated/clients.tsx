@@ -460,6 +460,13 @@ function ClientsPage() {
         </CardContent>
       </Card>
 
+<div className="mb-3">
+  <h2 className="font-display text-lg font-semibold">Fichier clients</h2>
+  <p className="text-sm text-muted-foreground">
+    Consultez et gérez les informations des clients de l'établissement.
+  </p>
+</div>
+
       <Card>
         <CardContent className="overflow-x-auto p-0">
           <Table>
