@@ -1,7 +1,6 @@
-import logoAsset from "@/assets/le-daya-logo.png.asset.json";
 import { cn } from "@/lib/utils";
 
-export const LOGO_URL = logoAsset.url;
+export const LOGO_URL = "/IMG_20260812_225755.png";
 export const SLOGAN = "Notre priorité, votre satisfaction";
 
 /** Logo officiel — proportions d'origine strictement conservées (largeur auto). */
