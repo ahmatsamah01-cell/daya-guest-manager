@@ -223,8 +223,6 @@ function ClientsPage() {
         toast.error("Impossible de supprimer : ce client a des réservations enregistrées.");
       } else {
         toast.error(e.message);
-      }
-    },
   });
 
   const filtres = (clients ?? []).filter((c) =>
