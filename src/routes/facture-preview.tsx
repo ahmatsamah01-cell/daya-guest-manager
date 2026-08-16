@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { FactureDocument, type FactureDocumentData } from "@/components/FactureDocument";
 import { LOGO_URL } from "@/components/Brand";
 
-export const Route = createFileRoute("/__facture-preview")({
+export const Route = createFileRoute("/facture-preview")({
   head: () => ({
     meta: [
       { title: "Aperçu facture — LE DAYA Hotel Manager" },
