@@ -151,6 +151,7 @@ function StatCard({
 function Dashboard() {
   const jour = today();
   const [periode, setPeriode] = useState("jour");
+  const [rapportPeriode, setRapportPeriode] = useState("mois_actuel");
 
   const dateDebut =
     periode === "semaine"
@@ -310,6 +311,50 @@ const varArrivees = periode === "jour" ? variation(arrivees.length, arriveesHier
 const varDeparts = periode === "jour" ? variation(departs.length, departsHier) : null;
 const varCA = periode === "jour" ? variation(entrees, entreesHier) : null;
 const varEnCours = periode === "jour" ? variation(enCours.length, enCoursHier) : null;
+const maintenant = new Date(jour);
+let rapportDebut: Date;
+let rapportFin: Date;
+let rapportLabel: string;
+
+if (rapportPeriode === "mois_actuel") {
+  rapportDebut = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
+  rapportFin = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 1);
+  rapportLabel = maintenant.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+} else if (rapportPeriode === "mois_dernier") {
+  rapportDebut = new Date(maintenant.getFullYear(), maintenant.getMonth() - 1, 1);
+  rapportFin = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
+  rapportLabel = rapportDebut.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+} else if (rapportPeriode === "annee_actuelle") {
+  rapportDebut = new Date(maintenant.getFullYear(), 0, 1);
+  rapportFin = new Date(maintenant.getFullYear() + 1, 0, 1);
+  rapportLabel = String(maintenant.getFullYear());
+} else {
+  rapportDebut = new Date(maintenant.getFullYear() - 1, 0, 1);
+  rapportFin = new Date(maintenant.getFullYear(), 0, 1);
+  rapportLabel = String(maintenant.getFullYear() - 1);
+}
+
+const nuitsVenduesPeriode = data.reservations.reduce((total, r) => {
+  const debutR = new Date(r.date_arrivee);
+  const finR = new Date(r.date_depart);
+  const debutEff = debutR > rapportDebut ? debutR : rapportDebut;
+  const finEff = finR < rapportFin ? finR : rapportFin;
+  const nuits = Math.max(
+    0,
+    Math.round((finEff.getTime() - debutEff.getTime()) / (1000 * 60 * 60 * 24)),
+  );
+  return total + nuits;
+}, 0);
+
+const joursDansRapport = Math.max(
+  1,
+  Math.round((Math.min(rapportFin.getTime(), maintenant.getTime() + 86400000) - rapportDebut.getTime()) / 86400000),
+);
+const nuitsDisponiblesRapport = totalChambres * joursDansRapport;
+const tauxOccupationRapport =
+  nuitsDisponiblesRapport > 0
+    ? Math.round((nuitsVenduesPeriode / nuitsDisponiblesRapport) * 100)
+    : 0;
 const chambresOccupeesPeriode = new Set(
   data.reservations
     .filter((r) => r.date_arrivee <= jour && r.date_depart > dateDebut)
@@ -542,6 +587,35 @@ const activiteRecente = [...data.reservations]
     </ChartContainer>
   </CardContent>
 
+</Card>
+<Card className="mt-6">
+  <CardHeader className="flex flex-row items-center justify-between">
+    <CardTitle className="text-base">Nuits vendues</CardTitle>
+    <Select value={rapportPeriode} onValueChange={setRapportPeriode}>
+      <SelectTrigger className="w-[160px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="mois_actuel">Ce mois</SelectItem>
+        <SelectItem value="mois_dernier">Mois dernier</SelectItem>
+        <SelectItem value="annee_actuelle">Cette année</SelectItem>
+        <SelectItem value="annee_derniere">Année dernière</SelectItem>
+      </SelectContent>
+    </Select>
+  </CardHeader>
+  <CardContent className="flex flex-wrap items-center gap-6">
+    <div>
+      <p className="font-display text-3xl font-bold">{nuitsVenduesPeriode}</p>
+      <p className="text-xs text-muted-foreground capitalize">
+        nuit(s) vendue(s) — {rapportLabel}
+      </p>
+    </div>
+    <div className="h-10 w-px bg-border" />
+    <div>
+      <p className="font-display text-3xl font-bold">{tauxOccupationRapport}%</p>
+      <p className="text-xs text-muted-foreground">Taux d'occupation moyen</p>
+    </div>
+  </CardContent>
 </Card>
 <Card className="mt-6 overflow-hidden border-none bg-gradient-to-br from-card to-muted/50 shadow-md">
   <CardHeader>
