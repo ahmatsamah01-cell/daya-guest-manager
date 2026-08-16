@@ -177,3 +177,25 @@
     margin: 0;
   }
 }
+
+/* Compression automatique quand le tableau est long : évite tout débordement */
+.facture-corps.facture-dense {
+  font-size: 9.5pt;
+}
+.facture-corps.facture-dense .facture-logo-top {
+  margin-bottom: 12pt;
+}
+.facture-corps.facture-dense .facture-titre-etab {
+  margin-bottom: 10pt;
+}
+.facture-corps.facture-dense .facture-tableau {
+  margin-top: 8pt;
+}
+.facture-corps.facture-dense .facture-tableau th,
+.facture-corps.facture-dense .facture-tableau td {
+  padding: 1pt 4pt;
+  font-size: 9.5pt;
+}
+.facture-corps.facture-dense .facture-espace-haut {
+  margin-top: 8pt;
+}
