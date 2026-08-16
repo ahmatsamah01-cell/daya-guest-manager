@@ -588,7 +588,7 @@ const activiteRecente = [...data.reservations]
   </CardContent>
 
 </Card>
-<Card className="mt-6">
+<Card className="mt-6 overflow-hidden border-none bg-gradient-to-br from-card to-muted/50 shadow-md">
   <CardHeader className="flex flex-row items-center justify-between">
     <CardTitle className="text-base">Nuits vendues</CardTitle>
     <Select value={rapportPeriode} onValueChange={setRapportPeriode}>
@@ -603,25 +603,7 @@ const activiteRecente = [...data.reservations]
       </SelectContent>
     </Select>
   </CardHeader>
-  <CardContent className="flex flex-wrap items-center gap-6">
-    <div>
-      <p className="font-display text-3xl font-bold">{nuitsVenduesPeriode}</p>
-      <p className="text-xs text-muted-foreground capitalize">
-        nuit(s) vendue(s) — {rapportLabel}
-      </p>
-    </div>
-    <div className="h-10 w-px bg-border" />
-    <div>
-      <p className="font-display text-3xl font-bold">{tauxOccupationRapport}%</p>
-      <p className="text-xs text-muted-foreground">Taux d'occupation moyen</p>
-    </div>
-  </CardContent>
-</Card>
-<Card className="mt-6 overflow-hidden border-none bg-gradient-to-br from-card to-muted/50 shadow-md">
-  <CardHeader>
-    <CardTitle className="text-base">Occupation des chambres</CardTitle>
-  </CardHeader>
-  <CardContent className="flex flex-col items-center gap-4 sm:flex-row sm:justify-around">
+  <CardContent className="flex flex-col items-center gap-6 sm:flex-row sm:justify-around">
     <div className="relative h-[180px] w-[180px]">
       <ChartContainer config={{}} className="h-full w-full drop-shadow-[0_0_18px_rgba(220,38,38,0.25)]">
         <PieChart>
@@ -643,12 +625,19 @@ const activiteRecente = [...data.reservations]
         </PieChart>
       </ChartContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-display text-2xl font-bold">{tauxOccupation}%</span>
+        <span className="font-display text-2xl font-bold">{tauxOccupationRapport}%</span>
         <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          Taux d'occupation
+          Occupation
         </span>
       </div>
-    </div>    <div className="space-y-2">
+    </div>
+    <div className="space-y-3">
+      <div>
+        <p className="font-display text-3xl font-bold">{nuitsVenduesPeriode}</p>
+        <p className="text-xs text-muted-foreground capitalize">
+          nuit(s) vendue(s) — {rapportLabel}
+        </p>
+      </div>
       {donneesDonut.map((d, i) => (
         <div key={i} className="flex items-center gap-2 text-sm">
           <span className="size-3 rounded-full" style={{ backgroundColor: d.couleur }} />
@@ -656,12 +645,6 @@ const activiteRecente = [...data.reservations]
           <span className="font-semibold">{d.value}</span>
         </div>
       ))}
-      {donneesDonut.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Aucune chambre enregistrée.</p>
-      ) : null}
-      <p className="pt-2 text-xs text-muted-foreground">
-        {chambresOccupeesPeriode} chambre(s) différente(s) occupée(s) sur la période
-      </p>
     </div>
   </CardContent>
 </Card>
