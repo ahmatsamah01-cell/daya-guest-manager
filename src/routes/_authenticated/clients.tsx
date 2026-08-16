@@ -224,7 +224,6 @@ function ClientsPage() {
       } else {
         toast.error(e.message);
   });
-
   const filtres = (clients ?? []).filter((c) =>
     `${c.nom} ${c.prenom ?? ""} ${c.telephone ?? ""}`.toLowerCase().includes(recherche.toLowerCase()),
   );
