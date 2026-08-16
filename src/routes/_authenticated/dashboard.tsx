@@ -303,7 +303,7 @@ data.operations
     .filter((o) => o.sens === "entree" && o.date_operation.slice(0, 10) === jour)
     .forEach((o) => {
       alertes.push({
-        texte: `Encaissement du jour : ${formatFCFA(Number(o.montant))}${o.description ? " — " + o.description : ""}`,
+        texte: `Encaissement du jour : ${formatFCFA(Number(o.montant))}${o.motif ? " — " + o.motif : ""}`,
         icon: Wallet,
         couleur: "text-blue-600",
       });
@@ -313,7 +313,7 @@ data.operations
     .filter((d) => d.date_depense === jour)
     .forEach((d) => {
       alertes.push({
-        texte: `Dépense du jour : ${formatFCFA(Number(d.montant))}${d.description ? " — " + d.description : ""}`,
+        texte: `Dépense du jour : ${formatFCFA(Number(d.montant))}${d.libelle ? " — " + d.libelle : ""}`,
         icon: TrendingDown,
         couleur: "text-red-500",
       });

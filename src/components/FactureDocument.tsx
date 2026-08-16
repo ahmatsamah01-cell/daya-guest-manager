@@ -17,15 +17,15 @@ export type FactureDocumentData = {
   clientNom: string;
   periodeLabel: string; // ex: "18/07 au 19/07/2026"
   lignesHebergement: LigneHebergement[];
-  reliquat?: number;
+  reliquat?: number | undefined;
   totalHebergement: number;
-  buanderie?: LigneBuanderie;
-  lignesDayUse?: LigneHebergement[];
-  totalDayUse?: number;
-  remise?: { label: string; montant: number };
-  avance?: number;
+  buanderie?: LigneBuanderie | undefined;
+  lignesDayUse?: LigneHebergement[] | undefined;
+  totalDayUse?: number | undefined;
+  remise?: { label: string; montant: number } | undefined;
+  avance?: number | undefined;
   totalGeneral: number;
-  chequeBeneficiaire?: string;
+  chequeBeneficiaire?: string | undefined;
   ville: string;
   dateEmission: string; // déjà formatée, ex: "17 juillet 2026"
   etablissement: {
@@ -103,12 +103,49 @@ function formatXAF(n: number): string {
   return Math.round(n).toLocaleString("fr-FR").replace(/\s/g, ".") + " XAF";
 }
 
+const MAX_CORPS_PT = 500;
+
 export function FactureDocument({ data }: { data: FactureDocumentData }) {
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useLayoutEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    setScale(1);
+    const id = requestAnimationFrame(() => {
+      const maxPx = (MAX_CORPS_PT * 96) / 72;
+      const h = el.scrollHeight;
+      setScale(h > maxPx ? Math.max(0.55, maxPx / h) : 1);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [data]);
+
   return (
     <div className="facture-a4">
-      <div className="facture-corps">
+      <div
+        className={
+          data.lignesHebergement.length + (data.lignesDayUse?.length ?? 0) > 6
+            ? "facture-corps facture-dense"
+            : "facture-corps"
+        }
+      >
+      <div
+        ref={innerRef}
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          width: `${100 / scale}%`,
+        }}
+      >
       <div className="facture-logo-top">
-        <img src={data.logoUrl} alt="Le Daya Guest House" />
+        <img
+          src={data.logoUrl}
+          alt="Le Daya Guest House"
+          width={234}
+          height={117}
+          style={{ width: "175.56pt", height: "87.72pt", objectFit: "contain", display: "block" }}
+        />
       </div>
 
       <p className="facture-titre-etab">{data.etablissement.nom}</p>
@@ -187,7 +224,7 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
               {data.lignesDayUse.map((l, i) => (
                 <tr key={`dayuse-${i}`}>
                   <td>DAY USE</td>
-                  <td className="facture-centre">{l.periode}</td>
+                  <td className="facture-centre facture-rouge">{l.periode}</td>
                   <td className="facture-centre">{l.chambre}</td>
                   <td className="facture-droite">{formatXAF(l.prixUnitaire)}</td>
                   <td className="facture-droite">{formatXAF(l.prixTotal)}</td>
@@ -280,13 +317,20 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
         </>
       ) : null}
       </div>
+      </div>
 
       <p className="facture-date">
         Fait à {data.ville}, le {data.dateEmission}
       </p>
 
       <div className="facture-logo-bas">
-        <img src={data.logoUrl} alt="Le Daya Guest House" />
+        <img
+          src={data.logoUrl}
+          alt="Le Daya Guest House"
+          width={213}
+          height={107}
+          style={{ width: "160pt", height: "80pt", objectFit: "contain", display: "block" }}
+        />
       </div>
 
       <div className="facture-pied">

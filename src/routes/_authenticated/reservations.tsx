@@ -186,7 +186,7 @@ const [facturerResa, setFacturerResa] = useState<Resa | null>(null);
     onError: (e: Error) => toast.error(e.message),
   });
 
-type Resa = NonNullable<ReturnType<typeof useQuery<{ id: string }[]>>["data"]>[number];
+type Resa = NonNullable<typeof reservations>[number];
 
   const cloturer = useMutation({
     mutationFn: async ({
