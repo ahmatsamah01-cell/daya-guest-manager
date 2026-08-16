@@ -105,15 +105,57 @@ function ChambresPage() {
     },
   });
 
+  const { data: reservations } = useQuery({
+    queryKey: ["chambres-reservations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("chambre_id, statut, date_arrivee, date_depart")
+        .neq("statut", "annulee");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  function statutChambre(chambreId: string): { cle: string; label: string; badge: string } {
+    const aujourd_hui = new Date().toISOString().slice(0, 10);
+    const occupee = (reservations ?? []).some(
+      (r) =>
+        r.chambre_id === chambreId &&
+        (r.statut === "en_cours" || (r.date_arrivee <= aujourd_hui && r.date_depart > aujourd_hui)),
+    );
+    if (occupee) {
+      return {
+        cle: "occupee",
+        label: "Occupée",
+        badge: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400",
+      };
+    }
+    const reservee = (reservations ?? []).some(
+      (r) => r.chambre_id === chambreId && r.statut === "reservee",
+    );
+    if (reservee) {
+      return {
+        cle: "reservee",
+        label: "Réservée",
+        badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400",
+      };
+    }
+    return {
+      cle: "libre",
+      label: "Disponible",
+      badge: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
+    };
+  }
+
   const enregistrer = useMutation({
     mutationFn: async (f: Form) => {
-      const payload = {
+     const payload = {
         etablissement_id: etab!.id,
         nom: f.nom,
         type: f.type,
         prix_nuit: Number(f.prix_nuit),
         capacite: Number(f.capacite),
-        statut: f.statut,
         description: f.description || null,
         photo_url: f.photo_url || null, 
       };
@@ -295,12 +337,7 @@ function ChambresPage() {
       {vue === "grille" ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {(chambres ?? []).map((c) => {
-            const statutStyle =
-              c.statut === "libre"
-                ? { badge: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400", label: "Disponible" }
-                : c.statut === "occupee"
-                  ? { badge: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400", label: "Occupée" }
-                  : { badge: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400", label: "Maintenance" };
+            const statutStyle = statutChambre(c.id);
 
             return (
               <Card key={c.id} className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
@@ -394,9 +431,11 @@ function ChambresPage() {
                     <TableCell>{formatFCFA(c.prix_nuit)}</TableCell>
                     <TableCell>{c.capacite}</TableCell>
                     <TableCell>
-                      <Badge variant={c.statut === "libre" ? "secondary" : "outline"}>
-                        {c.statut}
-                      </Badge>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statutChambre(c.id).badge}`}
+                      >
+                        {statutChambre(c.id).label}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap">
                       <Button
