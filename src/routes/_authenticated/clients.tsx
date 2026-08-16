@@ -338,33 +338,41 @@ function ClientsPage() {
               <History className="size-4 text-muted-foreground" />
               <p className="font-display font-semibold">Historique des séjours</p>
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
-              <div className="flex items-center gap-2 rounded-lg border bg-blue-50 px-3 py-2 dark:bg-blue-950/30">
-                <Users2 className="size-4 text-blue-600" />
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:gap-4">
+              <div className="group flex min-w-[130px] items-center gap-3 rounded-xl border bg-gradient-to-br from-blue-50 to-blue-100/50 px-4 py-3 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-blue-950/40 dark:to-blue-900/20">
+                <div className="flex size-10 items-center justify-center rounded-full bg-blue-500 shadow-[0_0_16px_rgba(59,130,246,0.5)] transition-transform group-hover:scale-110">
+                  <Users2 className="size-5 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm font-bold leading-none">{(sejours ?? []).length}</p>
-                  <p className="text-[10px] text-muted-foreground">Séjours</p>
+                  <p className="font-display text-xl font-bold leading-none">{(sejours ?? []).length}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Séjours</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 rounded-lg border bg-green-50 px-3 py-2 dark:bg-green-950/30">
-                <BedDouble className="size-4 text-green-600" />
+              <div className="group flex min-w-[130px] items-center gap-3 rounded-xl border bg-gradient-to-br from-green-50 to-green-100/50 px-4 py-3 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-green-950/40 dark:to-green-900/20">
+                <div className="flex size-10 items-center justify-center rounded-full bg-green-500 shadow-[0_0_16px_rgba(34,197,94,0.5)] transition-transform group-hover:scale-110">
+                  <BedDouble className="size-5 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm font-bold leading-none">{statsHistorique.nuitees}</p>
-                  <p className="text-[10px] text-muted-foreground">Nuitées</p>
+                  <p className="font-display text-xl font-bold leading-none">{statsHistorique.nuitees}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Nuitées</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 rounded-lg border bg-amber-50 px-3 py-2 dark:bg-amber-950/30">
-                <Wallet className="size-4 text-amber-600" />
+              <div className="group flex min-w-[150px] items-center gap-3 rounded-xl border bg-gradient-to-br from-amber-50 to-amber-100/50 px-4 py-3 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-amber-950/40 dark:to-amber-900/20">
+                <div className="flex size-10 items-center justify-center rounded-full bg-amber-500 shadow-[0_0_16px_rgba(245,158,11,0.5)] transition-transform group-hover:scale-110">
+                  <Wallet className="size-5 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm font-bold leading-none">{formatFCFA(statsHistorique.total)}</p>
-                  <p className="text-[10px] text-muted-foreground">Total</p>
+                  <p className="font-display text-xl font-bold leading-none">{formatFCFA(statsHistorique.total)}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Total</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 rounded-lg border bg-purple-50 px-3 py-2 dark:bg-purple-950/30">
-                <Landmark className="size-4 text-purple-600" />
+              <div className="group flex min-w-[150px] items-center gap-3 rounded-xl border bg-gradient-to-br from-purple-50 to-purple-100/50 px-4 py-3 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-purple-950/40 dark:to-purple-900/20">
+                <div className="flex size-10 items-center justify-center rounded-full bg-purple-500 shadow-[0_0_16px_rgba(147,51,234,0.5)] transition-transform group-hover:scale-110">
+                  <Landmark className="size-5 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm font-bold leading-none">{formatFCFA(statsHistorique.taxes)}</p>
-                  <p className="text-[10px] text-muted-foreground">Taxes</p>
+                  <p className="font-display text-xl font-bold leading-none">{formatFCFA(statsHistorique.taxes)}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Taxes</p>
                 </div>
               </div>
             </div>
@@ -529,98 +537,98 @@ function ClientsPage() {
         </div>
       </div>
 
-      <Card>
-        <CardContent className="overflow-x-auto p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-10">N°</TableHead>
-                <TableHead>Nom et prénom</TableHead>
-                <TableHead>Téléphone</TableHead>
-                <TableHead>Pièce</TableHead>
-                <TableHead>Nationalité</TableHead>
-                <TableHead className="text-center">Séjours</TableHead>
-                <TableHead>Dernier séjour</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtres.map((c, i) => {
-                const infos = infosClient(c.id);
-                const nomComplet = `${c.prenom ?? ""} ${c.nom}`.trim();
-                return (
-                  <TableRow key={c.id}>
-                    <TableCell>{i + 1}</TableCell>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                          style={{ backgroundColor: couleurAvatar(nomComplet) }}
-                        >
-                          {nomComplet[0]?.toUpperCase() ?? "?"}
-                        </span>
-                        {nomComplet}
-                      </div>
-                    </TableCell>
-                    <TableCell>{c.telephone ?? "—"}</TableCell>
-                    <TableCell>
-                      {c.type_piece ? `${c.type_piece} ${c.numero_piece ?? ""}` : "—"}
-                    </TableCell>
-                    <TableCell>{c.nationalite ?? "—"}</TableCell>
-                    <TableCell className="text-center">
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-                        {infos.nbSejours}
-                      </span>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                      {infos.dernier
-                        ? `${formatDate(infos.dernier.date_arrivee)} → ${formatDate(infos.dernier.date_depart)}`
-                        : "—"}
-                    </TableCell>
-                    <TableCell className="text-right whitespace-nowrap">
-                      <Button variant="ghost" size="icon" onClick={() => setFicheClient(c.id)}>
-                        <Eye className="size-4" />
-                      </Button>
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {filtres.map((c) => {
+          const infos = infosClient(c.id);
+          const nomComplet = `${c.prenom ?? ""} ${c.nom}`.trim();
+          return (
+            <Card
+              key={c.id}
+              className="group cursor-pointer overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg"
+              onClick={() => setFicheClient(c.id)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex size-12 shrink-0 items-center justify-center rounded-full text-lg font-semibold text-white shadow-md"
+                      style={{ backgroundColor: couleurAvatar(nomComplet) }}
+                    >
+                      {nomComplet[0]?.toUpperCase() ?? "?"}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate font-display font-semibold">{nomComplet}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {c.nationalite ?? "Nationalité —"}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                    {infos.nbSejours} séj.
+                  </span>
+                </div>
+
+                <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+                  <p>📞 {c.telephone ?? "—"}</p>
+                  <p>
+                    🪪 {c.type_piece ? `${c.type_piece} ${c.numero_piece ?? ""}` : "—"}
+                  </p>
+                  <p>
+                    🗓️{" "}
+                    {infos.dernier
+                      ? `${formatDate(infos.dernier.date_arrivee)} → ${formatDate(infos.dernier.date_depart)}`
+                      : "Aucun séjour"}
+                  </p>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between border-t pt-3">
+                  <p className="text-sm font-semibold text-primary">
+                    {formatFCFA(infos.totalDepense)}
+                  </p>
+                  <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
+                      onClick={() => {
+                        setForm({
+                          id: c.id,
+                          nom: c.nom,
+                          prenom: c.prenom ?? "",
+                          telephone: c.telephone ?? "",
+                          email: c.email ?? "",
+                          type_piece: c.type_piece ?? "",
+                          numero_piece: c.numero_piece ?? "",
+                          nationalite: c.nationalite ?? "",
+                          adresse: c.adresse ?? "",
+                        });
+                        setOpen(true);
+                      }}
+                    >
+                      <Pencil className="size-3.5" />
+                    </Button>
+                    {role?.estAdmin ? (
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => {
-                          setForm({
-                            id: c.id,
-                            nom: c.nom,
-                            prenom: c.prenom ?? "",
-                            telephone: c.telephone ?? "",
-                            email: c.email ?? "",
-                            type_piece: c.type_piece ?? "",
-                            numero_piece: c.numero_piece ?? "",
-                            nationalite: c.nationalite ?? "",
-                            adresse: c.adresse ?? "",
-                          });
-                          setOpen(true);
-                        }}
+                        className="size-8"
+                        onClick={() => supprimer.mutate(c.id)}
                       >
-                        <Pencil className="size-4" />
+                        <Trash2 className="size-3.5 text-destructive" />
                       </Button>
-                      {role?.estAdmin ? (
-                        <Button variant="ghost" size="icon" onClick={() => supprimer.mutate(c.id)}>
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
-                      ) : null}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {filtres.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                    Aucun client enregistré.
-                  </TableCell>
-                </TableRow>
-              ) : null}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                    ) : null}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+        {filtres.length === 0 ? (
+          <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
+            Aucun client enregistré.
+          </p>
+        ) : null}
+      </div>
 
       <Dialog open={!!ficheClient} onOpenChange={(o) => !o && setFicheClient(null)}>
         <DialogContent className="max-w-2xl">
