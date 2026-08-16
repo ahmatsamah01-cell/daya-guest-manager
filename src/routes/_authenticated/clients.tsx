@@ -217,7 +217,7 @@ const supprimer = useMutation({
     },
     onError: (e: Error) => toast.error(e.message),
       }
-  });
+});
    const statsHistorique = (sejours ?? []).reduce(
     (acc, s) => {
       const n = nbNuits(s.date_arrivee, s.date_depart);
