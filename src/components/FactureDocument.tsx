@@ -17,15 +17,15 @@ export type FactureDocumentData = {
   clientNom: string;
   periodeLabel: string; // ex: "18/07 au 19/07/2026"
   lignesHebergement: LigneHebergement[];
-  reliquat?: number;
+  reliquat?: number | undefined;
   totalHebergement: number;
-  buanderie?: LigneBuanderie;
-  lignesDayUse?: LigneHebergement[];
-  totalDayUse?: number;
-  remise?: { label: string; montant: number };
-  avance?: number;
+  buanderie?: LigneBuanderie | undefined;
+  lignesDayUse?: LigneHebergement[] | undefined;
+  totalDayUse?: number | undefined;
+  remise?: { label: string; montant: number } | undefined;
+  avance?: number | undefined;
   totalGeneral: number;
-  chequeBeneficiaire?: string;
+  chequeBeneficiaire?: string | undefined;
   ville: string;
   dateEmission: string; // déjà formatée, ex: "17 juillet 2026"
   etablissement: {

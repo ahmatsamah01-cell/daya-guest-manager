@@ -66,7 +66,7 @@ function Notifications() {
     .filter((o) => o.sens === "entree")
     .forEach((o) => {
       notifications.push({
-        texte: `Encaissement : ${formatFCFA(Number(o.montant))}${o.description ? " — " + o.description : ""}`,
+        texte: `Encaissement : ${formatFCFA(Number(o.montant))}${o.motif ? " — " + o.motif : ""}`,
         icon: Wallet,
         couleur: "text-blue-600",
       });
@@ -74,7 +74,7 @@ function Notifications() {
 
   data.depenses.forEach((d) => {
     notifications.push({
-      texte: `Dépense : ${formatFCFA(Number(d.montant))}${d.description ? " — " + d.description : ""}`,
+      texte: `Dépense : ${formatFCFA(Number(d.montant))}${d.libelle ? " — " + d.libelle : ""}`,
       icon: TrendingDown,
       couleur: "text-red-500",
     });
