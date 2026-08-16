@@ -195,7 +195,11 @@ const factureData: FactureDocumentData | null = facture
         avance: Number(facture.montant_paye) > 0 ? Number(facture.montant_paye) : undefined,
         totalGeneral: Number(facture.montant_total),
         ville: etab?.ville ?? "Port-Gentil",
-        dateEmission: formatDate(facture.date_facture),
+        dateEmission: new Date().toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
         etablissement: {
           nom: etab?.nom ?? "LE DAYA Guest House",
           adresse: "BP 780",
