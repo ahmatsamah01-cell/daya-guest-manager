@@ -659,10 +659,11 @@ const activiteRecente = [...data.reservations]
     ) : null}
   </CardContent>
 </Card>
-<Card className="mt-6 overflow-hidden border-none bg-gradient-to-br from-card to-muted/50 shadow-md">
+<Card className="animate-fade-in-up relative z-10 mt-6 overflow-hidden border-none bg-card shadow-md" style={{ animationDelay: "240ms" }}>
   <CardHeader className="flex flex-row items-center justify-between">
     <CardTitle className="text-base">Nuits vendues</CardTitle>
-    <Select value={rapportPeriode} onValueChange={setRapportPeriode}>
+    <Select value={rapportPeriode}
+    onValueChange={setRapportPeriode}>
       <SelectTrigger className="w-[160px]">
         <SelectValue />
       </SelectTrigger>
