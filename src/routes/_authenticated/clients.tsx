@@ -216,7 +216,7 @@ const supprimer = useMutation({
       toast.success("Client et son historique supprimés.");
     },
     onError: (e: Error) => toast.error(e.message),
-      }});
+});
    const statsHistorique = (sejours ?? []).reduce(
     (acc, s) => {
       const n = nbNuits(s.date_arrivee, s.date_depart);
