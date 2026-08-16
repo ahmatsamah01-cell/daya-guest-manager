@@ -100,8 +100,8 @@ function StatCard({
   variation?: { texte: string; hausse: boolean } | null;
 }) {
   const contenu = (
-    <Card className="transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-      <CardContent className="flex items-start gap-3 p-4">
+    <Card className="h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+      <CardContent className="flex h-full items-start gap-3 p-4">
         <div
           className="flex size-10 shrink-0 items-center justify-center rounded-lg"
           style={{ backgroundColor: couleur }}
@@ -139,7 +139,7 @@ function StatCard({
 
   if (to) {
     return (
-      <Link to={to} className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary">
+      <Link to={to} className="block h-full rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary">
         {contenu}
       </Link>
     );
@@ -505,8 +505,8 @@ const activiteRecente = [...data.reservations]
 
 
   return (
-    <div className="relative isolate">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-white via-red-50/40 to-white dark:from-background dark:via-background dark:to-background">
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden bg-gradient-to-br from-white via-red-50/40 to-white dark:from-background dark:via-background dark:to-background">
         <div className="animate-float-slow absolute -left-20 top-10 size-72 rounded-full bg-red-300/20 blur-3xl" />
         <div className="animate-float-slower absolute right-0 top-1/3 size-96 rounded-full bg-amber-200/20 blur-3xl" />
         <div className="animate-float-slow absolute bottom-0 left-1/3 size-80 rounded-full bg-red-200/20 blur-3xl" />
