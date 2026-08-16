@@ -184,25 +184,42 @@ function ClientsPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
- const supprimer = useMutation({
+const supprimer = useMutation({
     mutationFn: async (id: string) => {
+      const { data: resasClient } = await supabase
+        .from("reservations")
+        .select("id")
+        .eq("client_id", id);
+      const idsResas = (resasClient ?? []).map((r) => r.id);
+
+      if (idsResas.length > 0) {
+        const { data: facturesLiees } = await supabase
+          .from("factures")
+          .select("id")
+          .in("reservation_id", idsResas);
+        const idsFactures = (facturesLiees ?? []).map((f) => f.id);
+
+        if (idsFactures.length > 0) {
+          await supabase.from("facture_lignes").delete().in("facture_id", idsFactures);
+          await supabase.from("factures").delete().in("id", idsFactures);
+        }
+
+        await supabase.from("taxes_sejour").delete().in("reservation_id", idsResas);
+        await supabase.from("reservations").delete().in("id", idsResas);
+      }
+
       const { error } = await supabase.from("clients").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["clients"] });
-      toast.success("Client supprimé.");
+      qc.invalidateQueries();
+      toast.success("Client et son historique supprimés.");
     },
-    onError: (e: Error) => {
-      if (e.message.includes("foreign key") || e.message.includes("violates")) {
-        toast.error("Impossible de supprimer : ce client a des réservations enregistrées.");
-      } else {
-        toast.error(e.message);
+    onError: (e: Error) => toast.error(e.message),
       }
-    },
+    }, 
   });
-  const statsHistorique = (sejours ?? []).reduce(
+   const statsHistorique = (sejours ?? []).reduce(
     (acc, s) => {
       const n = nbNuits(s.date_arrivee, s.date_depart);
       acc.nuitees += n;
