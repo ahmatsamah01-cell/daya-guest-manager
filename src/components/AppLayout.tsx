@@ -15,6 +15,8 @@ import {
   Bell, 
   Menu,
   LogOut,
+  Sun, 
+  Moon, 
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -102,6 +104,14 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { data: role } = useMonRole();
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  const toggleDark = () => {
+    const nouveau = !dark;
+    setDark(nouveau);
+    document.documentElement.classList.toggle("dark", nouveau);
+    localStorage.setItem("le-daya-theme", nouveau ? "dark" : "light");
+  };
 
   return (
     <div className="min-h-screen bg-background lg:flex">
@@ -144,6 +154,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
               year: "numeric",
             })}
           </span>
+
+<Button variant="ghost" size="icon" onClick={toggleDark}>
+            {dark ? <Sun className="size-5" /> : <Moon className="size-5" />}
+          </Button>
 
           <Button variant="ghost" size="icon" className="relative" asChild>
   <Link to="/notifications">
