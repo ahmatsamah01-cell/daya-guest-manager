@@ -150,6 +150,12 @@ function StatCard({
 
 function Dashboard() {
   const jour = today();
+  const debutMoisDernierGlobal = new Date(new Date(jour).getFullYear(), new Date(jour).getMonth() - 1, 1)
+    .toISOString()
+    .slice(0, 10);
+  const finMoisDernierGlobal = new Date(new Date(jour).getFullYear(), new Date(jour).getMonth(), 0)
+    .toISOString()
+    .slice(0, 10);
   const [periode, setPeriode] = useState("jour");
   const [rapportPeriode, setRapportPeriode] = useState("mois_actuel");
   const [evolutionVue, setEvolutionVue] = useState<"mois" | "annee">("mois");
@@ -191,6 +197,20 @@ function Dashboard() {
         taxes: taxes.data ?? [],
         clients: clients.data ?? [],
       };
+    },
+  });
+
+const { data: caMoisDernierData } = useQuery({
+    queryKey: ["ca-mois-dernier", jour],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("caisse_operations")
+        .select("montant")
+        .eq("sens", "entree")
+        .gte("date_operation", `${debutMoisDernierGlobal}T00:00:00`)
+        .lte("date_operation", `${finMoisDernierGlobal}T23:59:59`);
+      if (error) throw error;
+      return data ?? [];
     },
   });
 
@@ -312,10 +332,21 @@ const occupeesHier = new Set(
 );
 const arriveesHier = data.reservations.filter((r) => r.date_arrivee === hier).length;
 const departsHier = data.reservations.filter((r) => r.date_depart === hier).length;
-const entreesHier = data.operations
-  .filter((o) => o.sens === "entree" && o.date_operation.slice(0, 10) === hier)
-  .reduce((s, o) => s + Number(o.montant), 0);
 const enCoursHier = occupeesHier.size;
+
+const debutMoisActuel = `${jour.slice(0, 7)}-01`;
+const debutMoisDernier = new Date(new Date(jour).getFullYear(), new Date(jour).getMonth() - 1, 1)
+  .toISOString()
+  .slice(0, 10);
+const finMoisDernier = new Date(new Date(jour).getFullYear(), new Date(jour).getMonth(), 0)
+  .toISOString()
+  .slice(0, 10);
+
+const caMoisActuel = data.operations
+  .filter((o) => o.sens === "entree" && o.date_operation.slice(0, 10) >= debutMoisActuel)
+  .reduce((s, o) => s + Number(o.montant), 0);
+
+const caMoisDernier = (caMoisDernierData ?? []).reduce((s, o) => s + Number(o.montant), 0);
 
 function variation(actuel: number, precedent: number): { texte: string; hausse: boolean } | null {
   if (precedent === 0 && actuel === 0) return null;
@@ -327,7 +358,7 @@ function variation(actuel: number, precedent: number): { texte: string; hausse: 
 const varOccupation = periode === "jour" ? variation(occupees.size, occupeesHier.size) : null;
 const varArrivees = periode === "jour" ? variation(arrivees.length, arriveesHier) : null;
 const varDeparts = periode === "jour" ? variation(departs.length, departsHier) : null;
-const varCA = periode === "jour" ? variation(entrees, entreesHier) : null;
+const varCA = variation(caMoisActuel, caMoisDernier);
 const varEnCours = periode === "jour" ? variation(enCours.length, enCoursHier) : null;
 const maintenant = new Date(jour);
 let rapportDebut: Date;
@@ -585,9 +616,9 @@ const activiteRecente = [...data.reservations]
     variation={varDeparts}
   />
   <StatCard
-    titre="CA du jour"
-    valeur={formatFCFA(entrees)}
-    detail="Chiffre d'affaires"
+    titre="CA du mois"
+    valeur={formatFCFA(caMoisActuel)}
+    detail={`vs ${formatFCFA(caMoisDernier)} le mois dernier`}
     icon={Wallet}
     couleur="#2563eb"
     to="/caisse"
