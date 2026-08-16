@@ -108,7 +108,13 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
     <div className="facture-a4">
       <div className="facture-corps">
       <div className="facture-logo-top">
-        <img src={data.logoUrl} alt="Le Daya Guest House" />
+        <img
+          src={data.logoUrl}
+          alt="Le Daya Guest House"
+          width={234}
+          height={117}
+          style={{ width: "175.56pt", height: "87.72pt", objectFit: "contain", display: "block" }}
+        />
       </div>
 
       <p className="facture-titre-etab">{data.etablissement.nom}</p>
@@ -286,7 +292,13 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
       </p>
 
       <div className="facture-logo-bas">
-        <img src={data.logoUrl} alt="Le Daya Guest House" />
+        <img
+          src={data.logoUrl}
+          alt="Le Daya Guest House"
+          width={213}
+          height={107}
+          style={{ width: "160pt", height: "80pt", objectFit: "contain", display: "block" }}
+        />
       </div>
 
       <div className="facture-pied">
