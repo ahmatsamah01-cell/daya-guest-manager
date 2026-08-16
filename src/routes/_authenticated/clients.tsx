@@ -358,12 +358,12 @@ function ClientsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">N°</TableHead>
-                  <TableHead>Nom et prénom</TableHead>
-                  <TableHead>Type de chambre</TableHead>
-                  <TableHead>N° chambre</TableHead>
-                  <TableHead>Période de séjour</TableHead>
-                  <TableHead className="text-right">Prix unitaire</TableHead>
-                  <TableHead className="text-right">Prix total</TableHead>
+                  <TableHead>Nom</TableHead>
+<TableHead>Téléphone</TableHead>
+<TableHead>Pièce</TableHead>
+<TableHead>Nationalité</TableHead>
+<TableHead className="text-center">Séjours</TableHead>
+<TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -490,7 +490,10 @@ function ClientsPage() {
                     {c.type_piece ? `${c.type_piece} ${c.numero_piece ?? ""}` : "—"}
                   </TableCell>
                   <TableCell>{c.nationalite ?? "—"}</TableCell>
-                  <TableCell className="text-right whitespace-nowrap">
+<TableCell className="text-center">
+  {(sejours ?? []).filter((s) => s.client_id === c.id).length}
+</TableCell>
+<TableCell className="text-right whitespace-nowrap">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -521,7 +524,7 @@ function ClientsPage() {
               ))}
               {filtres.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                     Aucun client enregistré.
                   </TableCell>
                 </TableRow>
