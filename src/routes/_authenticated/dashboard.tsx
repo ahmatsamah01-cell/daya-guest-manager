@@ -608,7 +608,14 @@ const activiteRecente = [...data.reservations]
       <ChartContainer config={{}} className="h-full w-full drop-shadow-[0_0_18px_rgba(220,38,38,0.25)]">
         <PieChart>
           <Pie
-            data={donneesDonut}
+            data={[
+              { name: "Vendues", value: nuitsVenduesPeriode, couleur: "#dc2626" },
+              {
+                name: "Disponibles",
+                value: Math.max(0, nuitsDisponiblesRapport - nuitsVenduesPeriode),
+                couleur: "#e5e7eb",
+              },
+            ]}
             dataKey="value"
             nameKey="name"
             innerRadius={55}
@@ -617,9 +624,8 @@ const activiteRecente = [...data.reservations]
             cornerRadius={6}
             animationDuration={800}
           >
-            {donneesDonut.map((entry, i) => (
-              <Cell key={i} fill={entry.couleur} stroke="none" />
-            ))}
+            <Cell fill="#dc2626" stroke="none" />
+            <Cell fill="#e5e7eb" stroke="none" />
           </Pie>
           <ChartTooltip content={<ChartTooltipContent />} />
         </PieChart>
@@ -633,18 +639,28 @@ const activiteRecente = [...data.reservations]
     </div>
     <div className="space-y-3">
       <div>
-        <p className="font-display text-3xl font-bold">{nuitsVenduesPeriode}</p>
+        <p className="font-display text-3xl font-bold">
+          {nuitsVenduesPeriode}{" "}
+          <span className="text-lg font-normal text-muted-foreground">
+            / {nuitsDisponiblesRapport}
+          </span>
+        </p>
         <p className="text-xs text-muted-foreground capitalize">
           nuit(s) vendue(s) — {rapportLabel}
         </p>
       </div>
-      {donneesDonut.map((d, i) => (
-        <div key={i} className="flex items-center gap-2 text-sm">
-          <span className="size-3 rounded-full" style={{ backgroundColor: d.couleur }} />
-          <span className="text-muted-foreground">{d.name}</span>
-          <span className="font-semibold">{d.value}</span>
-        </div>
-      ))}
+      <div className="flex items-center gap-2 text-sm">
+        <span className="size-3 rounded-full bg-red-600" />
+        <span className="text-muted-foreground">Vendues</span>
+        <span className="font-semibold">{nuitsVenduesPeriode}</span>
+      </div>
+      <div className="flex items-center gap-2 text-sm">
+        <span className="size-3 rounded-full bg-gray-300" />
+        <span className="text-muted-foreground">Disponibles</span>
+        <span className="font-semibold">
+          {Math.max(0, nuitsDisponiblesRapport - nuitsVenduesPeriode)}
+        </span>
+      </div>
     </div>
   </CardContent>
 </Card>
