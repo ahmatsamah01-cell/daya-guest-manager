@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, BedDouble, Users2, LayoutGrid, Liste, Camera } from "lucide-react";
+import { useRef } from "react";
+import { Plus, Pencil, Trash2, BedDouble, Users2, LayoutGrid, List, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -311,7 +312,7 @@ function ChambresPage() {
                       <BedDouble className="size-10 text-white/70" />
                     </div>
                   )}
-</span>
+                  <span
                     className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${statutStyle.badge}`}
                   >
                     {statutStyle.label}
@@ -339,7 +340,7 @@ function ChambresPage() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => {
+                    onClick={() => {
                         setForm({
                           id: c.id,
                           nom: c.nom,
@@ -348,6 +349,7 @@ function ChambresPage() {
                           capacite: String(c.capacite),
                           statut: c.statut,
                           description: c.description ?? "",
+                          photo_url: c.photo_url ?? "",
                         });
                         setOpen(true);
                       }}
