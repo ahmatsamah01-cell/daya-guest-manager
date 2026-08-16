@@ -106,7 +106,13 @@ function formatXAF(n: number): string {
 export function FactureDocument({ data }: { data: FactureDocumentData }) {
   return (
     <div className="facture-a4">
-      <div className="facture-corps">
+      <div
+        className={
+          data.lignesHebergement.length + (data.lignesDayUse?.length ?? 0) > 6
+            ? "facture-corps facture-dense"
+            : "facture-corps"
+        }
+      >
       <div className="facture-logo-top">
         <img
           src={data.logoUrl}
@@ -193,7 +199,7 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
               {data.lignesDayUse.map((l, i) => (
                 <tr key={`dayuse-${i}`}>
                   <td>DAY USE</td>
-                  <td className="facture-centre">{l.periode}</td>
+                  <td className="facture-centre facture-rouge">{l.periode}</td>
                   <td className="facture-centre">{l.chambre}</td>
                   <td className="facture-droite">{formatXAF(l.prixUnitaire)}</td>
                   <td className="facture-droite">{formatXAF(l.prixTotal)}</td>
