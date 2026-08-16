@@ -505,8 +505,14 @@ const activiteRecente = [...data.reservations]
 
 
   return (
-    <div>
-      <div className="mb-6 overflow-hidden rounded-xl border bg-card shadow-sm">
+    <div className="relative isolate">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-white via-red-50/40 to-white dark:from-background dark:via-background dark:to-background">
+        <div className="animate-float-slow absolute -left-20 top-10 size-72 rounded-full bg-red-300/20 blur-3xl" />
+        <div className="animate-float-slower absolute right-0 top-1/3 size-96 rounded-full bg-amber-200/20 blur-3xl" />
+        <div className="animate-float-slow absolute bottom-0 left-1/3 size-80 rounded-full bg-red-200/20 blur-3xl" />
+      </div>
+
+      <div className="animate-fade-in-up mb-6 overflow-hidden rounded-xl border bg-card/90 shadow-sm backdrop-blur-sm">
   <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
     <div className="flex items-center gap-4">
       <div className="rounded-lg bg-white p-2">
@@ -552,7 +558,7 @@ const activiteRecente = [...data.reservations]
         description={`LE DAYA Guest House — situation du ${formatDate(jour)}`}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="animate-fade-in-up grid gap-4 sm:grid-cols-2 xl:grid-cols-5" style={{ animationDelay: "80ms" }}>
   <StatCard
     titre="Occupation"
     valeur={`${occupees.size}/${totalChambres}`}
@@ -599,9 +605,9 @@ const activiteRecente = [...data.reservations]
     variation={varEnCours}
   />
 </div>
-<Card className="mt-6 overflow-hidden border-none bg-gradient-to-br from-card via-card to-primary/5 shadow-md">
+<Card className="animate-fade-in-up mt-6 overflow-hidden border-none bg-gradient-to-br from-card to-muted/50 shadow-md" style={{ animationDelay: "240ms" }}>
   <CardHeader className="flex flex-row items-center justify-between">
-    <CardTitle className="text-base">Évolution du chiffre d'affaires</CardTitle>
+    <CardTitle className="text-base">Nuits vendues</CardTitle>
     <Select value={evolutionVue} onValueChange={(v) => setEvolutionVue(v as "mois" | "annee")}>
       <SelectTrigger className="w-[140px]">
         <SelectValue />
