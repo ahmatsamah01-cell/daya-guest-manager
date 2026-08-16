@@ -528,15 +528,12 @@ const activiteRecente = [...data.reservations]
       </div>
     </div>
 
-    <div className="relative h-32 w-full overflow-hidden rounded-lg bg-gradient-to-br from-red-900 via-red-800 to-stone-900 sm:h-36 sm:max-w-md">
-  <div className="absolute inset-0 flex items-center justify-center">
-    <div className="flex flex-col items-center gap-2 text-white/90">
-      <BedDouble className="size-10" />
-      <span className="text-xs font-medium uppercase tracking-wide">
-        Réception
-      </span>
-    </div>
-  </div>
+    <div className="relative h-32 w-full overflow-hidden rounded-lg sm:h-36 sm:max-w-md">
+  <img
+    src="/IMG-20260618-WA0011.jpg"
+    alt="LE DAYA Guest House — Réception"
+    className="h-full w-full object-cover"
+  />
 </div>
  </div>
   </div>
