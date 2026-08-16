@@ -605,9 +605,9 @@ const activiteRecente = [...data.reservations]
     variation={varEnCours}
   />
 </div>
-<Card className="animate-fade-in-up mt-6 overflow-hidden border-none bg-gradient-to-br from-card to-muted/50 shadow-md" style={{ animationDelay: "240ms" }}>
+<Card className="animate-fade-in-up mt-6 overflow-hidden border-none bg-gradient-to-br from-card via-card to-primary/5 shadow-md" style={{ animationDelay: "160ms" }}>
   <CardHeader className="flex flex-row items-center justify-between">
-    <CardTitle className="text-base">Nuits vendues</CardTitle>
+    <CardTitle className="text-base">Évolution du chiffre d'affaires</CardTitle>
     <Select value={evolutionVue} onValueChange={(v) => setEvolutionVue(v as "mois" | "annee")}>
       <SelectTrigger className="w-[140px]">
         <SelectValue />
