@@ -103,7 +103,24 @@ function formatXAF(n: number): string {
   return Math.round(n).toLocaleString("fr-FR").replace(/\s/g, ".") + " XAF";
 }
 
+const MAX_CORPS_PT = 500;
+
 export function FactureDocument({ data }: { data: FactureDocumentData }) {
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useLayoutEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    setScale(1);
+    const id = requestAnimationFrame(() => {
+      const maxPx = (MAX_CORPS_PT * 96) / 72;
+      const h = el.scrollHeight;
+      setScale(h > maxPx ? Math.max(0.55, maxPx / h) : 1);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [data]);
+
   return (
     <div className="facture-a4">
       <div
@@ -112,6 +129,14 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
             ? "facture-corps facture-dense"
             : "facture-corps"
         }
+      >
+      <div
+        ref={innerRef}
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          width: `${100 / scale}%`,
+        }}
       >
       <div className="facture-logo-top">
         <img
@@ -291,6 +316,7 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
           </p>
         </>
       ) : null}
+      </div>
       </div>
 
       <p className="facture-date">
