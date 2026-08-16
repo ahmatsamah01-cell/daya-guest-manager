@@ -505,8 +505,9 @@ const activiteRecente = [...data.reservations]
 
 
   return (
-    <div className="relative">
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-gradient-to-br from-white via-red-50/40 to-white dark:from-background dark:via-background dark:to-background">
+    <div>
+      <div className="relative overflow-hidden rounded-2xl">
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl bg-gradient-to-br from-white via-red-50/40 to-white dark:from-background dark:via-background dark:to-background">
         <div className="animate-float-slow absolute -left-20 top-10 size-72 rounded-full bg-red-300/20 blur-3xl" />
         <div className="animate-float-slower absolute right-0 top-1/3 size-96 rounded-full bg-amber-200/20 blur-3xl" />
         <div className="animate-float-slow absolute bottom-0 left-1/3 size-80 rounded-full bg-red-200/20 blur-3xl" />
@@ -734,6 +735,8 @@ const activiteRecente = [...data.reservations]
     </div>
   </CardContent>
 </Card>
+
+      </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
        <Card className="lg:col-span-1">
