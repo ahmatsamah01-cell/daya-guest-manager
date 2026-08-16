@@ -166,7 +166,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
   </Link>
 </Button>
 
-          <div className="hidden items-center gap-2 sm:flex">
+          <Link
+            to="/mon-compte"
+            className="hidden items-center gap-2 rounded-lg px-2 py-1 transition-colors hover:bg-accent sm:flex"
+          >
             <div className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
               {(role?.email?.[0] ?? "U").toUpperCase()}
             </div>
@@ -178,8 +181,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 {role?.roles?.join(", ") || "—"}
               </p>
             </div>
-          </div>
-        </header>
+          </Link>
 
         <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
           {children}
