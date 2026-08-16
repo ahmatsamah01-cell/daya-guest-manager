@@ -16,7 +16,11 @@ import {
   Menu,
   LogOut,
   Sun, 
-  Moon, 
+  Moon,
+  Cloud, 
+  CloudRain,
+  CloudLightning,
+  CloudFog,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -101,6 +105,43 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     </div>
   );
 }
+function iconMeteo(code: number) {
+  if (code === 0) return { Icon: Sun, label: "Ensoleillé" };
+  if ([1, 2, 3].includes(code)) return { Icon: Cloud, label: "Nuageux" };
+  if ([45, 48].includes(code)) return { Icon: CloudFog, label: "Brumeux" };
+  if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code))
+    return { Icon: CloudRain, label: "Pluvieux" };
+  if ([95, 96, 99].includes(code)) return { Icon: CloudLightning, label: "Orageux" };
+  return { Icon: Cloud, label: "Nuageux" };
+}
+
+function MeteoWidget() {
+  const { data } = useQuery({
+    queryKey: ["meteo-port-gentil"],
+    queryFn: async () => {
+      const res = await fetch(
+        "https://api.open-meteo.com/v1/forecast?latitude=-0.72&longitude=8.78&current_weather=true",
+      );
+      if (!res.ok) throw new Error("Erreur météo");
+      return res.json();
+    },
+    staleTime: 15 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const courant = data?.current_weather;
+  if (!courant) return null;
+
+  const { Icon, label } = iconMeteo(courant.weathercode);
+
+  return (
+    <div className="hidden items-center gap-1.5 rounded-full border bg-card px-3 py-1 text-xs sm:flex">
+      <Icon className="size-4 text-amber-500" />
+      <span className="font-medium">{Math.round(courant.temperature)}°C</span>
+      <span className="hidden text-muted-foreground md:inline">— {label}, Port-Gentil</span>
+    </div>
+  );
+}
 export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { data: role } = useMonRole();
@@ -154,6 +195,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
               year: "numeric",
             })}
           </span>
+
+          <MeteoWidget />
 
 <Button variant="ghost" size="icon" onClick={toggleDark}>
             {dark ? <Sun className="size-5" /> : <Moon className="size-5" />}
