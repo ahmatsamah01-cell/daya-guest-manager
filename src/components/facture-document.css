@@ -12,8 +12,13 @@
   overflow: hidden;
 }
 
+/* Zone de contenu variable : ne peut jamais pousser les blocs fixes du bas */
 .facture-corps {
-  max-height: 500pt;
+  position: absolute;
+  top: 35.4pt;
+  left: 70.8pt;
+  right: 70.8pt;
+  max-height: 535pt;
   overflow: hidden;
 }
 
@@ -24,9 +29,10 @@
   display: block;
 }
 .facture-logo-top img {
-  width: 100%;
-  height: 100%;
+  width: 175.56pt;
+  height: 87.72pt;
   object-fit: contain;
+  display: block;
 }
 
 .facture-titre-etab {
@@ -51,19 +57,11 @@
   color: #ff0000;
 }
 
-@media print {
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
-  .facture-a4 {
-    margin: 0;
-  }
-}
 .facture-tableau {
   width: 100%;
   border-collapse: collapse;
   margin-top: 14pt;
+  table-layout: fixed;
 }
 
 .facture-tableau th,
@@ -72,6 +70,7 @@
   text-align: left;
   font-size: 11.04pt;
   font-weight: normal;
+  overflow: hidden;
 }
 
 .facture-entete-bandeau th {
@@ -92,13 +91,13 @@
   text-align: center;
 }
 
+.facture-droite {
+  text-align: right;
+}
+
 .facture-total-general td {
   background-color: #d9d9d9;
   height: 13.44pt;
-}
-
-.facture-droite {
-  text-align: right;
 }
 
 .facture-total-label {
@@ -121,16 +120,35 @@
   color: #0070c0;
 }
 
+/* ---- Blocs fixes (jamais déplacés par la longueur du tableau) ---- */
+
 .facture-date {
   position: absolute;
   top: 585pt;
   right: 70.8pt;
+  margin: 0;
   text-align: right;
+}
+
+.facture-logo-bas {
+  position: absolute;
+  top: 620pt;
+  left: 0;
+  right: 0;
+  width: 160pt;
+  height: 80pt;
+  margin: 0 auto;
+}
+.facture-logo-bas img {
+  width: 160pt;
+  height: 80pt;
+  object-fit: contain;
+  display: block;
 }
 
 .facture-pied {
   position: absolute;
-  top: 713pt;
+  top: 720pt;
   left: 0;
   right: 0;
   text-align: center;
@@ -138,19 +156,8 @@
   padding: 0 20pt;
 }
 
-.facture-logo-bas img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.facture-pied {
-  position: absolute;
-  bottom: 30pt;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 9.5pt;
+.facture-pied p {
+  margin: 0 0 1pt 0;
 }
 
 .facture-pied-titre {
@@ -159,4 +166,14 @@
 
 .facture-tirets {
   color: #0070c0;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  .facture-a4 {
+    margin: 0;
+  }
 }
