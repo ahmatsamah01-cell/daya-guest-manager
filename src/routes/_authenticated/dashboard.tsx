@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users, ArrowDown, ArrowUp} from "lucide-react";
+import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users, ArrowDown, ArrowUp,ArrowUpRight,ArrowDownRight} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent,} from "@/components/ui/chart";
@@ -82,7 +82,6 @@ function Stat({
 
   return contenu;
 }
-
 function StatCard({
   titre,
   valeur,
@@ -90,6 +89,7 @@ function StatCard({
   icon: Icon,
   couleur,
   to,
+  variation,
 }: {
   titre: string;
   valeur: string;
@@ -97,6 +97,7 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
   couleur: string;
   to?: string;
+  variation?: { texte: string; hausse: boolean } | null;
 }) {
   const contenu = (
     <Card className="transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
@@ -107,8 +108,26 @@ function StatCard({
         >
           <Icon className="size-5 text-white" />
         </div>
-        <div className="min-w-0">
-          <p className="text-sm text-muted-foreground">{titre}</p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm text-muted-foreground">{titre}</p>
+            {variation ? (
+              <span
+                className={`flex shrink-0 items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                  variation.hausse
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                    : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                }`}
+              >
+                {variation.hausse ? (
+                  <ArrowUpRight className="size-3" />
+                ) : (
+                  <ArrowDownRight className="size-3" />
+                )}
+                {variation.texte}
+              </span>
+            ) : null}
+          </div>
           <p className="font-display text-2xl font-bold">{valeur}</p>
           {detail ? (
             <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>
@@ -156,7 +175,7 @@ function Dashboard() {
           .select("*, clients(nom, prenom), chambres(nom)")
           .neq("statut", "annulee")
           .order("date_arrivee"),
-        supabase.from("caisse_operations").select("*").gte("date_operation", `${dateDebut}T00:00:00`),
+        supabase.from("caisse_operations").select("*").gte("date_operation", `${new Date(new Date(dateDebut).getTime() - 86400000).toISOString().slice(0, 10)}T00:00:00`),
         supabase.from("depenses").select("*").gte("date_depense", dateDebut).lte("date_depense", jour), 
         supabase.from("taxes_sejour").select("*").lte("date_nuitee", jour),
         supabase.from("clients").select("id"),
@@ -265,7 +284,32 @@ const chartConfig = {
     color: "hsl(var(--destructive))",
   },
 };
+const hier = new Date(new Date(jour).getTime() - 86400000).toISOString().slice(0, 10);
 
+const occupeesHier = new Set(
+  data.reservations
+    .filter((r) => r.date_arrivee <= hier && r.date_depart > hier)
+    .map((r) => r.chambre_id),
+);
+const arriveesHier = data.reservations.filter((r) => r.date_arrivee === hier).length;
+const departsHier = data.reservations.filter((r) => r.date_depart === hier).length;
+const entreesHier = data.operations
+  .filter((o) => o.sens === "entree" && o.date_operation.slice(0, 10) === hier)
+  .reduce((s, o) => s + Number(o.montant), 0);
+const enCoursHier = occupeesHier.size;
+
+function variation(actuel: number, precedent: number): { texte: string; hausse: boolean } | null {
+  if (precedent === 0 && actuel === 0) return null;
+  if (precedent === 0) return { texte: "Nouveau", hausse: true };
+  const pct = Math.round(((actuel - precedent) / precedent) * 100);
+  return { texte: `${pct >= 0 ? "+" : ""}${pct}%`, hausse: pct >= 0 };
+}
+
+const varOccupation = periode === "jour" ? variation(occupees.size, occupeesHier.size) : null;
+const varArrivees = periode === "jour" ? variation(arrivees.length, arriveesHier) : null;
+const varDeparts = periode === "jour" ? variation(departs.length, departsHier) : null;
+const varCA = periode === "jour" ? variation(entrees, entreesHier) : null;
+const varEnCours = periode === "jour" ? variation(enCours.length, enCoursHier) : null;
 const reservees = data.chambres.filter(
   (c) => !occupees.has(c.id) && data.reservations.some((r) => r.chambre_id === c.id && r.statut === "reservee"),
 ).length;
@@ -433,6 +477,7 @@ const activiteRecente = [...data.reservations]
     icon={BedDouble}
     couleur="#166534"
     to="/chambres"
+    variation={varOccupation}
   />
   <StatCard
     titre="Arrivées du jour"
@@ -441,6 +486,7 @@ const activiteRecente = [...data.reservations]
     icon={CalendarCheck}
     couleur="#ea580c"
     to="/reservations"
+    variation={varArrivees}
   />
   <StatCard
     titre="Départs du jour"
@@ -449,6 +495,7 @@ const activiteRecente = [...data.reservations]
     icon={CalendarCheck}
     couleur="#9333ea"
     to="/reservations"
+    variation={varDeparts}
   />
   <StatCard
     titre="CA du jour"
@@ -457,6 +504,7 @@ const activiteRecente = [...data.reservations]
     icon={Wallet}
     couleur="#2563eb"
     to="/caisse"
+    variation={varCA}
   />
   <StatCard
     titre="Réservations en cours"
@@ -465,6 +513,7 @@ const activiteRecente = [...data.reservations]
     icon={Users}
     couleur="#16a34a"
     to="/reservations"
+    variation={varEnCours}
   />
 </div>
 <Card className="mt-6">
@@ -489,32 +538,40 @@ const activiteRecente = [...data.reservations]
   </CardContent>
 
 </Card>
-
-<Card className="mt-6">
+<Card className="mt-6 overflow-hidden border-none bg-gradient-to-br from-card to-muted/50 shadow-md">
   <CardHeader>
     <CardTitle className="text-base">Occupation des chambres</CardTitle>
   </CardHeader>
   <CardContent className="flex flex-col items-center gap-4 sm:flex-row sm:justify-around">
-    <div className="h-[180px] w-[180px]">
-      <ChartContainer config={{}} className="h-full w-full">
+    <div className="relative h-[180px] w-[180px]">
+      <ChartContainer config={{}} className="h-full w-full drop-shadow-[0_0_18px_rgba(220,38,38,0.25)]">
         <PieChart>
           <Pie
             data={donneesDonut}
             dataKey="value"
             nameKey="name"
-            innerRadius={50}
+            innerRadius={55}
             outerRadius={80}
-            paddingAngle={2}
+            paddingAngle={3}
+            cornerRadius={6}
+            animationDuration={800}
           >
             {donneesDonut.map((entry, i) => (
-              <Cell key={i} fill={entry.couleur} />
+              <Cell key={i} fill={entry.couleur} stroke="none" />
             ))}
           </Pie>
           <ChartTooltip content={<ChartTooltipContent />} />
         </PieChart>
       </ChartContainer>
-    </div>
-    <div className="space-y-2">
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-display text-2xl font-bold">
+          {totalChambres > 0 ? Math.round((occupees.size / totalChambres) * 100) : 0}%
+        </span>
+        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+          Occupé
+        </span>
+      </div>
+    </div>    <div className="space-y-2">
       {donneesDonut.map((d, i) => (
         <div key={i} className="flex items-center gap-2 text-sm">
           <span className="size-3 rounded-full" style={{ backgroundColor: d.couleur }} />
