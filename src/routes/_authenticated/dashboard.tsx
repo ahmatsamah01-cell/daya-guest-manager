@@ -12,7 +12,7 @@ import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users, ArrowD
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent,} from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, Pie, PieChart, Cell } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/AppLayout";
 import { BrandLogo, SLOGAN } from "@/components/Brand";
@@ -265,6 +265,17 @@ const chartConfig = {
     color: "hsl(var(--destructive))",
   },
 };
+
+const reservees = data.chambres.filter(
+  (c) => !occupees.has(c.id) && data.reservations.some((r) => r.chambre_id === c.id && r.statut === "reservee"),
+).length;
+const disponibles = totalChambres - occupees.size - reservees;
+
+const donneesDonut = [
+  { name: "Disponible", value: disponibles, couleur: "#16a34a" },
+  { name: "Réservée", value: reservees, couleur: "#f97316" },
+  { name: "Occupée", value: occupees.size, couleur: "#dc2626" },
+].filter((d) => d.value > 0);
 const reservationsProches = data.reservations.filter(
     (r) =>
       r.statut === "reservee" &&
@@ -475,6 +486,46 @@ const activiteRecente = [...data.reservations]
         <Bar dataKey="sorties" fill="var(--color-sorties)" radius={4} />
       </BarChart>
     </ChartContainer>
+  </CardContent>
+
+</Card>
+
+<Card className="mt-6">
+  <CardHeader>
+    <CardTitle className="text-base">Occupation des chambres</CardTitle>
+  </CardHeader>
+  <CardContent className="flex flex-col items-center gap-4 sm:flex-row sm:justify-around">
+    <div className="h-[180px] w-[180px]">
+      <ChartContainer config={{}} className="h-full w-full">
+        <PieChart>
+          <Pie
+            data={donneesDonut}
+            dataKey="value"
+            nameKey="name"
+            innerRadius={50}
+            outerRadius={80}
+            paddingAngle={2}
+          >
+            {donneesDonut.map((entry, i) => (
+              <Cell key={i} fill={entry.couleur} />
+            ))}
+          </Pie>
+          <ChartTooltip content={<ChartTooltipContent />} />
+        </PieChart>
+      </ChartContainer>
+    </div>
+    <div className="space-y-2">
+      {donneesDonut.map((d, i) => (
+        <div key={i} className="flex items-center gap-2 text-sm">
+          <span className="size-3 rounded-full" style={{ backgroundColor: d.couleur }} />
+          <span className="text-muted-foreground">{d.name}</span>
+          <span className="font-semibold">{d.value}</span>
+        </div>
+      ))}
+      {donneesDonut.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Aucune chambre enregistrée.</p>
+      ) : null}
+    </div>
   </CardContent>
 </Card>
 
