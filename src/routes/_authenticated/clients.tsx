@@ -85,32 +85,82 @@ function ClientsPage() {
     },
   });
 
-  function imprimerHistorique() {
-    const contenu = document.querySelector(".historique-print");
-    if (!contenu) return;
-    const fenetre = window.open("", "_blank", "width=1000,height=1000");
-    if (!fenetre) return;
-    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-      .map((el) => el.outerHTML)
-      .join("\n");
-    fenetre.document.write(`
-      <html>
-        <head>
-          <title>Historique des séjours</title>
-          ${styles}
-        </head>
-        <body style="padding: 32px; margin: 0;">
-          ${contenu.outerHTML}
-        </body>
-      </html>
-    `);
-    fenetre.document.close();
-    fenetre.onload = () => {
-      fenetre.focus();
-      fenetre.print();
-    };
+ function imprimerHistorique() {
+  const contenu = document.querySelector(".historique-print");
+  if (!contenu) return;
+
+  const fenetre = window.open("", "_blank", "width=1000,height=1000");
+  if (!fenetre) {
+    toast.error("Impossible d'ouvrir la fenêtre d'impression.");
+    return;
   }
 
+  const styles = Array.from(
+    document.querySelectorAll('link[rel="stylesheet"], style')
+  )
+    .map((el) => el.outerHTML)
+    .join("\n");
+
+  const contenuClone = contenu.cloneNode(true) as HTMLElement;
+
+  // Retire la classe "hidden" pour que le contenu soit visible à l'impression
+  contenuClone.classList.remove("hidden");
+
+  fenetre.document.write(`
+    <!DOCTYPE html>
+    <html lang="fr">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Historique des séjours</title>
+        ${styles}
+        <style>
+          @page {
+            margin: 15mm;
+          }
+
+          body {
+            padding: 0;
+            margin: 0;
+            background: white;
+            color: black;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          th,
+          td {
+            border: 1px solid #ccc;
+            padding: 6px;
+          }
+
+          th {
+            background: #f3f3f3;
+          }
+
+          @media print {
+            body {
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        ${contenuClone.outerHTML}
+      </body>
+    </html>
+  `);
+
+  fenetre.document.close();
+
+  fenetre.onload = () => {
+    fenetre.focus();
+    fenetre.print();
+  };
+}
   const { data: clients } = useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
