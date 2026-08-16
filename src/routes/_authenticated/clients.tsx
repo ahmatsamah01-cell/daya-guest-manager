@@ -217,7 +217,6 @@ const supprimer = useMutation({
     },
     onError: (e: Error) => toast.error(e.message),
       }
-    }, 
   });
    const statsHistorique = (sejours ?? []).reduce(
     (acc, s) => {
