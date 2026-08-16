@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Printer, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
 import { useEtablissement, useMonRole } from "@/hooks/use-hotel";
+import { formatFCFA, formatDate, nbNuits, today } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/clients")({
   head: () => ({
@@ -65,6 +66,50 @@ function ClientsPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Form>(vide);
   const [recherche, setRecherche] = useState("");
+
+  const [dateDebutFiltre, setDateDebutFiltre] = useState(`${today().slice(0, 7)}-01`);
+  const [dateFinFiltre, setDateFinFiltre] = useState(today());
+
+  const { data: sejours } = useQuery({
+    queryKey: ["clients-sejours", dateDebutFiltre, dateFinFiltre],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("*, clients(nom, prenom), chambres(nom, type)")
+        .neq("statut", "annulee")
+        .gte("date_arrivee", dateDebutFiltre)
+        .lte("date_arrivee", dateFinFiltre)
+        .order("date_arrivee");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  function imprimerHistorique() {
+    const contenu = document.querySelector(".historique-print");
+    if (!contenu) return;
+    const fenetre = window.open("", "_blank", "width=1000,height=1000");
+    if (!fenetre) return;
+    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+      .map((el) => el.outerHTML)
+      .join("\n");
+    fenetre.document.write(`
+      <html>
+        <head>
+          <title>Historique des séjours</title>
+          ${styles}
+        </head>
+        <body style="padding: 32px; margin: 0;">
+          ${contenu.outerHTML}
+        </body>
+      </html>
+    `);
+    fenetre.document.close();
+    fenetre.onload = () => {
+      fenetre.focus();
+      fenetre.print();
+    };
+  }
 
   const { data: clients } = useQuery({
     queryKey: ["clients"],
@@ -220,13 +265,150 @@ function ClientsPage() {
         }
       />
 
-      <div className="mb-4 max-w-sm">
+     <div className="mb-4 max-w-sm">
         <Input
           placeholder="Rechercher un client…"
           value={recherche}
           onChange={(e) => setRecherche(e.target.value)}
         />
       </div>
+
+      <Card className="mb-6">
+        <CardContent className="space-y-4 p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <History className="size-4 text-muted-foreground" />
+            <p className="font-display font-semibold">Historique des séjours</p>
+          </div>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs">Du</Label>
+              <Input
+                type="date"
+                value={dateDebutFiltre}
+                onChange={(e) => setDateDebutFiltre(e.target.value)}
+                className="w-[160px]"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Au</Label>
+              <Input
+                type="date"
+                value={dateFinFiltre}
+                onChange={(e) => setDateFinFiltre(e.target.value)}
+                className="w-[160px]"
+              />
+            </div>
+            <Button variant="outline" onClick={imprimerHistorique} className="gap-2">
+              <Printer className="size-4" /> Imprimer
+            </Button>
+          </div>
+
+          <div className="overflow-x-auto rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">N°</TableHead>
+                  <TableHead>Nom et prénom</TableHead>
+                  <TableHead>Type de chambre</TableHead>
+                  <TableHead>N° chambre</TableHead>
+                  <TableHead>Période de séjour</TableHead>
+                  <TableHead className="text-right">Prix unitaire</TableHead>
+                  <TableHead className="text-right">Prix total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(sejours ?? []).map((s, i) => {
+                  const n = nbNuits(s.date_arrivee, s.date_depart);
+                  return (
+                    <TableRow key={s.id}>
+                      <TableCell>{i + 1}</TableCell>
+                      <TableCell className="font-medium">
+                        {s.clients?.prenom} {s.clients?.nom}
+                      </TableCell>
+                      <TableCell>{s.chambres?.type ?? "—"}</TableCell>
+                      <TableCell>{s.chambres?.nom ?? "—"}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {formatDate(s.date_arrivee)} → {formatDate(s.date_depart)}
+                      </TableCell>
+                      <TableCell className="text-right whitespace-nowrap">
+                        {formatFCFA(s.prix_nuit)}
+                      </TableCell>
+                      <TableCell className="text-right whitespace-nowrap font-medium">
+                        {formatFCFA(n * Number(s.prix_nuit))}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {(sejours ?? []).length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                      Aucun séjour sur cette période.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="historique-print hidden">
+            <div className="mb-4 text-center">
+              <p className="font-display text-lg font-bold">{etab?.nom ?? "LE DAYA Guest House"}</p>
+              <p className="text-sm text-muted-foreground">
+                Historique des séjours — du {formatDate(dateDebutFiltre)} au {formatDate(dateFinFiltre)}
+              </p>
+            </div>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+              <thead>
+                <tr>
+                  {["N°", "Nom et prénom", "Type", "Chambre", "Période", "Prix U.", "Prix total"].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        style={{
+                          border: "1px solid #ccc",
+                          padding: "6px",
+                          background: "#f3f3f3",
+                          textAlign: "left",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ),
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {(sejours ?? []).map((s, i) => {
+                  const n = nbNuits(s.date_arrivee, s.date_depart);
+                  return (
+                    <tr key={s.id}>
+                      <td style={{ border: "1px solid #ccc", padding: "6px" }}>{i + 1}</td>
+                      <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                        {s.clients?.prenom} {s.clients?.nom}
+                      </td>
+                      <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                        {s.chambres?.type ?? "—"}
+                      </td>
+                      <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                        {s.chambres?.nom ?? "—"}
+                      </td>
+                      <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                        {formatDate(s.date_arrivee)} → {formatDate(s.date_depart)}
+                      </td>
+                      <td style={{ border: "1px solid #ccc", padding: "6px", textAlign: "right" }}>
+                        {formatFCFA(s.prix_nuit)}
+                      </td>
+                      <td style={{ border: "1px solid #ccc", padding: "6px", textAlign: "right" }}>
+                        {formatFCFA(n * Number(s.prix_nuit))}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="overflow-x-auto p-0">
