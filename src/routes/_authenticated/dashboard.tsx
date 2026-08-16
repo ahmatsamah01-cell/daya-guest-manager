@@ -310,6 +310,11 @@ const varArrivees = periode === "jour" ? variation(arrivees.length, arriveesHier
 const varDeparts = periode === "jour" ? variation(departs.length, departsHier) : null;
 const varCA = periode === "jour" ? variation(entrees, entreesHier) : null;
 const varEnCours = periode === "jour" ? variation(enCours.length, enCoursHier) : null;
+const chambresOccupeesPeriode = new Set(
+  data.reservations
+    .filter((r) => r.date_arrivee <= jour && r.date_depart > dateDebut)
+    .map((r) => r.chambre_id),
+).size;
 const reservees = data.chambres.filter(
   (c) => !occupees.has(c.id) && data.reservations.some((r) => r.chambre_id === c.id && r.statut === "reservee"),
 ).length;
@@ -564,11 +569,9 @@ const activiteRecente = [...data.reservations]
         </PieChart>
       </ChartContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-display text-2xl font-bold">
-          {totalChambres > 0 ? Math.round((occupees.size / totalChambres) * 100) : 0}%
-        </span>
+        <span className="font-display text-2xl font-bold">{tauxOccupation}%</span>
         <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          Occupé
+          Taux d'occupation
         </span>
       </div>
     </div>    <div className="space-y-2">
@@ -582,6 +585,9 @@ const activiteRecente = [...data.reservations]
       {donneesDonut.length === 0 ? (
         <p className="text-sm text-muted-foreground">Aucune chambre enregistrée.</p>
       ) : null}
+      <p className="pt-2 text-xs text-muted-foreground">
+        {chambresOccupeesPeriode} chambre(s) différente(s) occupée(s) sur la période
+      </p>
     </div>
   </CardContent>
 </Card>
