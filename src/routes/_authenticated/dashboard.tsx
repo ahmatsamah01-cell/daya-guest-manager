@@ -346,10 +346,7 @@ const nuitsVenduesPeriode = data.reservations.reduce((total, r) => {
   return total + nuits;
 }, 0);
 
-const joursDansRapport = Math.max(
-  1,
-  Math.round((Math.min(rapportFin.getTime(), maintenant.getTime() + 86400000) - rapportDebut.getTime()) / 86400000),
-);
+
 const nuitsDisponiblesRapport = totalChambres * joursDansRapport;
 const tauxOccupationRapport =
   nuitsDisponiblesRapport > 0
