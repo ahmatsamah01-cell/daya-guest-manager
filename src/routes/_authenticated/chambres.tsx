@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRef } from "react";
-import { useRef } from "react";
 import { Plus, Pencil, Trash2, BedDouble, Users2, LayoutGrid, List, Camera, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
