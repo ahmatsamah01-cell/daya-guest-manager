@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, BedDouble, Users2, LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +69,7 @@ function ChambresPage() {
   const { data: role } = useMonRole();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Form>(vide);
+  const [vue, setVue] = useState<"grille" | "tableau">("grille");
 
   const { data: chambres } = useQuery({
     queryKey: ["chambres"],
@@ -216,35 +217,69 @@ function ChambresPage() {
         }
       />
 
-      <Card>
-        <CardContent className="overflow-x-auto p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Chambre</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Prix / nuit</TableHead>
-                <TableHead>Capacité</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(chambres ?? []).map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.nom}</TableCell>
-                  <TableCell>{c.type}</TableCell>
-                  <TableCell>{formatFCFA(c.prix_nuit)}</TableCell>
-                  <TableCell>{c.capacite}</TableCell>
-                  <TableCell>
-                    <Badge variant={c.statut === "libre" ? "secondary" : "outline"}>
-                      {c.statut}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right whitespace-nowrap">
+     <div className="mb-4 flex justify-end">
+        <div className="flex rounded-lg border p-1">
+          <Button
+            variant={vue === "grille" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setVue("grille")}
+          >
+            <LayoutGrid className="size-4" />
+          </Button>
+          <Button
+            variant={vue === "tableau" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setVue("tableau")}
+          >
+            <List className="size-4" />
+          </Button>
+        </div>
+      </div>
+
+      {vue === "grille" ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {(chambres ?? []).map((c) => {
+            const statutStyle =
+              c.statut === "libre"
+                ? { badge: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400", label: "Disponible" }
+                : c.statut === "occupee"
+                  ? { badge: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400", label: "Occupée" }
+                  : { badge: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400", label: "Maintenance" };
+
+            return (
+              <Card key={c.id} className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
+                <div className="relative h-32 w-full overflow-hidden bg-gradient-to-br from-red-900 via-red-800 to-stone-900">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <BedDouble className="size-10 text-white/70" />
+                  </div>
+                  <span
+                    className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${statutStyle.badge}`}
+                  >
+                    {statutStyle.label}
+                  </span>
+                </div>
+                <CardContent className="space-y-2 p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-display font-semibold">{c.nom}</p>
+                      <p className="text-xs text-muted-foreground">{c.type}</p>
+                    </div>
+                    <p className="font-display text-sm font-bold text-primary">
+                      {formatFCFA(c.prix_nuit)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Users2 className="size-3.5" />
+                    {c.capacite} pers.
+                  </div>
+                  {c.description ? (
+                    <p className="line-clamp-2 text-xs text-muted-foreground">{c.description}</p>
+                  ) : null}
+                  <div className="flex gap-2 pt-2">
                     <Button
-                      variant="ghost"
-                      size="icon"
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
                       onClick={() => {
                         setForm({
                           id: c.id,
@@ -258,24 +293,86 @@ function ChambresPage() {
                         setOpen(true);
                       }}
                     >
-                      <Pencil className="size-4" />
+                      <Pencil className="size-3.5" /> Modifier
                     </Button>
                     {role?.estAdmin ? (
+                      <Button variant="outline" size="sm" onClick={() => supprimer.mutate(c.id)}>
+                        <Trash2 className="size-3.5 text-destructive" />
+                      </Button>
+                    ) : null}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+          {(chambres ?? []).length === 0 ? (
+            <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
+              Aucune chambre enregistrée.
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="overflow-x-auto p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Chambre</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Prix / nuit</TableHead>
+                  <TableHead>Capacité</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(chambres ?? []).map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell className="font-medium">{c.nom}</TableCell>
+                    <TableCell>{c.type}</TableCell>
+                    <TableCell>{formatFCFA(c.prix_nuit)}</TableCell>
+                    <TableCell>{c.capacite}</TableCell>
+                    <TableCell>
+                      <Badge variant={c.statut === "libre" ? "secondary" : "outline"}>
+                        {c.statut}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right whitespace-nowrap">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => supprimer.mutate(c.id)}
+                        onClick={() => {
+                          setForm({
+                            id: c.id,
+                            nom: c.nom,
+                            type: c.type,
+                            prix_nuit: String(c.prix_nuit),
+                            capacite: String(c.capacite),
+                            statut: c.statut,
+                            description: c.description ?? "",
+                          });
+                          setOpen(true);
+                        }}
                       >
-                        <Trash2 className="size-4 text-destructive" />
+                        <Pencil className="size-4" />
                       </Button>
-                    ) : null}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                      {role?.estAdmin ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => supprimer.mutate(c.id)}
+                        >
+                          <Trash2 className="size-4 text-destructive" />
+                        </Button>
+                      ) : null}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
