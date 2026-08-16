@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRef } from "react";
-import { Plus, Pencil, Trash2, BedDouble, Users2, LayoutGrid, List, Camera } from "lucide-react";
+import { useRef } from "react";
+import { Plus, Pencil, Trash2, BedDouble, Users2, LayoutGrid, List, Camera, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +76,8 @@ function ChambresPage() {
   const [vue, setVue] = useState<"grille" | "tableau">("grille");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [calendrierChambre, setCalendrierChambre] = useState<{ id: string; nom: string } | null>(null);
+  const [moisAffiche, setMoisAffiche] = useState(() => new Date());
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -377,7 +380,17 @@ function ChambresPage() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                    onClick={() => {
+                      onClick={() => {
+                        setMoisAffiche(new Date());
+                        setCalendrierChambre({ id: c.id, nom: c.nom });
+                      }}
+                    >
+                      <CalendarDays className="size-3.5" /> Calendrier
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
                         setForm({
                           id: c.id,
                           nom: c.nom,
@@ -391,7 +404,7 @@ function ChambresPage() {
                         setOpen(true);
                       }}
                     >
-                      <Pencil className="size-3.5" /> Modifier
+                      <Pencil className="size-3.5" />
                     </Button>
                     {role?.estAdmin ? (
                       <Button variant="outline" size="sm" onClick={() => supprimer.mutate(c.id)}>
@@ -474,6 +487,90 @@ function ChambresPage() {
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={!!calendrierChambre} onOpenChange={(o) => !o && setCalendrierChambre(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Calendrier — {calendrierChambre?.nom}</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                setMoisAffiche(new Date(moisAffiche.getFullYear(), moisAffiche.getMonth() - 1, 1))
+              }
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            <p className="font-medium capitalize">
+              {moisAffiche.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
+            </p>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                setMoisAffiche(new Date(moisAffiche.getFullYear(), moisAffiche.getMonth() + 1, 1))
+              }
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 text-center text-[10px] text-muted-foreground">
+            {["L", "M", "M", "J", "V", "S", "D"].map((j, i) => (
+              <span key={i}>{j}</span>
+            ))}
+          </div>
+
+          {(() => {
+            const premierJour = new Date(moisAffiche.getFullYear(), moisAffiche.getMonth(), 1);
+            const dernierJour = new Date(moisAffiche.getFullYear(), moisAffiche.getMonth() + 1, 0);
+            const decalage = (premierJour.getDay() + 6) % 7;
+            const cases: (Date | null)[] = [
+              ...Array(decalage).fill(null),
+              ...Array.from({ length: dernierJour.getDate() }, (_, i) => new Date(moisAffiche.getFullYear(), moisAffiche.getMonth(), i + 1)),
+            ];
+
+            return (
+              <div className="grid grid-cols-7 gap-1">
+                {cases.map((date, i) => {
+                  if (!date) return <div key={i} />;
+                  const dateStr = date.toISOString().slice(0, 10);
+                  const occupe = (reservations ?? []).some(
+                    (r) =>
+                      r.chambre_id === calendrierChambre?.id &&
+                      dateStr >= r.date_arrivee &&
+                      dateStr < r.date_depart,
+                  );
+                  return (
+                    <div
+                      key={i}
+                      className={`flex aspect-square items-center justify-center rounded-md text-xs font-medium ${
+                        occupe
+                          ? "bg-red-500 text-white"
+                          : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      }`}
+                    >
+                      {date.getDate()}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+
+          <div className="flex justify-center gap-4 pt-2 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-green-500" /> Disponible
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-red-500" /> Occupée
+            </span>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
