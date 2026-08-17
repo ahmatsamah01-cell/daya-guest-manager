@@ -112,6 +112,12 @@ function ReservationsPage() {
 
   const creer = useMutation({
     mutationFn: async () => {
+      const conflit = detecterConflit(form.chambre_id, form.date_arrivee, form.date_depart);
+      if (conflit) {
+        throw new Error(
+          `Chambre déjà réservée du ${formatDate(conflit.date_arrivee)} au ${formatDate(conflit.date_depart)} pour cette période.`,
+        );
+      }
       const { error } = await supabase.from("reservations").insert({
         etablissement_id: etab!.id,
         client_id: form.client_id,
@@ -173,6 +179,17 @@ const [facturerResa, setFacturerResa] = useState<Resa | null>(null);
 
   const modifier = useMutation({
     mutationFn: async () => {
+      const conflit = detecterConflit(
+        editForm.chambre_id,
+        editForm.date_arrivee,
+        editForm.date_depart,
+        editId ?? undefined,
+      );
+      if (conflit) {
+        throw new Error(
+          `Chambre déjà réservée du ${formatDate(conflit.date_arrivee)} au ${formatDate(conflit.date_depart)} pour cette période.`,
+        );
+      }
       const { error } = await supabase
         .from("reservations")
         .update({
@@ -324,6 +341,27 @@ type Resa = NonNullable<typeof reservations>[number];
   const nuits =
     form.date_arrivee && form.date_depart ? nbNuits(form.date_arrivee, form.date_depart) : 0;
   const totalEstime = nuits * (Number(form.prix_nuit) || 0) + nuits * taxeParNuit;
+
+  function detecterConflit(
+    chambreId: string,
+    dateArrivee: string,
+    dateDepart: string,
+    ignorerId?: string,
+  ) {
+    return (reservations ?? []).find(
+      (r) =>
+        r.id !== ignorerId &&
+        r.chambre_id === chambreId &&
+        r.statut !== "annulee" &&
+        dateArrivee < r.date_depart &&
+        dateDepart > r.date_arrivee,
+    );
+  }
+
+  const conflitCreation =
+    form.chambre_id && form.date_arrivee && form.date_depart
+      ? detecterConflit(form.chambre_id, form.date_arrivee, form.date_depart)
+      : null;
 
   const joursPlanning = Array.from({ length: 14 }, (_, i) => {
     const d = new Date(planningDebut);
@@ -499,6 +537,14 @@ type Resa = NonNullable<typeof reservations>[number];
                   </div>
                 </div>
 
+                {conflitCreation ? (
+                  <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+                    ⚠️ Chambre déjà réservée du {formatDate(conflitCreation.date_arrivee)} au{" "}
+                    {formatDate(conflitCreation.date_depart)} pour{" "}
+                    {conflitCreation.clients?.prenom} {conflitCreation.clients?.nom}.
+                  </div>
+                ) : null}
+
                 <div className="rounded-lg bg-muted p-3 text-sm">
                   <p>
                     {nuits} nuit(s) — taxe de séjour {formatFCFA(taxeParNuit)} / nuitée
@@ -508,7 +554,13 @@ type Resa = NonNullable<typeof reservations>[number];
                 <DialogFooter>
                   <Button
                     type="submit"
-                    disabled={creer.isPending || !etab || !form.client_id || !form.chambre_id}
+                    disabled={
+                      creer.isPending ||
+                      !etab ||
+                      !form.client_id ||
+                      !form.chambre_id ||
+                      !!conflitCreation
+                    }
                   >
                     Enregistrer
                   </Button>
@@ -849,8 +901,15 @@ type Resa = NonNullable<typeof reservations>[number];
                 onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
               />
             </div>
+            {conflitEdition ? (
+              <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+                ⚠️ Chambre déjà réservée du {formatDate(conflitEdition.date_arrivee)} au{" "}
+                {formatDate(conflitEdition.date_depart)} pour{" "}
+                {conflitEdition.clients?.prenom} {conflitEdition.clients?.nom}.
+              </div>
+            ) : null}
             <DialogFooter>
-              <Button type="submit" disabled={modifier.isPending}>
+              <Button type="submit" disabled={modifier.isPending || !!conflitEdition}>
                 Enregistrer les modifications
               </Button>
             </DialogFooter>
@@ -859,7 +918,6 @@ type Resa = NonNullable<typeof reservations>[number];
       </Dialog>
 
       <Dialog open={!!facturerResa} onOpenChange={(o) => !o && setFacturerResa(null)}>
-        <DialogContent>
           <DialogHeader>
             <DialogTitle>Check-out & facturation</DialogTitle>
           </DialogHeader>
