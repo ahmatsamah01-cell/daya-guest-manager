@@ -167,9 +167,20 @@ export function FactureDocument({ data }: { data: FactureDocumentData }) {
         <span className="facture-rouge">13h30</span> et{" "}
         <span className="facture-rouge">20h00</span>
       </p>
-      <p className="facture-bold facture-ligne">
-        Les départs se font tous les jours au plus tard à{" "}
-        <span className="facture-rouge">12h00</span>
+      <p className="facture-bold facture-ligne facture-ligne-depart">
+        <span>
+          Les départs se font tous les jours au plus tard à{" "}
+          <span className="facture-rouge">12h00</span>
+        </span>
+        {qrDataUrl ? (
+          <img
+            className="facture-qr"
+            src={qrDataUrl}
+            alt="QR fiche client"
+            width={72}
+            height={72}
+          />
+        ) : null}
       </p>
 
      <table className="facture-tableau">
