@@ -68,6 +68,10 @@ function ReservationsPage() {
     nb_personnes: "1",
     prix_nuit: "",
     notes: "",
+    mode_paiement: "",
+    montant_paye: "",
+    reserve_par: "",
+    numero_confirmation: "",
   });
 
   const { data: reservations } = useQuery({
@@ -116,12 +120,29 @@ function ReservationsPage() {
         prix_nuit: Number(form.prix_nuit),
         taxe_nuit: taxeParNuit,
         notes: form.notes || null,
+        mode_paiement: form.mode_paiement || null,
+        montant_paye: Number(form.montant_paye) || 0,
+        reserve_par: form.reserve_par || null,
+        numero_confirmation: form.numero_confirmation || null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["reservations"] });
       setOpen(false);
+      setForm({
+        client_id: "",
+        chambre_id: "",
+        date_arrivee: today(),
+        date_depart: "",
+        nb_personnes: "1",
+        prix_nuit: "",
+        notes: "",
+        mode_paiement: "",
+        montant_paye: "",
+        reserve_par: "",
+        numero_confirmation: "",
+      });
       toast.success("Réservation créée.");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -410,6 +431,49 @@ type Resa = NonNullable<typeof reservations>[number];
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   />
                 </div>
+
+                <div className="grid gap-4 border-t pt-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Moyen de paiement</Label>
+                    <Select
+                      value={form.mode_paiement}
+                      onValueChange={(v) => setForm({ ...form, mode_paiement: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="especes">Espèces</SelectItem>
+                        <SelectItem value="airtel_money">Airtel Money</SelectItem>
+                        <SelectItem value="moov_money">Moov Money</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Montant déjà payé (FCFA)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={form.montant_paye}
+                      onChange={(e) => setForm({ ...form, montant_paye: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Réservé par</Label>
+                    <Input
+                      value={form.reserve_par}
+                      onChange={(e) => setForm({ ...form, reserve_par: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>N° de confirmation</Label>
+                    <Input
+                      value={form.numero_confirmation}
+                      onChange={(e) => setForm({ ...form, numero_confirmation: e.target.value })}
+                    />
+                  </div>
+                </div>
+
                 <div className="rounded-lg bg-muted p-3 text-sm">
                   <p>
                     {nuits} nuit(s) — taxe de séjour {formatFCFA(taxeParNuit)} / nuitée
