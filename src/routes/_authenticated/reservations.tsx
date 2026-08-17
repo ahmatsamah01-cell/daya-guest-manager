@@ -923,6 +923,7 @@ type Resa = NonNullable<typeof reservations>[number];
       </Dialog>
 
       <Dialog open={!!facturerResa} onOpenChange={(o) => !o && setFacturerResa(null)}>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Check-out & facturation</DialogTitle>
           </DialogHeader>
@@ -1000,7 +1001,8 @@ type Resa = NonNullable<typeof reservations>[number];
               </Button>
             </DialogFooter>
           </form>
-        </Dialog>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
