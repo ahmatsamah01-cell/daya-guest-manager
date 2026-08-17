@@ -395,8 +395,6 @@ type Resa = NonNullable<typeof reservations>[number];
   }
 
   const reservationsFiltrees = (reservations ?? []).filter((r) => {
-
-  const reservationsFiltrees = (reservations ?? []).filter((r) => {
     const q = recherche.trim().toLowerCase();
     const matchRecherche =
       !q ||
