@@ -995,7 +995,7 @@ type Resa = NonNullable<typeof reservations>[number];
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
-      </Dialog>
+        </Dialog>
+    </div>
   );
 }
