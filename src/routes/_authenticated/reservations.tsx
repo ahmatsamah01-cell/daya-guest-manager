@@ -363,6 +363,11 @@ type Resa = NonNullable<typeof reservations>[number];
       ? detecterConflit(form.chambre_id, form.date_arrivee, form.date_depart)
       : null;
 
+  const conflitEdition =
+    editForm.chambre_id && editForm.date_arrivee && editForm.date_depart
+      ? detecterConflit(editForm.chambre_id, editForm.date_arrivee, editForm.date_depart, editId ?? undefined)
+      : null;
+
   const joursPlanning = Array.from({ length: 14 }, (_, i) => {
     const d = new Date(planningDebut);
     d.setDate(d.getDate() + i);
@@ -753,16 +758,16 @@ type Resa = NonNullable<typeof reservations>[number];
                         </>
                       ) : null}
                       {r.statut === "en_cours" ? (
-  <Button
-    size="sm"
-    onClick={() => {
-      setFacturerResa(r);
-      setFacturerForm({ avance: "", buanderie: "", remiseType: "montant", remiseValeur: "" });
-    }}
-  >
-    Check-out & facturer
-  </Button>
-) : null}
+        <Button
+          size="sm"
+          onClick={() => {
+            setFacturerResa(r);
+            setFacturerForm({ avance: "", buanderie: "", remiseType: "montant", remiseValeur: "" });
+          }}
+        >
+          Check-out & facturer
+        </Button>
+      ) : null}
                     </TableCell>
                   </TableRow>
                 );
