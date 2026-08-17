@@ -387,6 +387,15 @@ type Resa = NonNullable<typeof reservations>[number];
     );
   }
 
+  function couleurStatutPlanning(statut: string) {
+    if (statut === "en_cours") return "bg-red-500";
+    if (statut === "reservee") return "bg-orange-400";
+    if (statut === "terminee") return "bg-gray-300";
+    return "bg-gray-200";
+  }
+
+  const reservationsFiltrees = (reservations ?? []).filter((r) => {
+
   const reservationsFiltrees = (reservations ?? []).filter((r) => {
     const q = recherche.trim().toLowerCase();
     const matchRecherche =
