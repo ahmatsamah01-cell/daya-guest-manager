@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Printer, History, Eye, Users2, BedDouble, Wallet, Landmark } from "lucide-react";
+import { Plus, Pencil, Trash2, Printer, History, Eye, Users2, BedDouble, Wallet, Landmark, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,6 +99,82 @@ function ClientsPage() {
   });
 
   const [ficheClient, setFicheClient] = useState<string | null>(null);
+
+function imprimerFichePolice(sejour: any, client: any) {
+    const n = nbNuits(sejour.date_arrivee, sejour.date_depart);
+    const total = n * Number(sejour.prix_nuit) + n * Number(sejour.taxe_nuit ?? 0);
+
+    const fenetre = window.open("", "_blank", "width=800,height=1000");
+    if (!fenetre) return;
+
+    fenetre.document.write(`
+      <!DOCTYPE html>
+      <html lang="fr">
+        <head>
+          <meta charset="UTF-8" />
+          <title>Fiche de renseignement client</title>
+          <style>
+            body { font-family: 'Times New Roman', serif; padding: 30px; color: #000; }
+            h1 { text-align: center; font-size: 20px; margin-bottom: 24px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #333; padding: 8px 10px; font-size: 13px; text-align: left; }
+            th { width: 40%; background: #f5f5f5; font-weight: normal; }
+            .titre-section { background: #d32f2f; color: white; text-align: center; font-weight: bold; padding: 6px; font-size: 14px; }
+            @page { margin: 15mm; }
+          </style>
+        </head>
+        <body>
+          <h1>FICHE DE RENSEIGNEMENT CLIENT</h1>
+          <table>
+            <tr><th>NOM HÔTEL</th><td>${etab?.nom ?? "LE DAYA Guest House"}</td></tr>
+            <tr><th>ADRESSE DE L'HÔTEL</th><td>${etab?.ville ?? ""}</td></tr>
+            <tr><th>TÉLÉPHONE DE L'HÔTEL</th><td>074.87.42.33</td></tr>
+          </table>
+
+          <div class="titre-section">CLIENT</div>
+          <table>
+            <tr><th>NOM ET PRÉNOM</th><td>${client.prenom ?? ""} ${client.nom ?? ""}</td></tr>
+            <tr><th>ADRESSE</th><td>${client.adresse ?? "—"}</td></tr>
+            <tr><th>TÉLÉPHONE</th><td>${client.telephone ?? "—"}</td></tr>
+            <tr><th>NATIONALITÉ</th><td>${client.nationalite ?? "—"}</td></tr>
+            <tr><th>N° ET PIÈCE D'IDENTITÉ</th><td>${client.type_piece ?? ""} ${client.numero_piece ?? "—"}</td></tr>
+          </table>
+
+          <div class="titre-section">DÉTAILS DE LA RÉSERVATION</div>
+          <table>
+            <tr><th>DATE D'ARRIVÉE</th><td>${formatDate(sejour.date_arrivee)}</td></tr>
+            <tr><th>DATE DE DÉPART</th><td>${formatDate(sejour.date_depart)}</td></tr>
+            <tr><th>NOMBRE DE NUITS</th><td>${n}</td></tr>
+            <tr><th>TYPE DE CHAMBRE</th><td>${sejour.chambres?.type ?? "—"}</td></tr>
+            <tr><th>N° CHAMBRE</th><td>${sejour.chambres?.nom ?? "—"}</td></tr>
+            <tr><th>PRIX PAR NUIT</th><td>${formatFCFA(sejour.prix_nuit)}</td></tr>
+            <tr><th>TOTAL DE LA RÉSERVATION</th><td>${formatFCFA(total)}</td></tr>
+          </table>
+
+          <div class="titre-section">INFORMATIONS DE PAIEMENT</div>
+          <table>
+            <tr><th>MOYEN DE PAIEMENT</th><td>${sejour.mode_paiement ?? "—"}</td></tr>
+            <tr><th>MONTANT PAYÉ</th><td>${formatFCFA(sejour.montant_paye ?? 0)}</td></tr>
+          </table>
+
+          <div class="titre-section">CONFIRMATION DE LA RÉSERVATION</div>
+          <table>
+            <tr><th>RÉSERVÉ PAR</th><td>${sejour.reserve_par ?? "—"}</td></tr>
+            <tr><th>DATE DE LA RÉSERVATION</th><td>${sejour.created_at ? formatDate(sejour.created_at.slice(0, 10)) : "—"}</td></tr>
+            <tr><th>N° DE CONFIRMATION</th><td>${sejour.numero_confirmation ?? "—"}</td></tr>
+            <tr><th>SIGNATURE DU CLIENT</th><td>&nbsp;</td></tr>
+            <tr><th>SIGNATURE DU RESPONSABLE</th><td>&nbsp;</td></tr>
+          </table>
+        </body>
+      </html>
+    `);
+
+    fenetre.document.close();
+    fenetre.onload = () => {
+      fenetre.focus();
+      fenetre.print();
+    };
+  }
 
   function imprimerHistorique() {
     const contenu = document.querySelector(".historique-print");
@@ -703,9 +779,20 @@ function ClientsPage() {
                           {formatDate(s.date_arrivee)} → {formatDate(s.date_depart)}
                         </p>
                       </div>
-                      <span className="font-medium">
-                        {formatFCFA(nbNuits(s.date_arrivee, s.date_depart) * Number(s.prix_nuit))}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {formatFCFA(nbNuits(s.date_arrivee, s.date_depart) * Number(s.prix_nuit))}
+                        </span>
+                        {s.statut === "terminee" ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => imprimerFichePolice(s, clientFiche)}
+                          >
+                            <FileText className="size-3.5" /> Fiche
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
                   ))}
                   {infosFiche.historique.length === 0 ? (
