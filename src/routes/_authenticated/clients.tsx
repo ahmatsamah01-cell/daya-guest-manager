@@ -215,6 +215,26 @@ function ClientsPage() {
   const clientFiche = ficheClient ? (clients ?? []).find((c) => c.id === ficheClient) : null;
   const infosFiche = ficheClient ? infosClient(ficheClient) : null;
 
+  const supprimer = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("clients").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["clients"] });
+      toast.success("Client supprimé.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const filtres = (clients ?? []).filter((c) => {
+    const q = recherche.trim().toLowerCase();
+    if (!q) return true;
+    return [c.nom, c.prenom, c.telephone, c.email, c.numero_piece]
+      .filter(Boolean)
+      .some((v) => String(v).toLowerCase().includes(q));
+  });
+
   return (
     <div>
       <PageHeader

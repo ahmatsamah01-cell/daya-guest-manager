@@ -33,7 +33,7 @@ function MonComptePage() {
 
   useState(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setAvatarUrl((data.user?.user_metadata?.avatar_url as string) ?? null);
+      setAvatarUrl((data.user?.user_metadata?.["avatar_url"] as string) ?? null);
     });
   });
 
