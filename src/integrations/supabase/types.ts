@@ -586,9 +586,13 @@ export type Database = {
           date_depart: string
           etablissement_id: string
           id: string
+          mode_paiement: string | null
+          montant_paye: number | null
           nb_personnes: number
           notes: string | null
+          numero_confirmation: string | null
           prix_nuit: number
+          reserve_par: string | null
           statut: string
           taxe_nuit: number
           updated_at: string
@@ -602,9 +606,13 @@ export type Database = {
           date_depart: string
           etablissement_id: string
           id?: string
+          mode_paiement?: string | null
+          montant_paye?: number | null
           nb_personnes?: number
           notes?: string | null
+          numero_confirmation?: string | null
           prix_nuit: number
+          reserve_par?: string | null
           statut?: string
           taxe_nuit?: number
           updated_at?: string
@@ -618,9 +626,13 @@ export type Database = {
           date_depart?: string
           etablissement_id?: string
           id?: string
+          mode_paiement?: string | null
+          montant_paye?: number | null
           nb_personnes?: number
           notes?: string | null
+          numero_confirmation?: string | null
           prix_nuit?: number
+          reserve_par?: string | null
           statut?: string
           taxe_nuit?: number
           updated_at?: string
