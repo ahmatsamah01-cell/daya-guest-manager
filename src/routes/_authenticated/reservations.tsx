@@ -758,16 +758,16 @@ type Resa = NonNullable<typeof reservations>[number];
                         </>
                       ) : null}
                       {r.statut === "en_cours" ? (
-        <Button
-          size="sm"
-          onClick={() => {
-            setFacturerResa(r);
-            setFacturerForm({ avance: "", buanderie: "", remiseType: "montant", remiseValeur: "" });
-          }}
-        >
-          Check-out & facturer
-        </Button>
-      ) : null}
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setFacturerResa(r);
+                            setFacturerForm({ avance: "", buanderie: "", remiseType: "montant", remiseValeur: "" });
+                          }}
+                        >
+                          Check-out & facturer
+                        </Button>
+                      ) : null}
                     </TableCell>
                   </TableRow>
                 );
