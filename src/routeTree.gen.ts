@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as FacturePreviewRouteImport } from './routes/facture-preview'
 import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
 import { Route as AuthenticatedChambresRouteImport } from './routes/_authenticated/chambres'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
@@ -39,11 +38,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FacturePreviewRoute = FacturePreviewRouteImport.update({
-  id: '/facture-preview',
-  path: '/facture-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedCaisseRoute = AuthenticatedCaisseRouteImport.update({
@@ -117,7 +111,6 @@ const AuthenticatedTaxeSejourRoute = AuthenticatedTaxeSejourRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/facture-preview': typeof FacturePreviewRoute
   '/caisse': typeof AuthenticatedCaisseRoute
   '/chambres': typeof AuthenticatedChambresRoute
   '/clients': typeof AuthenticatedClientsRoute
@@ -135,7 +128,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/facture-preview': typeof FacturePreviewRoute
   '/caisse': typeof AuthenticatedCaisseRoute
   '/chambres': typeof AuthenticatedChambresRoute
   '/clients': typeof AuthenticatedClientsRoute
@@ -155,7 +147,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/facture-preview': typeof FacturePreviewRoute
   '/_authenticated/caisse': typeof AuthenticatedCaisseRoute
   '/_authenticated/chambres': typeof AuthenticatedChambresRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
@@ -175,7 +166,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/facture-preview'
     | '/caisse'
     | '/chambres'
     | '/clients'
@@ -193,7 +183,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/facture-preview'
     | '/caisse'
     | '/chambres'
     | '/clients'
@@ -212,7 +201,6 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/facture-preview'
     | '/_authenticated/caisse'
     | '/_authenticated/chambres'
     | '/_authenticated/clients'
@@ -232,7 +220,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  FacturePreviewRoute: typeof FacturePreviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -256,13 +243,6 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/facture-preview': {
-      id: '/facture-preview'
-      path: '/facture-preview'
-      fullPath: '/facture-preview'
-      preLoaderRoute: typeof FacturePreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/caisse': {
@@ -398,7 +378,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  FacturePreviewRoute: FacturePreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
