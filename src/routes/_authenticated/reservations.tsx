@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, LayoutGrid, List, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, LayoutGrid, List, ChevronLeft, ChevronRight, Search, Rows3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +60,9 @@ function ReservationsPage() {
   const prefixeFacture = params?.["prefixe_facture"] ?? "FAC";
 
   const [vue, setVue] = useState<"planning" | "liste">("planning");
+  const [sousVueListe, setSousVueListe] = useState<"tableau" | "cartes">("tableau");
+  const [recherche, setRecherche] = useState("");
+  const [filtreStatut, setFiltreStatut] = useState<string>("tous");
   const [planningDebut, setPlanningDebut] = useState(() => today());
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -384,12 +387,16 @@ type Resa = NonNullable<typeof reservations>[number];
     );
   }
 
-  function couleurStatutPlanning(statut: string) {
-    if (statut === "en_cours") return "bg-red-500";
-    if (statut === "reservee") return "bg-orange-400";
-    if (statut === "terminee") return "bg-gray-300";
-    return "bg-gray-200";
-  }
+  const reservationsFiltrees = (reservations ?? []).filter((r) => {
+    const q = recherche.trim().toLowerCase();
+    const matchRecherche =
+      !q ||
+      `${r.clients?.prenom ?? ""} ${r.clients?.nom ?? ""} ${r.chambres?.nom ?? ""}`
+        .toLowerCase()
+        .includes(q);
+    const matchStatut = filtreStatut === "tous" || r.statut === filtreStatut;
+    return matchRecherche && matchStatut;
+  });
 
   return (
     <div>
@@ -682,6 +689,140 @@ type Resa = NonNullable<typeof reservations>[number];
           </CardContent>
         </Card>
       ) : (
+      <>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="relative max-w-xs flex-1">
+          <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher client ou chambre…"
+            value={recherche}
+            onChange={(e) => setRecherche(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        <Select value={filtreStatut} onValueChange={setFiltreStatut}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="tous">Tous les statuts</SelectItem>
+            {Object.entries(STATUTS).map(([k, v]) => (
+              <SelectItem key={k} value={k}>
+                {v}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="ml-auto flex rounded-lg border p-1">
+          <Button
+            variant={sousVueListe === "tableau" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setSousVueListe("tableau")}
+          >
+            <Rows3 className="size-4" />
+          </Button>
+          <Button
+            variant={sousVueListe === "cartes" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setSousVueListe("cartes")}
+          >
+            <LayoutGrid className="size-4" />
+          </Button>
+        </div>
+      </div>
+
+      {sousVueListe === "cartes" ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {reservationsFiltrees.map((r) => {
+            const n = nbNuits(r.date_arrivee, r.date_depart);
+            return (
+              <Card key={r.id} className="overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
+                <CardContent className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-display font-semibold">
+                        {r.clients?.prenom} {r.clients?.nom}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{r.chambres?.nom}</p>
+                    </div>
+                    <Badge variant={r.statut === "annulee" ? "destructive" : "secondary"}>
+                      {STATUTS[r.statut] ?? r.statut}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {formatDate(r.date_arrivee)} → {formatDate(r.date_depart)}
+                    <span className="ml-1">({n} nuit(s))</span>
+                  </div>
+                  <p className="text-sm font-semibold text-primary">
+                    {formatFCFA(n * Number(r.prix_nuit) + n * Number(r.taxe_nuit))}
+                  </p>
+                  <div className="flex flex-wrap gap-2 border-t pt-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditId(r.id);
+                        setEditForm({
+                          client_id: r.client_id,
+                          chambre_id: r.chambre_id,
+                          date_arrivee: r.date_arrivee,
+                          date_depart: r.date_depart,
+                          nb_personnes: String(r.nb_personnes),
+                          prix_nuit: String(r.prix_nuit),
+                          taxe_nuit: String(r.taxe_nuit),
+                          statut: r.statut,
+                          notes: r.notes ?? "",
+                        });
+                      }}
+                    >
+                      Modifier
+                    </Button>
+                    {r.statut === "reservee" ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => changerStatut.mutate({ id: r.id, statut: "en_cours" })}
+                        >
+                          Check-in
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => changerStatut.mutate({ id: r.id, statut: "annulee" })}
+                        >
+                          Annuler
+                        </Button>
+                      </>
+                    ) : null}
+                    {r.statut === "en_cours" ? (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setFacturerResa(r);
+                          setFacturerForm({
+                            avance: "",
+                            buanderie: "",
+                            remiseType: "montant",
+                            remiseValeur: "",
+                          });
+                        }}
+                      >
+                        Check-out & facturer
+                      </Button>
+                    ) : null}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+          {reservationsFiltrees.length === 0 ? (
+            <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
+              Aucune réservation trouvée.
+            </p>
+          ) : null}
+        </div>
+      ) : (
       <Card>
         <CardContent className="overflow-x-auto p-0">
           <Table>
@@ -696,7 +837,7 @@ type Resa = NonNullable<typeof reservations>[number];
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(reservations ?? []).map((r) => {
+              {reservationsFiltrees.map((r) => {
                 const n = nbNuits(r.date_arrivee, r.date_depart);
                 return (
                   <TableRow key={r.id}>
@@ -772,10 +913,10 @@ type Resa = NonNullable<typeof reservations>[number];
                   </TableRow>
                 );
               })}
-              {(reservations ?? []).length === 0 ? (
+             {reservationsFiltrees.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                    Aucune réservation enregistrée.
+                    Aucune réservation trouvée.
                   </TableCell>
                 </TableRow>
               ) : null}
@@ -783,6 +924,8 @@ type Resa = NonNullable<typeof reservations>[number];
           </Table>
         </CardContent>
       </Card>
+      )}
+      </>
       )}
 
       <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
