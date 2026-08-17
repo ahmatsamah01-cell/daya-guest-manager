@@ -112,6 +112,23 @@ const MAX_CORPS_PT = 500;
 export function FactureDocument({ data }: { data: FactureDocumentData }) {
   const innerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let annule = false;
+    if (!data.qrUrl) {
+      setQrDataUrl(null);
+      return;
+    }
+    QRCode.toDataURL(data.qrUrl, { margin: 0, width: 200, errorCorrectionLevel: "M" })
+      .then((url) => {
+        if (!annule) setQrDataUrl(url);
+      })
+      .catch(() => setQrDataUrl(null));
+    return () => {
+      annule = true;
+    };
+  }, [data.qrUrl]);
 
   useLayoutEffect(() => {
     const el = innerRef.current;
