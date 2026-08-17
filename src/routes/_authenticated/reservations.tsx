@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, LayoutGrid, List, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,8 @@ function ReservationsPage() {
   const taxeParNuit = Number(params?.["taxe_sejour_montant"] ?? 1000);
   const prefixeFacture = params?.["prefixe_facture"] ?? "FAC";
 
+  const [vue, setVue] = useState<"planning" | "liste">("planning");
+  const [planningDebut, setPlanningDebut] = useState(() => today());
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     client_id: "",
@@ -323,6 +325,29 @@ type Resa = NonNullable<typeof reservations>[number];
     form.date_arrivee && form.date_depart ? nbNuits(form.date_arrivee, form.date_depart) : 0;
   const totalEstime = nuits * (Number(form.prix_nuit) || 0) + nuits * taxeParNuit;
 
+  const joursPlanning = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(planningDebut);
+    d.setDate(d.getDate() + i);
+    return d.toISOString().slice(0, 10);
+  });
+
+  function reservationPourJour(chambreId: string, jour: string) {
+    return (reservations ?? []).find(
+      (r) =>
+        r.chambre_id === chambreId &&
+        r.statut !== "annulee" &&
+        jour >= r.date_arrivee &&
+        jour < r.date_depart,
+    );
+  }
+
+  function couleurStatutPlanning(statut: string) {
+    if (statut === "en_cours") return "bg-red-500";
+    if (statut === "reservee") return "bg-orange-400";
+    if (statut === "terminee") return "bg-gray-300";
+    return "bg-gray-200";
+  }
+
   return (
     <div>
       <PageHeader
@@ -494,6 +519,112 @@ type Resa = NonNullable<typeof reservations>[number];
         }
       />
 
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex rounded-lg border p-1">
+          <Button
+            variant={vue === "planning" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setVue("planning")}
+          >
+            <LayoutGrid className="size-4" /> Planning
+          </Button>
+          <Button
+            variant={vue === "liste" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setVue("liste")}
+          >
+            <List className="size-4" /> Liste
+          </Button>
+        </div>
+        {vue === "planning" ? (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                const d = new Date(planningDebut);
+                d.setDate(d.getDate() - 7);
+                setPlanningDebut(d.toISOString().slice(0, 10));
+              }}
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            <span className="text-sm font-medium">
+              {formatDate(joursPlanning[0])} → {formatDate(joursPlanning[13])}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                const d = new Date(planningDebut);
+                d.setDate(d.getDate() + 7);
+                setPlanningDebut(d.toISOString().slice(0, 10));
+              }}
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        ) : null}
+      </div>
+
+      {vue === "planning" ? (
+        <Card className="mb-6">
+          <CardContent className="overflow-x-auto p-4">
+            <div className="mb-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded-full bg-red-500" /> En cours
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded-full bg-orange-400" /> Réservée
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded-full bg-gray-300" /> Terminée
+              </span>
+            </div>
+            <div style={{ minWidth: `${140 + joursPlanning.length * 70}px` }}>
+              <div className="grid" style={{ gridTemplateColumns: `140px repeat(${joursPlanning.length}, 70px)` }}>
+                <div className="sticky left-0 bg-card p-2 text-xs font-medium">Chambre</div>
+                {joursPlanning.map((j) => (
+                  <div key={j} className="border-l p-2 text-center text-xs text-muted-foreground">
+                    {new Date(j).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}
+                  </div>
+                ))}
+              </div>
+              {(chambres ?? []).map((c) => (
+                <div
+                  key={c.id}
+                  className="grid border-t"
+                  style={{ gridTemplateColumns: `140px repeat(${joursPlanning.length}, 70px)` }}
+                >
+                  <div className="sticky left-0 bg-card p-2 text-sm font-medium">{c.nom}</div>
+                  {joursPlanning.map((j) => {
+                    const r = reservationPourJour(c.id, j);
+                    return (
+                      <div key={j} className="border-l p-1">
+                        {r ? (
+                          <div
+                            title={`${r.clients?.prenom ?? ""} ${r.clients?.nom ?? ""}`}
+                            className={`flex h-6 items-center justify-center truncate rounded px-1 text-[10px] font-medium text-white ${couleurStatutPlanning(r.statut)}`}
+                          >
+                            {r.clients?.nom ?? ""}
+                          </div>
+                        ) : (
+                          <div className="h-6 rounded bg-green-50 dark:bg-green-950/20" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+              {(chambres ?? []).length === 0 ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  Aucune chambre enregistrée.
+                </p>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
       <Card>
         <CardContent className="overflow-x-auto p-0">
           <Table>
@@ -595,6 +726,9 @@ type Resa = NonNullable<typeof reservations>[number];
           </Table>
         </CardContent>
       </Card>
+      )}
+
+      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
 
       <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
         <DialogContent>
