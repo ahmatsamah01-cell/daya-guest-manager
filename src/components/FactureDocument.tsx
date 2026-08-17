@@ -42,6 +42,8 @@ export type FactureDocumentData = {
     cle: string;
   };
   logoUrl: string;
+  /** URL ouverte au scan du QR code (fiche client du séjour) */
+  qrUrl?: string | undefined;
 };
 
 const UNITES_F = [
