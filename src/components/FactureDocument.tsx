@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import QRCode from "qrcode";
 import "./facture-document.css";
 export type LigneHebergement = {
   periode: string;
