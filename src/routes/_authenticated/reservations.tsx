@@ -728,7 +728,7 @@ type Resa = NonNullable<typeof reservations>[number];
       </Card>
       )}
 
-      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}
+      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
 
         <DialogContent>
           <DialogHeader>
