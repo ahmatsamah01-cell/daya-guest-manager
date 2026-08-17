@@ -141,6 +141,7 @@ export type Database = {
           etablissement_id: string
           id: string
           nom: string
+          photo_url: string | null
           prix_nuit: number
           statut: string
           type: string
@@ -154,6 +155,7 @@ export type Database = {
           etablissement_id: string
           id?: string
           nom: string
+          photo_url?: string | null
           prix_nuit?: number
           statut?: string
           type: string
@@ -167,6 +169,7 @@ export type Database = {
           etablissement_id?: string
           id?: string
           nom?: string
+          photo_url?: string | null
           prix_nuit?: number
           statut?: string
           type?: string
