@@ -251,61 +251,47 @@ function CaissePage() {
       />
 
             <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        {/* Card Entrées */}
-        <Card className="relative overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/5 dark:border-emerald-500/30">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Entrées (Période)
-            </CardTitle>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-              <ArrowDownLeft className="size-5" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="font-display text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
+        <div className="group flex items-center gap-3 rounded-xl border bg-gradient-to-br from-emerald-50 to-emerald-100/50 px-4 py-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-emerald-950/40 dark:to-emerald-900/20">
+          <div className="flex size-11 items-center justify-center rounded-full bg-emerald-500 shadow-[0_0_16px_rgba(16,185,129,0.5)] transition-transform group-hover:scale-110">
+            <ArrowDownLeft className="size-5 text-white" />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Entrées (période)</p>
+            <p className="font-display text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {formatFCFA(entrees)}
-            </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">Recettes encaissées sur la période</p>
-          </CardContent>
-        </Card>
+            </p>
+            <p className="text-[11px] text-muted-foreground">Recettes encaissées</p>
+          </div>
+        </div>
 
-        {/* Card Sorties */}
-        <Card className="relative overflow-hidden border-rose-500/20 bg-gradient-to-br from-rose-500/5 via-transparent to-transparent shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-rose-500/40 hover:shadow-lg hover:shadow-rose-500/5 dark:border-rose-500/30">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Sorties (Période)
-            </CardTitle>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
-              <ArrowUpRight className="size-5" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="font-display text-2xl font-bold tracking-tight text-rose-600 dark:text-rose-400">
+        <div className="group flex items-center gap-3 rounded-xl border bg-gradient-to-br from-rose-50 to-rose-100/50 px-4 py-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-rose-950/40 dark:to-rose-900/20">
+          <div className="flex size-11 items-center justify-center rounded-full bg-rose-500 shadow-[0_0_16px_rgba(244,63,94,0.5)] transition-transform group-hover:scale-110">
+            <ArrowUpRight className="size-5 text-white" />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Sorties (période)</p>
+            <p className="font-display text-2xl font-bold text-rose-600 dark:text-rose-400">
               {formatFCFA(sorties)}
-            </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">Dépenses effectuées sur la période</p>
-          </CardContent>
-        </Card>
+            </p>
+            <p className="text-[11px] text-muted-foreground">Dépenses effectuées</p>
+          </div>
+        </div>
 
-                {/* Card Solde Période */}
-        <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Solde du mois (Entrées - Sorties)
-            </CardTitle>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Wallet className="size-5" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className={`font-display text-2xl font-bold tracking-tight ${soldePeriode >= 0 ? "text-primary" : "text-rose-600"}`}>
+        <div className="group flex items-center gap-3 rounded-xl border bg-gradient-to-br from-red-50 to-red-100/50 px-4 py-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-red-950/40 dark:to-red-900/20">
+          <div className="flex size-11 items-center justify-center rounded-full bg-red-600 shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
+            <Wallet className="size-5 text-white" />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Solde du mois</p>
+            <p
+              className={`font-display text-2xl font-bold ${soldePeriode >= 0 ? "text-red-700 dark:text-red-400" : "text-rose-600"}`}
+            >
               {formatFCFA(soldePeriode)}
-            </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">Bilan net du mois sélectionné</p>
-          </CardContent>
-        </Card>
+            </p>
+            <p className="text-[11px] text-muted-foreground">Entrées − Sorties</p>
+          </div>
+        </div>
       </div>
-
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Button
