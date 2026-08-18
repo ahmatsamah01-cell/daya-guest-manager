@@ -11,7 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { SettingsProvider } from "../context/ThemeContext"; // 👈 1. Importe le SettingsProvider ici
+import { ThemeProvider } from "../context/ThemeContext"; // 👈 On importe ThemeProvider
 
 function NotFoundComponent() {
   return (
@@ -116,9 +116,22 @@ function RootShell({ children }: { children: ReactNode }) {
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                var theme = localStorage.getItem('le-daya-theme');
-                if (theme === 'dark') {
+                var theme = localStorage.getItem('daya_theme');
+                if (theme) {
+                  document.documentElement.classList.add('theme-' + theme);
+                }
+                var mode = localStorage.getItem('daya_mode') || 'dark';
+                if (mode === 'dark' || (mode === 'auto' && new Date().getHours() >= 18)) {
                   document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+                var radius = localStorage.getItem('daya_radius');
+                if (radius) {
+                  var radiusMap = { sm: "0.3rem", lg: "0.75rem", "2xl": "1rem", "3xl": "1.5rem", full: "9999px" };
+                  if (radiusMap[radius]) {
+                    document.documentElement.style.setProperty("--radius", radiusMap[radius]);
+                  }
                 }
               } catch (e) {}
             `,
@@ -138,11 +151,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* 👈 2. Enveloppe le contenu avec SettingsProvider */}
-      <SettingsProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      {/* 👈 Utilisation correcte de ThemeProvider */}
+      <ThemeProvider>
         <Outlet />
-      </SettingsProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
