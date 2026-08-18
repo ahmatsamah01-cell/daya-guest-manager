@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { SettingsProvider } from "../context/ThemeContext"; // 👈 1. Importe le SettingsProvider ici
 
 function NotFoundComponent() {
   return (
@@ -137,8 +138,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      {/* 👈 2. Enveloppe le contenu avec SettingsProvider */}
+      <SettingsProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </SettingsProvider>
     </QueryClientProvider>
   );
 }
