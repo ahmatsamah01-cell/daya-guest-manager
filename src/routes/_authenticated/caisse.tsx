@@ -369,7 +369,7 @@ function CaissePage() {
                       Supprimer
                     </Button>
                   </TableCell>
-                  </TableRow>
+        </TableRow>
               ))}
               {(operations ?? []).length === 0 ? (
                 <TableRow>
