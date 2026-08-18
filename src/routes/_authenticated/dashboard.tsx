@@ -8,10 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users, ArrowDown, ArrowUp,ArrowUpRight,ArrowDownRight} from "lucide-react";
+import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users, ArrowDown, ArrowUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent,} from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Area, AreaChart } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/AppLayout";
@@ -51,12 +51,14 @@ function Stat({
   to?: string;
 }) {
   const contenu = (
-    <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+    <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {titre}
         </CardTitle>
-        <Icon className="size-5 text-primary transition-transform group-hover:scale-110" />
+        <div className="flex size-10 items-center justify-center rounded-full bg-primary shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
+          <Icon className="size-5 text-white" />
+        </div>
       </CardHeader>
 
       <CardContent>
@@ -82,6 +84,7 @@ function Stat({
 
   return contenu;
 }
+
 function StatCard({
   titre,
   valeur,
@@ -99,12 +102,54 @@ function StatCard({
   to?: string;
   variation?: { texte: string; hausse: boolean } | null;
 }) {
+  const stylesParCouleur: Record<
+    string,
+    { cardBg: string; iconBg: string; iconShadow: string }
+  > = {
+    "#166534": {
+      cardBg:
+        "bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20",
+      iconBg: "bg-emerald-700",
+      iconShadow: "shadow-[0_0_16px_rgba(22,101,52,0.5)]",
+    },
+    "#ea580c": {
+      cardBg:
+        "bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-orange-900/20",
+      iconBg: "bg-orange-500",
+      iconShadow: "shadow-[0_0_16px_rgba(234,88,12,0.5)]",
+    },
+    "#9333ea": {
+      cardBg:
+        "bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/40 dark:to-purple-900/20",
+      iconBg: "bg-purple-600",
+      iconShadow: "shadow-[0_0_16px_rgba(147,51,234,0.5)]",
+    },
+    "#2563eb": {
+      cardBg:
+        "bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20",
+      iconBg: "bg-blue-600",
+      iconShadow: "shadow-[0_0_16px_rgba(37,99,235,0.5)]",
+    },
+    "#16a34a": {
+      cardBg:
+        "bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20",
+      iconBg: "bg-emerald-600",
+      iconShadow: "shadow-[0_0_16px_rgba(22,163,74,0.5)]",
+    },
+  };
+
+  const styleTheme = stylesParCouleur[couleur] ?? {
+    cardBg:
+      "bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20",
+    iconBg: "bg-amber-500",
+    iconShadow: "shadow-[0_0_16px_rgba(245,158,11,0.5)]",
+  };
+
   const contenu = (
-    <Card className="h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+    <Card className={`group h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${styleTheme.cardBg}`}>
       <CardContent className="flex h-full items-start gap-3 p-4">
         <div
-          className="flex size-10 shrink-0 items-center justify-center rounded-lg"
-          style={{ backgroundColor: couleur }}
+          className={`flex size-10 shrink-0 items-center justify-center rounded-full ${styleTheme.iconBg} ${styleTheme.iconShadow} transition-transform group-hover:scale-110`}
         >
           <Icon className="size-5 text-white" />
         </div>
