@@ -50,12 +50,10 @@ function CaissePage() {
   const [open, setOpen] = useState(false);
   const [debut, setDebut] = useState(today());
   const [fin, setFin] = useState(today());
-    const [form, setForm] = useState({
-    sens: "entree",
+      const [form, setForm] = useState({
     motif: "",
     montant: "",
     mode_paiement: "especes",
-    reservation_id: "",
   });
 
   const { data: operations } = useQuery({
@@ -129,28 +127,28 @@ function CaissePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-    const ajouter = useMutation({
+     const ajouter = useMutation({
     mutationFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       const { error } = await supabase.from("caisse_operations").insert({
         etablissement_id: etab!.id,
-        sens: form.sens,
+        sens: "sortie",
         motif: form.motif,
         montant: Number(form.montant),
         mode_paiement: form.mode_paiement,
         created_by: u.user?.id ?? null,
-        reservation_id: form.reservation_id ? form.reservation_id : null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries();
       setOpen(false);
-      setForm({ sens: "entree", motif: "", montant: "", mode_paiement: "especes", reservation_id: "" });
-      toast.success("Opération enregistrée.");
+      setForm({ motif: "", montant: "", mode_paiement: "especes" });
+      toast.success("Sortie de caisse enregistrée.");
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   const entrees = (operations ?? [])
     .filter((o) => o.sens === "entree")
@@ -175,54 +173,28 @@ function CaissePage() {
               <DialogHeader>
                 <DialogTitle>Opération de caisse</DialogTitle>
               </DialogHeader>
-              <form
+                            <form
                 className="space-y-4"
                 onSubmit={(e) => {
                   e.preventDefault();
                   ajouter.mutate();
                 }}
               >
-                <div className="space-y-2">
-                  <Label>Sens</Label>
-                  <Select value={form.sens} onValueChange={(v) => setForm({ ...form, sens: v })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="entree">Entrée</SelectItem>
-                      <SelectItem value="sortie">Sortie</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="rounded-lg bg-destructive/10 p-3 text-xs text-destructive font-medium">
+                  Note : Ce formulaire sert uniquement à enregistrer une **Sortie de caisse** (dépense, décaissement). Les entrées sont générées automatiquement lors du check-out des réservations.
                 </div>
-                                <div className="space-y-2">
-                  <Label>Motif</Label>
+                <div className="space-y-2">
+                  <Label>Motif de la sortie</Label>
                   <Input
                     required
+                    placeholder="Ex: Achat fournitures, maintenance..."
                     value={form.motif}
                     onChange={(e) => setForm({ ...form, motif: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Lier à une réservation (Optionnel)</Label>
-                  <Select
-                    value={form.reservation_id}
-                    onValueChange={(v) => setForm({ ...form, reservation_id: v === "none" ? "" : v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner une réservation..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Aucune réservation</SelectItem>
-                      {(reservations ?? []).map((r) => (
-                        <SelectItem key={r.id} value={r.id}>
-                          Réservation #{r.id.slice(0, 8)} ({r.statut ?? "En cours"})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
                   <Label>Montant (FCFA)</Label>
+
 
                   <Input
                     type="number"
