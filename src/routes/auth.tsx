@@ -285,7 +285,7 @@ function AuthPage() {
       />
     )}
   </div>
-</div>
+</div
         className={`
             relative
             flex
