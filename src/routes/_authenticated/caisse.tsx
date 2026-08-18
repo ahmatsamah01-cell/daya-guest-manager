@@ -332,12 +332,15 @@ function CaissePage() {
                   </TableCell>
                   <TableCell>{o.motif}</TableCell>
                   <TableCell>{o.mode_paiement}</TableCell>
-                  <TableCell>
+                                    <TableCell>
                     <Badge variant={o.sens === "entree" ? "secondary" : "destructive"}>
                       {o.sens === "entree" ? "Entrée" : "Sortie"}
                     </Badge>
                   </TableCell>
-                                   <TableCell className="text-right whitespace-nowrap space-x-2">
+                  <TableCell className="text-right whitespace-nowrap">
+                    {formatFCFA(o.montant)}
+                  </TableCell>
+                  <TableCell className="text-right whitespace-nowrap space-x-2">
                     <Button
                       size="sm"
                       variant="outline"
@@ -369,6 +372,7 @@ function CaissePage() {
                       Supprimer
                     </Button>
                   </TableCell>
+
         </TableRow>
               ))}
               {(operations ?? []).length === 0 ? (
