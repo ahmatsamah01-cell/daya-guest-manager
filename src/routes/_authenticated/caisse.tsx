@@ -105,7 +105,7 @@ function CaissePage() {
     date_operation: "",
   });
 
-  const modifier = useMutation({
+    const modifier = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
         .from("caisse_operations")
@@ -123,6 +123,18 @@ function CaissePage() {
       qc.invalidateQueries();
       setEditId(null);
       toast.success("Opération modifiée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const supprimer = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("caisse_operations").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries();
+      toast.success("Opération supprimée avec succès.");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -325,10 +337,7 @@ function CaissePage() {
                       {o.sens === "entree" ? "Entrée" : "Sortie"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right whitespace-nowrap">
-                    {formatFCFA(o.montant)}
-                  </TableCell>
-                  <TableCell className="text-right whitespace-nowrap">
+                                   <TableCell className="text-right whitespace-nowrap space-x-2">
                     <Button
                       size="sm"
                       variant="outline"
@@ -347,8 +356,20 @@ function CaissePage() {
                     >
                       Modifier
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        if (confirm("Êtes-vous sûr de vouloir supprimer cette opération de caisse ?")) {
+                          supprimer.mutate(o.id);
+                        }
+                      }}
+                      disabled={supprimer.isPending}
+                    >
+                      Supprimer
+                    </Button>
                   </TableCell>
-                </TableRow>
+                  </TableRow>
               ))}
               {(operations ?? []).length === 0 ? (
                 <TableRow>
