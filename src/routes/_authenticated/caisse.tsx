@@ -194,7 +194,7 @@ function CaissePage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
+                                <div className="space-y-2">
                   <Label>Motif</Label>
                   <Input
                     required
@@ -203,7 +203,27 @@ function CaissePage() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label>Lier à une réservation (Optionnel)</Label>
+                  <Select
+                    value={form.reservation_id}
+                    onValueChange={(v) => setForm({ ...form, reservation_id: v === "none" ? "" : v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner une réservation..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Aucune réservation</SelectItem>
+                      {(reservations ?? []).map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          Réservation #{r.id.slice(0, 8)} ({r.statut ?? "En cours"})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label>Montant (FCFA)</Label>
+
                   <Input
                     type="number"
                     min="0"
