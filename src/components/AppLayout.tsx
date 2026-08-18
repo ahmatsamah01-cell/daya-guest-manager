@@ -137,11 +137,18 @@ function MeteoWidget() {
   const { Icon, label } = iconMeteo(courant.weathercode);
 
   return (
-    <div className="hidden items-center gap-1.5 rounded-full border bg-card px-3 py-1 text-xs sm:flex">
-      <Icon className="size-4 text-amber-500" />
+    <Link
+      to="/meteo"
+      title="Ouvrir la météo détaillée"
+      aria-label="Ouvrir la météo détaillée"
+      className="group hidden cursor-pointer items-center gap-1.5 rounded-full border bg-card px-3 py-1 text-xs transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:bg-accent hover:text-accent-foreground hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:flex"
+    >
+      <Icon className="size-4 text-amber-500 transition-transform group-hover:scale-110" />
       <span className="font-medium">{Math.round(courant.temperature)}°C</span>
-      <span className="hidden text-muted-foreground md:inline">— {label}, Port-Gentil</span>
-    </div>
+      <span className="hidden text-muted-foreground transition-colors group-hover:text-accent-foreground/80 md:inline">
+        — {label}, Port-Gentil
+      </span>
+    </Link>
   );
 }
 

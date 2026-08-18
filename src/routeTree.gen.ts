@@ -18,6 +18,7 @@ import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDepensesRouteImport } from './routes/_authenticated/depenses'
 import { Route as AuthenticatedFacturesRouteImport } from './routes/_authenticated/factures'
+import { Route as AuthenticatedMeteoRouteImport } from './routes/_authenticated/meteo'
 import { Route as AuthenticatedMonCompteRouteImport } from './routes/_authenticated/mon-compte'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
@@ -70,6 +71,11 @@ const AuthenticatedFacturesRoute = AuthenticatedFacturesRouteImport.update({
   path: '/factures',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMeteoRoute = AuthenticatedMeteoRouteImport.update({
+  id: '/meteo',
+  path: '/meteo',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMonCompteRoute = AuthenticatedMonCompteRouteImport.update({
   id: '/mon-compte',
   path: '/mon-compte',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/depenses': typeof AuthenticatedDepensesRoute
   '/factures': typeof AuthenticatedFacturesRoute
+  '/meteo': typeof AuthenticatedMeteoRoute
   '/mon-compte': typeof AuthenticatedMonCompteRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/depenses': typeof AuthenticatedDepensesRoute
   '/factures': typeof AuthenticatedFacturesRoute
+  '/meteo': typeof AuthenticatedMeteoRoute
   '/mon-compte': typeof AuthenticatedMonCompteRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/depenses': typeof AuthenticatedDepensesRoute
   '/_authenticated/factures': typeof AuthenticatedFacturesRoute
+  '/_authenticated/meteo': typeof AuthenticatedMeteoRoute
   '/_authenticated/mon-compte': typeof AuthenticatedMonCompteRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/depenses'
     | '/factures'
+    | '/meteo'
     | '/mon-compte'
     | '/notifications'
     | '/parametres'
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/depenses'
     | '/factures'
+    | '/meteo'
     | '/mon-compte'
     | '/notifications'
     | '/parametres'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/depenses'
     | '/_authenticated/factures'
+    | '/_authenticated/meteo'
     | '/_authenticated/mon-compte'
     | '/_authenticated/notifications'
     | '/_authenticated/parametres'
@@ -287,6 +299,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFacturesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/meteo': {
+      id: '/_authenticated/meteo'
+      path: '/meteo'
+      fullPath: '/meteo'
+      preLoaderRoute: typeof AuthenticatedMeteoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/mon-compte': {
       id: '/_authenticated/mon-compte'
       path: '/mon-compte'
@@ -346,6 +365,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDepensesRoute: typeof AuthenticatedDepensesRoute
   AuthenticatedFacturesRoute: typeof AuthenticatedFacturesRoute
+  AuthenticatedMeteoRoute: typeof AuthenticatedMeteoRoute
   AuthenticatedMonCompteRoute: typeof AuthenticatedMonCompteRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
@@ -362,6 +382,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDepensesRoute: AuthenticatedDepensesRoute,
   AuthenticatedFacturesRoute: AuthenticatedFacturesRoute,
+  AuthenticatedMeteoRoute: AuthenticatedMeteoRoute,
   AuthenticatedMonCompteRoute: AuthenticatedMonCompteRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
