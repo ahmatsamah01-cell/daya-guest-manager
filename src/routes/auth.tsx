@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react"; // Import des icônes
+import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
 import { BrandLogo } from "@/components/Brand";
 
 export const Route = createFileRoute("/auth")({
@@ -18,13 +18,6 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
 
   async function connexion(e: React.FormEvent) {
     e.preventDefault();
@@ -38,33 +31,27 @@ function AuthPage() {
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-zinc-950 overflow-hidden font-sans">
       
-      {/* Halo Rouge Amélioré */}
-      <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-red-900/10 blur-[120px] rounded-full animate-pulse-slow" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-zinc-900 blur-[100px] rounded-full" />
+      {/* Halo de fond principal */}
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,_rgba(63,63,70,0.1)_0%,_rgba(0,0,0,0)_100%)]" />
 
-      {/* Curseur Suiveur */}
-      <div className="fixed z-50 pointer-events-none w-6 h-6 rounded-full bg-red-500/10 blur-md transition-all duration-100" style={{ left: mousePos.x - 12, top: mousePos.y - 12 }} />
-
-      {/* Badge Système */}
-      <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1 bg-zinc-900/80 border border-white/10 rounded-full text-[10px] uppercase tracking-widest text-emerald-500">
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        Système Opérationnel
-      </div>
-
-      <div className="relative z-10 w-full max-w-sm animate-fade-in-up">
+      {/* --- CŒUR DE LA CARTE --- */}
+      <div className="relative z-10 w-full max-w-sm">
         
+        {/* Glow puissant derrière la carte pour détacher la bordure */}
+        <div className="absolute -inset-4 bg-red-600/10 blur-[80px] rounded-[3rem] z-0" />
+
         {/* Logo */}
-        <div className="mb-10 flex justify-center">
-          <div className="p-6 bg-zinc-900/30 backdrop-blur-md border border-white/5 rounded-3xl shadow-2xl">
+        <div className="relative z-10 mb-10 flex justify-center">
+          <div className="p-6 bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl shadow-2xl">
             <BrandLogo className="h-20" />
           </div>
         </div>
 
         {/* Carte de Connexion */}
-        <div className="p-8 bg-zinc-900/40 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)]">
+        <div className="relative z-10 p-8 bg-zinc-900/40 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.3)]">
           <div className="mb-8 text-center">
             <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Accès Manager</h2>
-            <p className="text-zinc-400 text-sm mt-1">Identifiez-vous pour accéder au tableau de bord</p>
+            <p className="text-zinc-400 text-sm mt-1">Authentification sécurisée</p>
           </div>
 
           <form onSubmit={connexion} className="space-y-5">
@@ -108,17 +95,13 @@ function AuthPage() {
             </Button>
           </form>
 
-          <div className="mt-6 flex justify-between items-center text-xs">
+          <div className="mt-6 flex justify-center items-center text-xs">
             <button className="text-zinc-500 hover:text-white transition-colors">Mot de passe oublié ?</button>
-            <ShieldCheck className="text-zinc-700" size={16} />
           </div>
         </div>
       </div>
 
       <style>{`
-        @keyframes pulse-slow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-        .animate-pulse-slow { animation: pulse-slow 8s ease-in-out infinite; }
-        
         @keyframes fade-in-up {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
