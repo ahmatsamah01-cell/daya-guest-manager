@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, ArrowDownLeft, ArrowUpRight, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -232,29 +232,58 @@ function CaissePage() {
         }
       />
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Entrées (période)</CardTitle>
+            <div className="mb-6 grid gap-4 sm:grid-cols-3">
+        {/* Card Entrées */}
+        <Card className="relative overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/5 dark:border-emerald-500/30">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Entrées (Période)
+            </CardTitle>
+            <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+              <ArrowDownLeft className="size-5" />
+            </div>
           </CardHeader>
-          <CardContent className="font-display text-2xl font-semibold text-success">
-            {formatFCFA(entrees)}
+          <CardContent>
+            <div className="font-display text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
+              {formatFCFA(entrees)}
+            </div>
+            <p className="mt-1 text-[11px] text-muted-foreground">Recettes encaissées sur la période</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Sorties (période)</CardTitle>
+
+        {/* Card Sorties */}
+        <Card className="relative overflow-hidden border-rose-500/20 bg-gradient-to-br from-rose-500/5 via-transparent to-transparent shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-rose-500/40 hover:shadow-lg hover:shadow-rose-500/5 dark:border-rose-500/30">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Sorties (Période)
+            </CardTitle>
+            <div className="flex size-9 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
+              <ArrowUpRight className="size-5" />
+            </div>
           </CardHeader>
-          <CardContent className="font-display text-2xl font-semibold text-destructive">
-            {formatFCFA(sorties)}
+          <CardContent>
+            <div className="font-display text-2xl font-bold tracking-tight text-rose-600 dark:text-rose-400">
+              {formatFCFA(sorties)}
+            </div>
+            <p className="mt-1 text-[11px] text-muted-foreground">Dépenses effectuées sur la période</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Solde de caisse global</CardTitle>
+
+        {/* Card Solde Global */}
+        <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Solde Global
+            </CardTitle>
+            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Wallet className="size-5" />
+            </div>
           </CardHeader>
-          <CardContent className="font-display text-2xl font-semibold">
-            {formatFCFA(soldeGlobal ?? 0)}
+          <CardContent>
+            <div className="font-display text-2xl font-bold tracking-tight text-foreground">
+              {formatFCFA(soldeGlobal ?? 0)}
+            </div>
+            <p className="mt-1 text-[11px] text-muted-foreground">Disponible au coffre/caisse</p>
           </CardContent>
         </Card>
       </div>
