@@ -171,7 +171,7 @@ function CaissePage() {
   const sorties = (operations ?? [])
     .filter((o) => o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
-  
+
   // Solde calculé spécifiquement sur le mois sélectionné (Entrées - Sorties)
   const soldePeriode = entrees - sorties;
 
@@ -344,7 +344,7 @@ function CaissePage() {
       </div>
 
       {vue === "table" ? (
-        <Card>
+        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-950/40 dark:to-slate-900/20">
           <CardContent className="overflow-x-auto p-0">
             <Table>
               <TableHeader>
@@ -421,7 +421,7 @@ function CaissePage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredOperations.map((o) => (
-            <Card key={o.id} className="relative overflow-hidden transition-all duration-300 hover:shadow-md">
+            <Card key={o.id} className="group relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-violet-50 to-violet-100/50 dark:from-violet-950/40 dark:to-violet-900/20">
               <CardContent className="p-5 space-y-3">
                 <div className="flex items-center justify-between">
                   <Badge variant={o.sens === "entree" ? "secondary" : "destructive"}>
