@@ -29,58 +29,62 @@ function AuthPage() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-zinc-950 overflow-hidden font-sans">
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-slate-50 overflow-hidden font-sans">
       
-      {/* Halo de fond principal */}
-      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,_rgba(63,63,70,0.1)_0%,_rgba(0,0,0,0)_100%)]" />
+      {/* Halo lumineux en arrière-plan */}
+      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-red-100/50 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-50/50 blur-[100px] rounded-full" />
 
-      {/* --- CŒUR DE LA CARTE --- */}
-      <div className="relative z-10 w-full max-w-sm">
+      {/* Badge Système (Restauré) */}
+      <div className="absolute top-6 right-6 flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur border border-slate-200 rounded-full text-[10px] uppercase tracking-widest text-emerald-600 shadow-sm">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        Système Opérationnel
+      </div>
+
+      <div className="relative z-10 w-full max-w-sm px-4">
         
-        {/* Glow puissant derrière la carte pour détacher la bordure */}
-        <div className="absolute -inset-4 bg-red-600/10 blur-[80px] rounded-[3rem] z-0" />
-
         {/* Logo */}
-        <div className="relative z-10 mb-10 flex justify-center">
-          <div className="p-6 bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-3xl shadow-2xl">
+        <div className="mb-10 flex justify-center">
+          <div className="p-6 bg-white/50 backdrop-blur-md border border-white/50 rounded-3xl shadow-xl">
             <BrandLogo className="h-20" />
           </div>
         </div>
 
-        {/* Carte de Connexion */}
-        <div className="relative z-10 p-8 bg-zinc-900/40 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.3)]">
+        {/* Carte de Connexion Interactive */}
+        <div className="group relative p-8 bg-white/80 backdrop-blur-xl border border-slate-200 rounded-3xl transition-all duration-500 hover:border-red-200 hover:shadow-[0_25px_50px_-12px_rgba(220,38,38,0.15)] shadow-[0_10px_30px_-5px_rgba(0,0,0,0.05)]">
+          
           <div className="mb-8 text-center">
-            <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Accès Manager</h2>
-            <p className="text-zinc-400 text-sm mt-1">Authentification sécurisée</p>
+            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Accès Manager</h2>
+            <p className="text-slate-500 text-sm mt-1">Authentification sécurisée</p>
           </div>
 
           <form onSubmit={connexion} className="space-y-5">
             <div className="relative group">
-              <Mail className="absolute left-3 top-3 w-5 h-5 text-zinc-500 group-focus-within:text-red-500 transition-colors" />
+              <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-400 group-focus-within:text-red-500 transition-colors" />
               <Input 
                 type="email" 
                 placeholder="Adresse e-mail" 
                 required 
-                className="pl-10 bg-black/50 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-red-500 focus:ring-red-500/20"
+                className="pl-10 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
             <div className="relative group">
-              <Lock className="absolute left-3 top-3 w-5 h-5 text-zinc-500 group-focus-within:text-red-500 transition-colors" />
+              <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-400 group-focus-within:text-red-500 transition-colors" />
               <Input 
                 type={showPassword ? "text" : "password"} 
                 placeholder="Mot de passe" 
                 required 
-                className="pl-10 pr-10 bg-black/50 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-red-500 focus:ring-red-500/20"
+                className="pl-10 pr-10 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500/20"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               <button 
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-zinc-500 hover:text-white transition-colors"
+                className="absolute right-3 top-3 text-slate-400 hover:text-slate-700 transition-colors"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -89,14 +93,15 @@ function AuthPage() {
             <Button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-bold h-12 rounded-xl transition-all shadow-[0_4px_15px_rgba(220,38,38,0.3)] active:scale-[0.98]"
+              className="w-full bg-slate-900 hover:bg-red-600 text-white font-bold h-12 rounded-xl transition-all shadow-lg active:scale-[0.98]"
             >
               {loading ? "Authentification..." : "SE CONNECTER"}
             </Button>
           </form>
 
-          <div className="mt-6 flex justify-center items-center text-xs">
-            <button className="text-zinc-500 hover:text-white transition-colors">Mot de passe oublié ?</button>
+          <div className="mt-6 flex justify-center items-center text-xs text-slate-400 gap-2">
+            <ShieldCheck size={14} />
+            <span>Chiffrement AES-256 actif</span>
           </div>
         </div>
       </div>
