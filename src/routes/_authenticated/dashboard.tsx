@@ -589,11 +589,11 @@ const activiteRecente = [...data.reservations]
         <div className="animate-float-slow absolute bottom-0 left-1/3 size-80 rounded-full bg-red-200/20 blur-3xl" />
       </div>
 
-      <div className="animate-fade-in-up mb-6 overflow-hidden rounded-xl border bg-card/90 shadow-sm backdrop-blur-sm">
-  <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
+      <Card className="animate-fade-in-up mb-6 overflow-hidden border-none bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20 shadow-md backdrop-blur-sm" style={{ animationDelay: "0ms" }}>
+  <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
     <div className="flex items-center gap-4">
-      <div className="rounded-lg bg-white p-2">
-        <BrandLogo className="max-h-16 sm:max-h-20" />
+      <div className="flex size-12 items-center justify-center rounded-full bg-primary shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
+        <BrandLogo className="max-h-8 text-white" />
       </div>
       <div className="min-w-0">
         <p className="text-sm text-muted-foreground">Bienvenue,</p>
@@ -612,7 +612,7 @@ const activiteRecente = [...data.reservations]
   />
 </div>
  </div>
-  </div>
+  </Card>
 
       <div className="mb-4 flex justify-end">
         <Select value={periode} onValueChange={setPeriode}>
@@ -679,7 +679,7 @@ const activiteRecente = [...data.reservations]
     variation={varEnCours}
   />
 </div>
-<Card className="animate-fade-in-up mt-6 overflow-hidden border-none bg-gradient-to-br from-card via-card to-primary/5 shadow-md" style={{ animationDelay: "160ms" }}>
+<Card className="animate-fade-in-up group mt-6 overflow-hidden border-none bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20 shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ animationDelay: "160ms" }}>
   <CardHeader className="flex flex-row items-center justify-between">
     <CardTitle className="text-base">Évolution du chiffre d'affaires</CardTitle>
     <Select value={evolutionVue} onValueChange={(v) => setEvolutionVue(v as "mois" | "annee")}>
@@ -732,7 +732,7 @@ const activiteRecente = [...data.reservations]
     ) : null}
   </CardContent>
 </Card>
-<Card className="animate-fade-in-up relative z-10 mt-6 overflow-hidden border-none bg-card shadow-md" style={{ animationDelay: "240ms" }}>
+<Card className="animate-fade-in-up group relative z-10 mt-6 overflow-hidden border-none bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20 shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ animationDelay: "240ms" }}>
   <CardHeader className="flex flex-row items-center justify-between">
     <CardTitle className="text-base">Nuits vendues</CardTitle>
     <Select value={rapportPeriode}
@@ -813,9 +813,12 @@ const activiteRecente = [...data.reservations]
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-       <Card className="lg:col-span-1">
-  <CardHeader>
+       <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20">
+  <CardHeader className="flex flex-row items-center justify-between">
     <CardTitle className="text-base">État des chambres</CardTitle>
+    <div className="flex size-10 items-center justify-center rounded-full bg-primary shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
+      <BedDouble className="size-5 text-white" />
+    </div>
   </CardHeader>
   <CardContent>
     <div className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
@@ -886,9 +889,12 @@ const activiteRecente = [...data.reservations]
   </CardContent>
 </Card>
 
-       <Card>
-  <CardHeader>
+       <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-orange-900/20">
+  <CardHeader className="flex flex-row items-center justify-between">
     <CardTitle className="text-base">Arrivées du jour</CardTitle>
+    <div className="flex size-10 items-center justify-center rounded-full bg-orange-500 shadow-[0_0_16px_rgba(234,88,12,0.5)] transition-transform group-hover:scale-110">
+      <ArrowDown className="size-5 text-white" />
+    </div>
   </CardHeader>
   <CardContent>
     {arrivees.length === 0 ? (
@@ -928,9 +934,12 @@ const activiteRecente = [...data.reservations]
   </CardContent>
 </Card>
 
-<Card>
-  <CardHeader>
+<Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/40 dark:to-purple-900/20">
+  <CardHeader className="flex flex-row items-center justify-between">
     <CardTitle className="text-base">Départs du jour</CardTitle>
+    <div className="flex size-10 items-center justify-center rounded-full bg-purple-600 shadow-[0_0_16px_rgba(147,51,234,0.5)] transition-transform group-hover:scale-110">
+      <ArrowUp className="size-5 text-white" />
+    </div>
   </CardHeader>
   <CardContent>
     {departs.length === 0 ? (
@@ -972,10 +981,12 @@ const activiteRecente = [...data.reservations]
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-       <Card>
+       <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/40 dark:to-red-900/20">
   <CardHeader className="flex flex-row items-center justify-between">
     <CardTitle className="text-base">Alertes</CardTitle>
-    <Badge variant="destructive">{alertes.length}</Badge>
+    <div className="flex size-10 items-center justify-center rounded-full bg-red-600 shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
+      <Badge variant="destructive" className="text-white">{alertes.length}</Badge>
+    </div>
   </CardHeader>
   <CardContent className="space-y-3">
     {alertes.length === 0 ? (
@@ -997,9 +1008,12 @@ const activiteRecente = [...data.reservations]
   </CardContent>
 </Card>
 
-        <Card>
-  <CardHeader>
+        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20">
+  <CardHeader className="flex flex-row items-center justify-between">
     <CardTitle className="text-base">Activité récente</CardTitle>
+    <div className="flex size-10 items-center justify-center rounded-full bg-blue-600 shadow-[0_0_16px_rgba(37,99,235,0.5)] transition-transform group-hover:scale-110">
+      <Users className="size-5 text-white" />
+    </div>
   </CardHeader>
   <CardContent className="space-y-3">
     {activiteRecente.length === 0 ? (
@@ -1022,9 +1036,12 @@ const activiteRecente = [...data.reservations]
     </Link>
   </CardContent>
 </Card>
-        <Card>
-          <CardHeader>
+        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/40 dark:to-green-900/20">
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Actions rapides</CardTitle>
+            <div className="flex size-10 items-center justify-center rounded-full bg-green-600 shadow-[0_0_16px_rgba(22,163,74,0.5)] transition-transform group-hover:scale-110">
+              <CalendarCheck className="size-5 text-white" />
+            </div>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-2">
             <Link
