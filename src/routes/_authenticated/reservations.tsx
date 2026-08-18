@@ -671,7 +671,7 @@ type Resa = NonNullable<typeof reservations>[number];
       </div>
 
       {vue === "planning" ? (
-        <Card className="mb-6">
+        <Card className="group mb-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20">
           <CardContent className="overflow-x-auto p-4">
             <div className="mb-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
@@ -775,7 +775,7 @@ type Resa = NonNullable<typeof reservations>[number];
           {reservationsFiltrees.map((r) => {
             const n = nbNuits(r.date_arrivee, r.date_depart);
             return (
-              <Card key={r.id} className="overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
+              <Card key={r.id} className="group overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20">
                 <CardContent className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -874,7 +874,7 @@ type Resa = NonNullable<typeof reservations>[number];
           ) : null}
         </div>
       ) : (
-      <Card>
+      <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20">
         <CardContent className="overflow-x-auto p-0">
           <Table>
             <TableHeader>
