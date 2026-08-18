@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, LayoutGrid, List, ChevronLeft, ChevronRight, Search, Rows3 } from "lucide-react";
+import { Plus, LayoutGrid, List, ChevronLeft, ChevronRight, Search, Rows3, CalendarPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -213,6 +213,38 @@ const [facturerResa, setFacturerResa] = useState<Resa | null>(null);
       qc.invalidateQueries();
       setEditId(null);
       toast.success("Réservation modifiée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+const [prolongerResa, setProlongerResa] = useState<Resa | null>(null);
+  const [nouvelleDatePeriode, setNouvelleDatePeriode] = useState("");
+
+  const prolonger = useMutation({
+    mutationFn: async () => {
+      if (!prolongerResa) return;
+      const conflit = detecterConflit(
+        prolongerResa.chambre_id,
+        prolongerResa.date_arrivee,
+        nouvelleDatePeriode,
+        prolongerResa.id,
+      );
+      if (conflit) {
+        throw new Error(
+          `Impossible : chambre déjà réservée à partir du ${formatDate(conflit.date_arrivee)}.`,
+        );
+      }
+      const { error } = await supabase
+        .from("reservations")
+        .update({ date_depart: nouvelleDatePeriode })
+        .eq("id", prolongerResa.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["reservations"] });
+      setProlongerResa(null);
+      setNouvelleDatePeriode("");
+      toast.success("Séjour prolongé.");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -803,20 +835,32 @@ type Resa = NonNullable<typeof reservations>[number];
                       </>
                     ) : null}
                     {r.statut === "en_cours" ? (
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setFacturerResa(r);
-                          setFacturerForm({
-                            avance: "",
-                            buanderie: "",
-                            remiseType: "montant",
-                            remiseValeur: "",
-                          });
-                        }}
-                      >
-                        Check-out & facturer
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setProlongerResa(r);
+                            setNouvelleDatePeriode(r.date_depart);
+                          }}
+                        >
+                          <CalendarPlus className="size-3.5" /> Prolonger
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setFacturerResa(r);
+                            setFacturerForm({
+                              avance: "",
+                              buanderie: "",
+                              remiseType: "montant",
+                              remiseValeur: "",
+                            });
+                          }}
+                        >
+                          Check-out & facturer
+                        </Button>
+                      </>
                     ) : null}
                   </div>
                 </CardContent>
@@ -906,15 +950,27 @@ type Resa = NonNullable<typeof reservations>[number];
                         </>
                       ) : null}
                       {r.statut === "en_cours" ? (
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            setFacturerResa(r);
-                            setFacturerForm({ avance: "", buanderie: "", remiseType: "montant", remiseValeur: "" });
-                          }}
-                        >
-                          Check-out & facturer
-                        </Button>
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setProlongerResa(r);
+                              setNouvelleDatePeriode(r.date_depart);
+                            }}
+                          >
+                            <CalendarPlus className="size-3.5" /> Prolonger
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setFacturerResa(r);
+                              setFacturerForm({ avance: "", buanderie: "", remiseType: "montant", remiseValeur: "" });
+                            }}
+                          >
+                            Check-out & facturer
+                          </Button>
+                        </>
                       ) : null}
                     </TableCell>
                   </TableRow>
@@ -1148,6 +1204,47 @@ type Resa = NonNullable<typeof reservations>[number];
             <DialogFooter>
               <Button type="submit" disabled={cloturer.isPending}>
                 Clôturer et générer la facture
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!prolongerResa} onOpenChange={(o) => !o && setProlongerResa(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Prolonger le séjour</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              prolonger.mutate();
+            }}
+          >
+            <p className="text-sm text-muted-foreground">
+              {prolongerResa?.clients?.prenom} {prolongerResa?.clients?.nom} —{" "}
+              {prolongerResa?.chambres?.nom}
+            </p>
+            <div className="space-y-2">
+              <Label>Date de départ actuelle</Label>
+              <p className="text-sm font-medium">
+                {prolongerResa ? formatDate(prolongerResa.date_depart) : ""}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Nouvelle date de départ</Label>
+              <Input
+                type="date"
+                required
+                min={prolongerResa?.date_depart}
+                value={nouvelleDatePeriode}
+                onChange={(e) => setNouvelleDatePeriode(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={prolonger.isPending}>
+                Prolonger le séjour
               </Button>
             </DialogFooter>
           </form>
