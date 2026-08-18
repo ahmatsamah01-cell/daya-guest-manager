@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BedDouble, CalendarCheck, Wallet, TrendingDown, Landmark, Users, ArrowDown, ArrowUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { BedDouble, CalendarCheck, Wallet, TrendingDown, Users, ArrowDown, ArrowUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -36,54 +36,6 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   }),
   component: Dashboard,
 });
-
-function Stat({
-  titre,
-  valeur,
-  detail,
-  icon: Icon,
-  to,
-}: {
-  titre: string;
-  valeur: string;
-  detail?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  to?: string;
-}) {
-  const contenu = (
-    <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {titre}
-        </CardTitle>
-        <div className="flex size-10 items-center justify-center rounded-full bg-primary shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
-          <Icon className="size-5 text-white" />
-        </div>
-      </CardHeader>
-
-      <CardContent>
-        <p className="font-display text-2xl font-semibold">{valeur}</p>
-
-        {detail ? (
-          <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
-        ) : null}
-      </CardContent>
-    </Card>
-  );
-
-  if (to) {
-    return (
-      <Link
-        to={to}
-        className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary"
-      >
-        {contenu}
-      </Link>
-    );
-  }
-
-  return contenu;
-}
 
 function StatCard({
   titre,
@@ -215,6 +167,7 @@ function Dashboard() {
         : periode === "annee"
           ? `${jour.slice(0, 4)}-01-01`
           : jour;
+
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard", jour, dateDebut],
     refetchOnMount: "always",
@@ -245,7 +198,7 @@ function Dashboard() {
     },
   });
 
-const { data: caMoisDernierData } = useQuery({
+  const { data: caMoisDernierData } = useQuery({
     queryKey: ["ca-mois-dernier", jour],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -259,7 +212,7 @@ const { data: caMoisDernierData } = useQuery({
     },
   });
 
-const { data: evolutionData } = useQuery({
+  const { data: evolutionData } = useQuery({
     queryKey: ["evolution-ca", evolutionVue, jour],
     queryFn: async () => {
       const depuis =
@@ -277,6 +230,7 @@ const { data: evolutionData } = useQuery({
       return data ?? [];
     },
   });
+
   if (isLoading || !data) {
     return <p className="text-sm text-muted-foreground">Chargement…</p>;
   }
@@ -286,200 +240,143 @@ const { data: evolutionData } = useQuery({
   );
   const occupees = new Set(enCours.map((r) => r.chambre_id));
   const arrivees = data.reservations.filter(
-  (r) => r.date_arrivee >= dateDebut && r.date_arrivee <= jour,
-);
-const departs = data.reservations.filter(
-  (r) => r.date_depart >= dateDebut && r.date_depart <= jour,
-);
+    (r) => r.date_arrivee >= dateDebut && r.date_arrivee <= jour,
+  );
+  const departs = data.reservations.filter(
+    (r) => r.date_depart >= dateDebut && r.date_depart <= jour,
+  );
 
-const totalChambres = data.chambres.length;
+  const totalChambres = data.chambres.length;
 
-const nuitsDisponibles =
-  totalChambres *
-  (Math.floor(
-    (new Date(jour).getTime() - new Date(dateDebut).getTime()) /
-      (1000 * 60 * 60 * 24),
-  ) + 1);
-
-const nuitsOccupees = data.reservations.reduce((total, r) => {
-  const debutReservation = new Date(r.date_arrivee);
-  const finReservation = new Date(r.date_depart);
-  const debutPeriode = new Date(dateDebut);
-  const finPeriode = new Date(new Date(jour).getTime() + 24 * 60 * 60 * 1000);
-
-  const debutEffectif =
-    debutReservation > debutPeriode ? debutReservation : debutPeriode;
-
-  const finEffectif =
-    finReservation < finPeriode ? finReservation : finPeriode;
-
-  const nuits = Math.max(
-    0,
-    Math.floor(
-      (finEffectif.getTime() - debutEffectif.getTime()) /
+  const nuitsDisponibles =
+    totalChambres *
+    (Math.floor(
+      (new Date(jour).getTime() - new Date(dateDebut).getTime()) /
         (1000 * 60 * 60 * 24),
-    ),
+    ) + 1);
+
+  const nuitsOccupees = data.reservations.reduce((total, r) => {
+    const debutReservation = new Date(r.date_arrivee);
+    const finReservation = new Date(r.date_depart);
+    const debutPeriode = new Date(dateDebut);
+    const finPeriode = new Date(new Date(jour).getTime() + 24 * 60 * 60 * 1000);
+
+    const debutEffectif =
+      debutReservation > debutPeriode ? debutReservation : debutPeriode;
+
+    const finEffectif =
+      finReservation < finPeriode ? finReservation : finPeriode;
+
+    const nuits = Math.max(
+      0,
+      Math.floor(
+        (finEffectif.getTime() - debutEffectif.getTime()) /
+          (1000 * 60 * 60 * 24),
+      ),
+    );
+
+    return total + nuits;
+  }, 0);
+
+  const hier = new Date(new Date(jour).getTime() - 86400000).toISOString().slice(0, 10);
+
+  const occupeesHier = new Set(
+    data.reservations
+      .filter((r) => r.date_arrivee <= hier && r.date_depart > hier)
+      .map((r) => r.chambre_id),
+  );
+  const arriveesHier = data.reservations.filter((r) => r.date_arrivee === hier).length;
+  const departsHier = data.reservations.filter((r) => r.date_depart === hier).length;
+  const enCoursHier = occupeesHier.size;
+
+  const debutMoisActuel = `${jour.slice(0, 7)}-01`;
+  const caMoisActuel = data.operations
+    .filter((o) => o.sens === "entree" && o.date_operation.slice(0, 10) >= debutMoisActuel)
+    .reduce((s, o) => s + Number(o.montant), 0);
+
+  const caMoisDernier = (caMoisDernierData ?? []).reduce((s, o) => s + Number(o.montant), 0);
+
+  function variation(actuel: number, precedent: number): { texte: string; hausse: boolean } | null {
+    if (precedent === 0 && actuel === 0) return null;
+    if (precedent === 0) return { texte: "Nouveau", hausse: true };
+    const pct = Math.round(((actuel - precedent) / precedent) * 100);
+    return { texte: `${pct >= 0 ? "+" : ""}${pct}%`, hausse: pct >= 0 };
+  }
+
+  const varOccupation = periode === "jour" ? variation(occupees.size, occupeesHier.size) : null;
+  const varArrivees = periode === "jour" ? variation(arrivees.length, arriveesHier) : null;
+  const varDeparts = periode === "jour" ? variation(departs.length, departsHier) : null;
+  const varCA = variation(caMoisActuel, caMoisDernier);
+  const varEnCours = periode === "jour" ? variation(enCours.length, enCoursHier) : null;
+
+  const maintenant = new Date(jour);
+  let rapportDebut: Date;
+  let rapportFin: Date;
+  let rapportLabel: string;
+
+  if (rapportPeriode === "mois_actuel") {
+    rapportDebut = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
+    rapportFin = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 1);
+    rapportLabel = maintenant.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  } else if (rapportPeriode === "mois_dernier") {
+    rapportDebut = new Date(maintenant.getFullYear(), maintenant.getMonth() - 1, 1);
+    rapportFin = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
+    rapportLabel = rapportDebut.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  } else if (rapportPeriode === "annee_actuelle") {
+    rapportDebut = new Date(maintenant.getFullYear(), 0, 1);
+    rapportFin = new Date(maintenant.getFullYear() + 1, 0, 1);
+    rapportLabel = String(maintenant.getFullYear());
+  } else {
+    rapportDebut = new Date(maintenant.getFullYear() - 1, 0, 1);
+    rapportFin = new Date(maintenant.getFullYear(), 0, 1);
+    rapportLabel = String(maintenant.getFullYear() - 1);
+  }
+
+  const nuitsVenduesPeriode = data.reservations.reduce((total, r) => {
+    const debutR = new Date(r.date_arrivee);
+    const finR = new Date(r.date_depart);
+    const debutEff = debutR > rapportDebut ? debutR : rapportDebut;
+    const finEff = finR < rapportFin ? finR : rapportFin;
+    const nuits = Math.max(
+      0,
+      Math.round((finEff.getTime() - debutEff.getTime()) / (1000 * 60 * 60 * 24)),
+    );
+    return total + nuits;
+  }, 0);
+
+  const joursDansRapport = Math.max(
+    1,
+    Math.round((rapportFin.getTime() - rapportDebut.getTime()) / 86400000),
   );
 
-  return total + nuits;
-}, 0);
+  const nuitsDisponiblesRapport = totalChambres * joursDansRapport;
+  const tauxOccupationRapport =
+    nuitsDisponiblesRapport > 0
+      ? Math.round((nuitsVenduesPeriode / nuitsDisponiblesRapport) * 100)
+      : 0;
 
-const tauxOccupation =
-  nuitsDisponibles > 0
-    ? Math.round((nuitsOccupees / nuitsDisponibles) * 100)
-    : 0;
+  const reservees = data.chambres.filter(
+    (c) => !occupees.has(c.id) && data.reservations.some((r) => r.chambre_id === c.id && r.statut === "reservee"),
+  ).length;
 
-  const entrees = data.operations
-    .filter((o) => o.sens === "entree")
-    .reduce((s, o) => s + Number(o.montant), 0);
-  const sorties = data.operations
-    .filter((o) => o.sens === "sortie")
-    .reduce((s, o) => s + Number(o.montant), 0);
-  const soldeNet = entrees - sorties;
-  const graphiqueFinancier = data.operations.reduce(
-  (acc, o) => {
-    const date = o.date_operation.slice(0, 10);
-    const montant = Number(o.montant);
+  const groupesCA: Record<string, number> = {};
+  (evolutionData ?? []).forEach((o) => {
+    const d = o.date_operation.slice(0, 10);
+    const cle = evolutionVue === "mois" ? d.slice(0, 7) : d.slice(0, 4);
+    groupesCA[cle] = (groupesCA[cle] ?? 0) + Number(o.montant);
+  });
 
-    if (!acc[date]) {
-      acc[date] = { date, recettes: 0, sorties: 0 };
-    }
+  const evolutionCA = Object.entries(groupesCA)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([cle, montant]) => ({
+      label:
+        evolutionVue === "mois"
+          ? new Date(`${cle}-01`).toLocaleDateString("fr-FR", { month: "short", year: "2-digit" })
+          : cle,
+      montant,
+    }));
 
-    if (o.sens === "entree") {
-      acc[date].recettes += montant;
-    } else {
-      acc[date].sorties += montant;
-    }
-
-    return acc;
-  },
-  {} as Record<string, { date: string; recettes: number; sorties: number }>,
-);
-  const donneesGraphique = Object.values(graphiqueFinancier).sort(
-  (a, b) => a.date.localeCompare(b.date),
-);
-const chartConfig = {
-  recettes: {
-    label: "Recettes",
-    color: "hsl(var(--primary))",
-  },
-  sorties: {
-    label: "Sorties",
-    color: "hsl(var(--destructive))",
-  },
-};
-const hier = new Date(new Date(jour).getTime() - 86400000).toISOString().slice(0, 10);
-
-const occupeesHier = new Set(
-  data.reservations
-    .filter((r) => r.date_arrivee <= hier && r.date_depart > hier)
-    .map((r) => r.chambre_id),
-);
-const arriveesHier = data.reservations.filter((r) => r.date_arrivee === hier).length;
-const departsHier = data.reservations.filter((r) => r.date_depart === hier).length;
-const enCoursHier = occupeesHier.size;
-
-const debutMoisActuel = `${jour.slice(0, 7)}-01`;
-const debutMoisDernier = new Date(new Date(jour).getFullYear(), new Date(jour).getMonth() - 1, 1)
-  .toISOString()
-  .slice(0, 10);
-const finMoisDernier = new Date(new Date(jour).getFullYear(), new Date(jour).getMonth(), 0)
-  .toISOString()
-  .slice(0, 10);
-
-const caMoisActuel = data.operations
-  .filter((o) => o.sens === "entree" && o.date_operation.slice(0, 10) >= debutMoisActuel)
-  .reduce((s, o) => s + Number(o.montant), 0);
-
-const caMoisDernier = (caMoisDernierData ?? []).reduce((s, o) => s + Number(o.montant), 0);
-
-function variation(actuel: number, precedent: number): { texte: string; hausse: boolean } | null {
-  if (precedent === 0 && actuel === 0) return null;
-  if (precedent === 0) return { texte: "Nouveau", hausse: true };
-  const pct = Math.round(((actuel - precedent) / precedent) * 100);
-  return { texte: `${pct >= 0 ? "+" : ""}${pct}%`, hausse: pct >= 0 };
-}
-
-const varOccupation = periode === "jour" ? variation(occupees.size, occupeesHier.size) : null;
-const varArrivees = periode === "jour" ? variation(arrivees.length, arriveesHier) : null;
-const varDeparts = periode === "jour" ? variation(departs.length, departsHier) : null;
-const varCA = variation(caMoisActuel, caMoisDernier);
-const varEnCours = periode === "jour" ? variation(enCours.length, enCoursHier) : null;
-const maintenant = new Date(jour);
-let rapportDebut: Date;
-let rapportFin: Date;
-let rapportLabel: string;
-
-if (rapportPeriode === "mois_actuel") {
-  rapportDebut = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
-  rapportFin = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 1);
-  rapportLabel = maintenant.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
-} else if (rapportPeriode === "mois_dernier") {
-  rapportDebut = new Date(maintenant.getFullYear(), maintenant.getMonth() - 1, 1);
-  rapportFin = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
-  rapportLabel = rapportDebut.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
-} else if (rapportPeriode === "annee_actuelle") {
-  rapportDebut = new Date(maintenant.getFullYear(), 0, 1);
-  rapportFin = new Date(maintenant.getFullYear() + 1, 0, 1);
-  rapportLabel = String(maintenant.getFullYear());
-} else {
-  rapportDebut = new Date(maintenant.getFullYear() - 1, 0, 1);
-  rapportFin = new Date(maintenant.getFullYear(), 0, 1);
-  rapportLabel = String(maintenant.getFullYear() - 1);
-}
-
-const nuitsVenduesPeriode = data.reservations.reduce((total, r) => {
-  const debutR = new Date(r.date_arrivee);
-  const finR = new Date(r.date_depart);
-  const debutEff = debutR > rapportDebut ? debutR : rapportDebut;
-  const finEff = finR < rapportFin ? finR : rapportFin;
-  const nuits = Math.max(
-    0,
-    Math.round((finEff.getTime() - debutEff.getTime()) / (1000 * 60 * 60 * 24)),
-  );
-  return total + nuits;
-}, 0);
-const joursDansRapport = Math.max(
-  1,
-  Math.round((rapportFin.getTime() - rapportDebut.getTime()) / 86400000),
-);
-
-const nuitsDisponiblesRapport = totalChambres * joursDansRapport;
-const tauxOccupationRapport =
-  nuitsDisponiblesRapport > 0
-    ? Math.round((nuitsVenduesPeriode / nuitsDisponiblesRapport) * 100)
-    : 0;
-const chambresOccupeesPeriode = new Set(
-  data.reservations
-    .filter((r) => r.date_arrivee <= jour && r.date_depart > dateDebut)
-    .map((r) => r.chambre_id),
-).size;
-const reservees = data.chambres.filter(
-  (c) => !occupees.has(c.id) && data.reservations.some((r) => r.chambre_id === c.id && r.statut === "reservee"),
-).length;
-const disponibles = totalChambres - occupees.size - reservees;
-
-const donneesDonut = [
-  { name: "Disponible", value: disponibles, couleur: "#16a34a" },
-  { name: "Réservée", value: reservees, couleur: "#f97316" },
-  { name: "Occupée", value: occupees.size, couleur: "#dc2626" },
-].filter((d) => d.value > 0);
-const groupesCA: Record<string, number> = {};
-(evolutionData ?? []).forEach((o) => {
-  const d = o.date_operation.slice(0, 10);
-  const cle = evolutionVue === "mois" ? d.slice(0, 7) : d.slice(0, 4);
-  groupesCA[cle] = (groupesCA[cle] ?? 0) + Number(o.montant);
-});
-const evolutionCA = Object.entries(groupesCA)
-  .sort(([a], [b]) => a.localeCompare(b))
-  .map(([cle, montant]) => ({
-    label:
-      evolutionVue === "mois"
-        ? new Date(`${cle}-01`).toLocaleDateString("fr-FR", { month: "short", year: "2-digit" })
-        : cle,
-    montant,
-  }));
-const reservationsProches = data.reservations.filter(
+  const reservationsProches = data.reservations.filter(
     (r) =>
       r.statut === "reservee" &&
       r.date_arrivee > jour &&
@@ -513,7 +410,8 @@ const reservationsProches = data.reservations.filter(
       couleur: "text-blue-500",
     });
   }
-data.operations
+
+  data.operations
     .filter((o) => o.sens === "entree" && o.date_operation.slice(0, 10) === jour)
     .forEach((o) => {
       alertes.push({
@@ -548,7 +446,8 @@ data.operations
       couleur: "text-orange-600",
     });
   });
-const activiteRecente = [...data.reservations]
+
+  const activiteRecente = [...data.reservations]
     .filter((r) => r.created_at)
     .sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))
     .slice(0, 5)
@@ -561,481 +460,465 @@ const activiteRecente = [...data.reservations]
           })
         : "",
     }));
-  const depensesPeriode = data.depenses.reduce((s, d) => s + Number(d.montant), 0);
-  const JOUR_MS = 24 * 60 * 60 * 1000;
-  const debutP = new Date(dateDebut).getTime();
-  const finP = new Date(jour).getTime() + JOUR_MS;
-  const taxeMois = data.taxes.reduce((s, t) => {
-    const debutT = new Date(t.date_nuitee).getTime();
-    const finT = debutT + Math.max(1, Number(t.nb_nuits) || 1) * JOUR_MS;
-    const nuits = Math.max(
-      0,
-      Math.round((Math.min(finT, finP) - Math.max(debutT, debutP)) / JOUR_MS),
-    );
-    if (nuits === 0) return s;
-    const unitaire =
-      Number(t.montant_unitaire) ||
-      Number(t.montant_total) / Math.max(1, Number(t.nb_nuits) || 1);
-    return s + unitaire * nuits;
-  }, 0);
-
 
   return (
     <div>
       <div className="relative overflow-hidden rounded-2xl">
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl bg-gradient-to-br from-white via-red-50/40 to-white dark:from-background dark:via-background dark:to-background">
-        <div className="animate-float-slow absolute -left-20 top-10 size-72 rounded-full bg-red-300/20 blur-3xl" />
-        <div className="animate-float-slower absolute right-0 top-1/3 size-96 rounded-full bg-amber-200/20 blur-3xl" />
-        <div className="animate-float-slow absolute bottom-0 left-1/3 size-80 rounded-full bg-red-200/20 blur-3xl" />
-      </div>
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl bg-gradient-to-br from-white via-red-50/40 to-white dark:from-background dark:via-background dark:to-background">
+          <div className="animate-float-slow absolute -left-20 top-10 size-72 rounded-full bg-red-300/20 blur-3xl" />
+          <div className="animate-float-slower absolute right-0 top-1/3 size-96 rounded-full bg-amber-200/20 blur-3xl" />
+          <div className="animate-float-slow absolute bottom-0 left-1/3 size-80 rounded-full bg-red-200/20 blur-3xl" />
+        </div>
 
-      <Card className="animate-fade-in-up mb-6 overflow-hidden border-none bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20 shadow-md backdrop-blur-sm" style={{ animationDelay: "0ms" }}>
-  <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
-    <div className="flex items-center gap-4">
-      <div className="flex size-12 items-center justify-center rounded-full bg-primary shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
-        <BrandLogo className="max-h-8 text-white" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm text-muted-foreground">Bienvenue,</p>
-        <p className="font-display text-2xl font-bold sm:text-3xl">
-          LE DAYA Guest House
-        </p>
-        <p className="text-sm italic text-muted-foreground">{SLOGAN}</p>
-      </div>
-    </div>
+        <Card className="animate-fade-in-up mb-6 overflow-hidden border-none bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20 shadow-md backdrop-blur-sm" style={{ animationDelay: "0ms" }}>
+          <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex size-12 items-center justify-center rounded-full bg-primary shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
+                <BrandLogo className="max-h-8 text-white" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm text-muted-foreground">Bienvenue,</p>
+                <p className="font-display text-2xl font-bold sm:text-3xl">
+                  LE DAYA Guest House
+                </p>
+                <p className="text-sm italic text-muted-foreground">{SLOGAN}</p>
+              </div>
+            </div>
 
-    <div className="relative h-32 w-full overflow-hidden rounded-lg sm:h-36 sm:max-w-md">
-  <img
-    src="/IMG-20260618-WA0011.jpg"
-    alt="LE DAYA Guest House — Réception"
-    className="h-full w-full object-cover"
-  />
-</div>
- </div>
-  </Card>
+            <div className="relative h-32 w-full overflow-hidden rounded-lg sm:h-36 sm:max-w-md">
+              <img
+                src="/IMG-20260618-WA0011.jpg"
+                alt="LE DAYA Guest House — Réception"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-      <div className="mb-4 flex justify-end">
-        <Select value={periode} onValueChange={setPeriode}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Période" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="jour">Aujourd'hui</SelectItem>
-            <SelectItem value="semaine">Cette semaine</SelectItem>
-            <SelectItem value="mois">Ce mois</SelectItem>
-            <SelectItem value="annee">Cette année</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <PageHeader
-        title="Tableau de bord"
-        description={`LE DAYA Guest House — situation du ${formatDate(jour)}`}
-      />
+        <div className="mb-4 flex justify-end">
+          <Select value={periode} onValueChange={setPeriode}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Période" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="jour">Aujourd'hui</SelectItem>
+              <SelectItem value="semaine">Cette semaine</SelectItem>
+              <SelectItem value="mois">Ce mois</SelectItem>
+              <SelectItem value="annee">Cette année</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div className="animate-fade-in-up grid gap-4 sm:grid-cols-2 xl:grid-cols-5" style={{ animationDelay: "80ms" }}>
-  <StatCard
-    titre="Occupation"
-    valeur={`${occupees.size}/${totalChambres}`}
-    detail={`${totalChambres - occupees.size} chambre(s) disponible(s)`}
-    icon={BedDouble}
-    couleur="#166534"
-    to="/chambres"
-    variation={varOccupation}
-  />
-  <StatCard
-    titre="Arrivées du jour"
-    valeur={String(arrivees.length)}
-    detail={arrivees.length === 0 ? "Aucune arrivée" : "Arrivée(s) prévue(s)"}
-    icon={CalendarCheck}
-    couleur="#ea580c"
-    to="/reservations"
-    variation={varArrivees}
-  />
-  <StatCard
-    titre="Départs du jour"
-    valeur={String(departs.length)}
-    detail={departs.length === 0 ? "Aucun départ" : "Départ(s) prévu(s)"}
-    icon={CalendarCheck}
-    couleur="#9333ea"
-    to="/reservations"
-    variation={varDeparts}
-  />
-  <StatCard
-    titre="CA du mois"
-    valeur={formatFCFA(caMoisActuel)}
-    detail={`vs ${formatFCFA(caMoisDernier)} le mois dernier`}
-    icon={Wallet}
-    couleur="#2563eb"
-    to="/caisse"
-    variation={varCA}
-  />
-  <StatCard
-    titre="Réservations en cours"
-    valeur={String(enCours.length)}
-    detail={`${enCours.length} chambre(s) réservée(s)`}
-    icon={Users}
-    couleur="#16a34a"
-    to="/reservations"
-    variation={varEnCours}
-  />
-</div>
-<Card className="animate-fade-in-up group mt-6 overflow-hidden border-none bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20 shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ animationDelay: "160ms" }}>
-  <CardHeader className="flex flex-row items-center justify-between">
-    <CardTitle className="text-base">Évolution du chiffre d'affaires</CardTitle>
-    <Select value={evolutionVue} onValueChange={(v) => setEvolutionVue(v as "mois" | "annee")}>
-      <SelectTrigger className="w-[140px]">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="mois">Par mois</SelectItem>
-        <SelectItem value="annee">Par année</SelectItem>
-      </SelectContent>
-    </Select>
-  </CardHeader>
-  <CardContent>
-    <ChartContainer config={{ montant: { label: "CA", color: "#dc2626" } }} className="h-[280px] w-full">
-      <AreaChart data={evolutionCA} margin={{ left: 0, right: 12, top: 12, bottom: 0 }}>
-        <defs>
-          <linearGradient id="caGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#dc2626" stopOpacity={0.5} />
-            <stop offset="100%" stopColor="#dc2626" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
-        <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-        <YAxis
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(v) => `${Math.round(Number(v) / 1000)}k`}
-          fontSize={12}
-          width={40}
+        <PageHeader
+          title="Tableau de bord"
+          description={`LE DAYA Guest House — situation du ${formatDate(jour)}`}
         />
-        <ChartTooltip
-          content={<ChartTooltipContent formatter={(value) => formatFCFA(Number(value))} />}
-        />
-        <Area
-          type="monotone"
-          dataKey="montant"
-          stroke="#dc2626"
-          strokeWidth={3}
-          fill="url(#caGradient)"
-          animationDuration={900}
-          dot={{ r: 4, fill: "#dc2626", strokeWidth: 0 }}
-          activeDot={{ r: 6 }}
-        />
-      </AreaChart>
-    </ChartContainer>
-    {evolutionCA.length === 0 ? (
-      <p className="mt-2 text-center text-sm text-muted-foreground">
-        Aucune donnée pour cette période.
-      </p>
-    ) : null}
-  </CardContent>
-</Card>
-<Card className="animate-fade-in-up group relative z-10 mt-6 overflow-hidden border-none bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20 shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ animationDelay: "240ms" }}>
-  <CardHeader className="flex flex-row items-center justify-between">
-    <CardTitle className="text-base">Nuits vendues</CardTitle>
-    <Select value={rapportPeriode}
-    onValueChange={setRapportPeriode}>
-      <SelectTrigger className="w-[160px]">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="mois_actuel">Ce mois</SelectItem>
-        <SelectItem value="mois_dernier">Mois dernier</SelectItem>
-        <SelectItem value="annee_actuelle">Cette année</SelectItem>
-        <SelectItem value="annee_derniere">Année dernière</SelectItem>
-      </SelectContent>
-    </Select>
-  </CardHeader>
-  <CardContent className="flex flex-col items-center gap-6 sm:flex-row sm:justify-around">
-    <div className="relative h-[180px] w-[180px]">
-      <ChartContainer config={{}} className="h-full w-full drop-shadow-[0_0_18px_rgba(220,38,38,0.25)]">
-        <PieChart>
-          <Pie
-            data={[
-              { name: "Vendues", value: nuitsVenduesPeriode, couleur: "#dc2626" },
-              {
-                name: "Disponibles",
-                value: Math.max(0, nuitsDisponiblesRapport - nuitsVenduesPeriode),
-                couleur: "#e5e7eb",
-              },
-            ]}
-            dataKey="value"
-            nameKey="name"
-            innerRadius={55}
-            outerRadius={80}
-            paddingAngle={3}
-            cornerRadius={6}
-            animationDuration={800}
-          >
-            <Cell fill="#dc2626" stroke="none" />
-            <Cell fill="#e5e7eb" stroke="none" />
-          </Pie>
-          <ChartTooltip content={<ChartTooltipContent />} />
-        </PieChart>
-      </ChartContainer>
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-display text-2xl font-bold">{tauxOccupationRapport}%</span>
-        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          Occupation
-        </span>
-      </div>
-    </div>
-    <div className="space-y-3">
-      <div>
-        <p className="font-display text-3xl font-bold">
-          {nuitsVenduesPeriode}{" "}
-          <span className="text-lg font-normal text-muted-foreground">
-            / {nuitsDisponiblesRapport}
-          </span>
-        </p>
-        <p className="text-xs text-muted-foreground capitalize">
-          nuit(s) vendue(s) — {rapportLabel}
-        </p>
-      </div>
-      <div className="flex items-center gap-2 text-sm">
-        <span className="size-3 rounded-full bg-red-600" />
-        <span className="text-muted-foreground">Vendues</span>
-        <span className="font-semibold">{nuitsVenduesPeriode}</span>
-      </div>
-      <div className="flex items-center gap-2 text-sm">
-        <span className="size-3 rounded-full bg-gray-300" />
-        <span className="text-muted-foreground">Disponibles</span>
-        <span className="font-semibold">
-          {Math.max(0, nuitsDisponiblesRapport - nuitsVenduesPeriode)}
-        </span>
-      </div>
-    </div>
-  </CardContent>
-</Card>
 
+        <div className="animate-fade-in-up grid gap-4 sm:grid-cols-2 xl:grid-cols-5" style={{ animationDelay: "80ms" }}>
+          <StatCard
+            titre="Occupation"
+            valeur={`${occupees.size}/${totalChambres}`}
+            detail={`${totalChambres - occupees.size} chambre(s) disponible(s)`}
+            icon={BedDouble}
+            couleur="#166534"
+            to="/chambres"
+            variation={varOccupation}
+          />
+          <StatCard
+            titre="Arrivées du jour"
+            valeur={String(arrivees.length)}
+            detail={arrivees.length === 0 ? "Aucune arrivée" : "Arrivée(s) prévue(s)"}
+            icon={CalendarCheck}
+            couleur="#ea580c"
+            to="/reservations"
+            variation={varArrivees}
+          />
+          <StatCard
+            titre="Départs du jour"
+            valeur={String(departs.length)}
+            detail={departs.length === 0 ? "Aucun départ" : "Départ(s) prévu(s)"}
+            icon={CalendarCheck}
+            couleur="#9333ea"
+            to="/reservations"
+            variation={varDeparts}
+          />
+          <StatCard
+            titre="CA du mois"
+            valeur={formatFCFA(caMoisActuel)}
+            detail={`vs ${formatFCFA(caMoisDernier)} le mois dernier`}
+            icon={Wallet}
+            couleur="#2563eb"
+            to="/caisse"
+            variation={varCA}
+          />
+          <StatCard
+            titre="Réservations en cours"
+            valeur={String(enCours.length)}
+            detail={`${enCours.length} chambre(s) réservée(s)`}
+            icon={Users}
+            couleur="#16a34a"
+            to="/reservations"
+            variation={varEnCours}
+          />
+        </div>
+
+        <Card className="animate-fade-in-up group mt-6 overflow-hidden border-none bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20 shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ animationDelay: "160ms" }}>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Évolution du chiffre d'affaires</CardTitle>
+            <Select value={evolutionVue} onValueChange={(v) => setEvolutionVue(v as "mois" | "annee")}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mois">Par mois</SelectItem>
+                <SelectItem value="annee">Par année</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={{ montant: { label: "CA", color: "#dc2626" } }} className="h-[280px] w-full">
+              <AreaChart data={evolutionCA} margin={{ left: 0, right: 12, top: 12, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="caGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#dc2626" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="#dc2626" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v) => `${Math.round(Number(v) / 1000)}k`}
+                  fontSize={12}
+                  width={40}
+                />
+                <ChartTooltip
+                  content={<ChartTooltipContent formatter={(value) => formatFCFA(Number(value))} />}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="montant"
+                  stroke="#dc2626"
+                  strokeWidth={3}
+                  fill="url(#caGradient)"
+                  animationDuration={900}
+                  dot={{ r: 4, fill: "#dc2626", strokeWidth: 0 }}
+                  activeDot={{ r: 6 }}
+                />
+              </AreaChart>
+            </ChartContainer>
+            {evolutionCA.length === 0 ? (
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                Aucune donnée pour cette période.
+              </p>
+            ) : null}
+          </CardContent>
+        </Card>
+
+        <Card className="animate-fade-in-up group relative z-10 mt-6 overflow-hidden border-none bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20 shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ animationDelay: "240ms" }}>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Nuits vendues</CardTitle>
+            <Select value={rapportPeriode} onValueChange={setRapportPeriode}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mois_actuel">Ce mois</SelectItem>
+                <SelectItem value="mois_dernier">Mois dernier</SelectItem>
+                <SelectItem value="annee_actuelle">Cette année</SelectItem>
+                <SelectItem value="annee_derniere">Année dernière</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-6 sm:flex-row sm:justify-around">
+            <div className="relative h-[180px] w-[180px]">
+              <ChartContainer config={{}} className="h-full w-full drop-shadow-[0_0_18px_rgba(220,38,38,0.25)]">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: "Vendues", value: nuitsVenduesPeriode, couleur: "#dc2626" },
+                      {
+                        name: "Disponibles",
+                        value: Math.max(0, nuitsDisponiblesRapport - nuitsVenduesPeriode),
+                        couleur: "#e5e7eb",
+                      },
+                    ]}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={55}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    cornerRadius={6}
+                    animationDuration={800}
+                  >
+                    <Cell fill="#dc2626" stroke="none" />
+                    <Cell fill="#e5e7eb" stroke="none" />
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </PieChart>
+              </ChartContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                <span className="font-display text-2xl font-bold">{tauxOccupationRapport}%</span>
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  Occupation
+                </span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <p className="font-display text-3xl font-bold">
+                  {nuitsVenduesPeriode}{" "}
+                  <span className="text-lg font-normal text-muted-foreground">
+                    / {nuitsDisponiblesRapport}
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground capitalize">
+                  nuit(s) vendue(s) — {rapportLabel}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="size-3 rounded-full bg-red-600" />
+                <span className="text-muted-foreground">Vendues</span>
+                <span className="font-semibold">{nuitsVenduesPeriode}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="size-3 rounded-full bg-gray-300" />
+                <span className="text-muted-foreground">Disponibles</span>
+                <span className="font-semibold">
+                  {Math.max(0, nuitsDisponiblesRapport - nuitsVenduesPeriode)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-       <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20">
-  <CardHeader className="flex flex-row items-center justify-between">
-    <CardTitle className="text-base">État des chambres</CardTitle>
-    <div className="flex size-10 items-center justify-center rounded-full bg-primary shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
-      <BedDouble className="size-5 text-white" />
-    </div>
-  </CardHeader>
-  <CardContent>
-    <div className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
-      <span className="flex items-center gap-1.5">
-        <span className="size-2 rounded-full bg-green-600" /> Disponible
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="size-2 rounded-full bg-orange-500" /> Réservée
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="size-2 rounded-full bg-red-600" /> Occupée
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="size-2 rounded-full bg-blue-500" /> Nettoyage
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="size-2 rounded-full bg-purple-600" /> Maintenance
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="size-2 rounded-full bg-gray-400" /> Hors service
-      </span>
-    </div>
-
-    <div className="space-y-2">
-      {data.chambres.slice(0, 5).map((c) => {
-        const occupee = occupees.has(c.id);
-        const reservee = data.reservations.some(
-          (r) => r.chambre_id === c.id && r.statut === "reservee",
-        );
-        const statut = occupee ? "Occupée" : reservee ? "Réservée" : "Disponible";
-        const couleur = occupee
-          ? "text-red-600"
-          : reservee
-            ? "text-orange-500"
-            : "text-green-600";
-
-        return (
-          <div
-            key={c.id}
-            className="flex items-center justify-between rounded-lg border px-3 py-2"
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium">{c.nom}</span>
-              <span className="text-xs text-muted-foreground">{c.type}</span>
+        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">État des chambres</CardTitle>
+            <div className="flex size-10 items-center justify-center rounded-full bg-primary shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
+              <BedDouble className="size-5 text-white" />
             </div>
-            <div className="flex items-center gap-4">
-              <span className={`text-xs font-medium ${couleur}`}>{statut}</span>
-              <span className="text-xs text-muted-foreground">
-                {formatFCFA(c.prix_nuit)}/nuit
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-green-600" /> Disponible
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-orange-500" /> Réservée
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-red-600" /> Occupée
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-blue-500" /> Nettoyage
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-purple-600" /> Maintenance
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-gray-400" /> Hors service
               </span>
             </div>
-          </div>
-        );
-      })}
-      {data.chambres.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Aucune chambre enregistrée.</p>
-      ) : null}
-    </div>
 
-    {data.chambres.length > 5 ? (
-      <Link
-        to="/chambres"
-        className="mt-3 block text-center text-sm text-primary hover:underline"
-      >
-        Voir toutes les chambres →
-      </Link>
-    ) : null}
-  </CardContent>
-</Card>
+            <div className="space-y-2">
+              {data.chambres.slice(0, 5).map((c) => {
+                const occupee = occupees.has(c.id);
+                const reservee = data.reservations.some(
+                  (r) => r.chambre_id === c.id && r.statut === "reservee",
+                );
+                const statut = occupee ? "Occupée" : reservee ? "Réservée" : "Disponible";
+                const couleur = occupee
+                  ? "text-red-600"
+                  : reservee
+                    ? "text-orange-500"
+                    : "text-green-600";
 
-       <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-orange-900/20">
-  <CardHeader className="flex flex-row items-center justify-between">
-    <CardTitle className="text-base">Arrivées du jour</CardTitle>
-    <div className="flex size-10 items-center justify-center rounded-full bg-orange-500 shadow-[0_0_16px_rgba(234,88,12,0.5)] transition-transform group-hover:scale-110">
-      <ArrowDown className="size-5 text-white" />
-    </div>
-  </CardHeader>
-  <CardContent>
-    {arrivees.length === 0 ? (
-      <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
-        <div className="flex size-14 items-center justify-center rounded-full bg-green-100">
-          <ArrowDown className="size-7 text-green-600" />
-        </div>
-        <p className="font-medium">Aucune arrivée prévue</p>
-        <p className="text-sm text-muted-foreground">Aucune arrivée aujourd'hui</p>
-      </div>
-    ) : (
-      <div className="space-y-2">
-        {arrivees.slice(0, 8).map((r) => (
-          <div
-            key={r.id}
-            className="flex items-center justify-between rounded-lg border px-3 py-2"
-          >
-            <div>
-              <p className="text-sm font-medium">
-                {r.clients?.prenom ?? ""} {r.clients?.nom ?? "Client"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {r.chambres?.nom} — dès {formatDate(r.date_arrivee)}
-              </p>
+                return (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between rounded-lg border px-3 py-2"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium">{c.nom}</span>
+                      <span className="text-xs text-muted-foreground">{c.type}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className={`text-xs font-medium ${couleur}`}>{statut}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatFCFA(c.prix_nuit)}/nuit
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+              {data.chambres.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Aucune chambre enregistrée.</p>
+              ) : null}
             </div>
-            <Badge variant="outline">{formatFCFA(r.prix_nuit)}</Badge>
-          </div>
-        ))}
-      </div>
-    )}
-    <Link
-      to="/reservations"
-      className="mt-3 block text-center text-sm text-primary hover:underline"
-    >
-      Voir toutes les arrivées →
-    </Link>
-  </CardContent>
-</Card>
 
-<Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/40 dark:to-purple-900/20">
-  <CardHeader className="flex flex-row items-center justify-between">
-    <CardTitle className="text-base">Départs du jour</CardTitle>
-    <div className="flex size-10 items-center justify-center rounded-full bg-purple-600 shadow-[0_0_16px_rgba(147,51,234,0.5)] transition-transform group-hover:scale-110">
-      <ArrowUp className="size-5 text-white" />
-    </div>
-  </CardHeader>
-  <CardContent>
-    {departs.length === 0 ? (
-      <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
-        <div className="flex size-14 items-center justify-center rounded-full bg-orange-100">
-          <ArrowUp className="size-7 text-orange-600" />
-        </div>
-        <p className="font-medium">Aucun départ prévu</p>
-        <p className="text-sm text-muted-foreground">Aucun départ aujourd'hui</p>
-      </div>
-    ) : (
-      <div className="space-y-2">
-        {departs.slice(0, 8).map((r) => (
-          <div
-            key={r.id}
-            className="flex items-center justify-between rounded-lg border px-3 py-2"
-          >
-            <div>
-              <p className="text-sm font-medium">
-                {r.clients?.prenom ?? ""} {r.clients?.nom ?? "Client"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {r.chambres?.nom} — jusqu'au {formatDate(r.date_depart)}
-              </p>
+            {data.chambres.length > 5 ? (
+              <Link
+                to="/chambres"
+                className="mt-3 block text-center text-sm text-primary hover:underline"
+              >
+                Voir toutes les chambres →
+              </Link>
+            ) : null}
+          </CardContent>
+        </Card>
+
+        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-orange-900/20">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Arrivées du jour</CardTitle>
+            <div className="flex size-10 items-center justify-center rounded-full bg-orange-500 shadow-[0_0_16px_rgba(234,88,12,0.5)] transition-transform group-hover:scale-110">
+              <ArrowDown className="size-5 text-white" />
             </div>
-            <Badge variant="outline">{formatFCFA(r.prix_nuit)}</Badge>
-          </div>
-        ))}
-      </div>
-    )}
-    <Link
-      to="/reservations"
-      className="mt-3 block text-center text-sm text-primary hover:underline"
-    >
-      Voir tous les départs →
-    </Link>
-  </CardContent>
-</Card>
+          </CardHeader>
+          <CardContent>
+            {arrivees.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+                <div className="flex size-14 items-center justify-center rounded-full bg-green-100">
+                  <ArrowDown className="size-7 text-green-600" />
+                </div>
+                <p className="font-medium">Aucune arrivée prévue</p>
+                <p className="text-sm text-muted-foreground">Aucune arrivée aujourd'hui</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {arrivees.slice(0, 8).map((r) => (
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between rounded-lg border px-3 py-2"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">
+                        {r.clients?.prenom ?? ""} {r.clients?.nom ?? "Client"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {r.chambres?.nom} — dès {formatDate(r.date_arrivee)}
+                      </p>
+                    </div>
+                    <Badge variant="outline">{formatFCFA(r.prix_nuit)}</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+            <Link
+              to="/reservations"
+              className="mt-3 block text-center text-sm text-primary hover:underline"
+            >
+              Voir toutes les arrivées →
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/40 dark:to-purple-900/20">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Départs du jour</CardTitle>
+            <div className="flex size-10 items-center justify-center rounded-full bg-purple-600 shadow-[0_0_16px_rgba(147,51,234,0.5)] transition-transform group-hover:scale-110">
+              <ArrowUp className="size-5 text-white" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            {departs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+                <div className="flex size-14 items-center justify-center rounded-full bg-orange-100">
+                  <ArrowUp className="size-7 text-orange-600" />
+                </div>
+                <p className="font-medium">Aucun départ prévu</p>
+                <p className="text-sm text-muted-foreground">Aucun départ aujourd'hui</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {departs.slice(0, 8).map((r) => (
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between rounded-lg border px-3 py-2"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">
+                        {r.clients?.prenom ?? ""} {r.clients?.nom ?? "Client"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {r.chambres?.nom} — jusqu'au {formatDate(r.date_depart)}
+                      </p>
+                    </div>
+                    <Badge variant="outline">{formatFCFA(r.prix_nuit)}</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+            <Link
+              to="/reservations"
+              className="mt-3 block text-center text-sm text-primary hover:underline"
+            >
+              Voir tous les départs →
+            </Link>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-       <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/40 dark:to-red-900/20">
-  <CardHeader className="flex flex-row items-center justify-between">
-    <CardTitle className="text-base">Alertes</CardTitle>
-    <div className="flex size-10 items-center justify-center rounded-full bg-red-600 shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
-      <Badge variant="destructive" className="text-white">{alertes.length}</Badge>
-    </div>
-  </CardHeader>
-  <CardContent className="space-y-3">
-    {alertes.length === 0 ? (
-      <p className="text-sm text-muted-foreground">Aucune alerte pour le moment.</p>
-    ) : (
-      alertes.map((a, i) => (
-        <div key={i} className="flex items-start gap-2 text-sm">
-          <a.icon className={`mt-0.5 size-4 shrink-0 ${a.couleur}`} />
-          <span>{a.texte}</span>
-        </div>
-      ))
-    )}
-    <Link
-      to="/reservations"
-      className="block pt-1 text-center text-sm text-primary hover:underline"
-    >
-      Voir toutes les alertes →
-    </Link>
-  </CardContent>
-</Card>
+        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/40 dark:to-red-900/20">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Alertes</CardTitle>
+            <div className="flex size-10 items-center justify-center rounded-full bg-red-600 shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
+              <Badge variant="destructive" className="text-white">{alertes.length}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {alertes.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Aucune alerte pour le moment.</p>
+            ) : (
+              alertes.map((a, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm">
+                  <a.icon className={`mt-0.5 size-4 shrink-0 ${a.couleur}`} />
+                  <span>{a.texte}</span>
+                </div>
+              ))
+            )}
+            <Link
+              to="/reservations"
+              className="block pt-1 text-center text-sm text-primary hover:underline"
+            >
+              Voir toutes les alertes →
+            </Link>
+          </CardContent>
+        </Card>
 
         <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20">
-  <CardHeader className="flex flex-row items-center justify-between">
-    <CardTitle className="text-base">Activité récente</CardTitle>
-    <div className="flex size-10 items-center justify-center rounded-full bg-blue-600 shadow-[0_0_16px_rgba(37,99,235,0.5)] transition-transform group-hover:scale-110">
-      <Users className="size-5 text-white" />
-    </div>
-  </CardHeader>
-  <CardContent className="space-y-3">
-    {activiteRecente.length === 0 ? (
-      <p className="text-sm text-muted-foreground">
-        Aucune activité récente enregistrée.
-      </p>
-    ) : (
-      activiteRecente.map((a, i) => (
-        <div key={i} className="flex items-center justify-between text-sm">
-          <span>{a.texte}</span>
-          <span className="shrink-0 text-xs text-muted-foreground">{a.heure}</span>
-        </div>
-      ))
-    )}
-    <Link
-      to="/reservations"
-      className="block pt-1 text-center text-sm text-primary hover:underline"
-    >
-      Voir toute l'activité →
-    </Link>
-  </CardContent>
-</Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Activité récente</CardTitle>
+            <div className="flex size-10 items-center justify-center rounded-full bg-blue-600 shadow-[0_0_16px_rgba(37,99,235,0.5)] transition-transform group-hover:scale-110">
+              <Users className="size-5 text-white" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {activiteRecente.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Aucune activité récente enregistrée.
+              </p>
+            ) : (
+              activiteRecente.map((a, i) => (
+                <div key={i} className="flex items-center justify-between text-sm">
+                  <span>{a.texte}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{a.heure}</span>
+                </div>
+              ))
+            )}
+            <Link
+              to="/reservations"
+              className="block pt-1 text-center text-sm text-primary hover:underline"
+            >
+              Voir toute l'activité →
+            </Link>
+          </CardContent>
+        </Card>
+
         <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/40 dark:to-green-900/20">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Actions rapides</CardTitle>
