@@ -50,11 +50,12 @@ function CaissePage() {
   const [open, setOpen] = useState(false);
   const [debut, setDebut] = useState(today());
   const [fin, setFin] = useState(today());
-  const [form, setForm] = useState({
+    const [form, setForm] = useState({
     sens: "entree",
     motif: "",
     montant: "",
     mode_paiement: "especes",
+    reservation_id: "",
   });
 
   const { data: operations } = useQuery({
@@ -82,6 +83,20 @@ function CaissePage() {
       );
     },
   });
+
+  const { data: reservations } = useQuery({
+    queryKey: ["reservations-select-caisse"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
+  });
+
 
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
@@ -114,7 +129,7 @@ function CaissePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const ajouter = useMutation({
+    const ajouter = useMutation({
     mutationFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       const { error } = await supabase.from("caisse_operations").insert({
@@ -124,13 +139,14 @@ function CaissePage() {
         montant: Number(form.montant),
         mode_paiement: form.mode_paiement,
         created_by: u.user?.id ?? null,
+        reservation_id: form.reservation_id ? form.reservation_id : null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries();
       setOpen(false);
-      setForm({ sens: "entree", motif: "", montant: "", mode_paiement: "especes" });
+      setForm({ sens: "entree", motif: "", montant: "", mode_paiement: "especes", reservation_id: "" });
       toast.success("Opération enregistrée.");
     },
     onError: (e: Error) => toast.error(e.message),
