@@ -29,6 +29,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useEtablissement, useMonRole } from "@/hooks/use-hotel";
 import { BrandLogo, SLOGAN } from "@/components/Brand";
 import { cn } from "@/lib/utils";
+import { useSettings, type ModeType } from "@/context/ThemeContext";
 
 const NAV = [
   { to: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -143,17 +144,28 @@ function MeteoWidget() {
     </div>
   );
 }
+
 export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { data: role } = useMonRole();
-  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+  
+  // ✨ CHANGEMENT : Utiliser ThemeContext au lieu du state local
+  const { mode, setMode } = useSettings();
 
   const toggleDark = () => {
-    const nouveau = !dark;
-    setDark(nouveau);
-    document.documentElement.classList.toggle("dark", nouveau);
-    localStorage.setItem("le-daya-theme", nouveau ? "dark" : "light");
+    // Basculer entre "dark" et "light" (ou "auto" → "dark" → "light")
+    const modeMap: Record<ModeType, ModeType> = {
+      light: "dark",
+      dark: "light",
+      auto: "dark", // Si auto, bascule vers dark
+    };
+    setMode(modeMap[mode]);
   };
+
+  // Déterminer si on est en mode dark pour afficher la bonne icône
+  const isDark =
+    mode === "dark" ||
+    (mode === "auto" && new Date().getHours() >= 18);
 
   return (
     <div className="min-h-screen bg-background lg:flex">
@@ -199,16 +211,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           <MeteoWidget />
 
-<Button variant="ghost" size="icon" onClick={toggleDark}>
-            {dark ? <Sun className="size-5" /> : <Moon className="size-5" />}
+          <Button variant="ghost" size="icon" onClick={toggleDark}>
+            {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
           </Button>
 
           <Button variant="ghost" size="icon" className="relative" asChild>
-  <Link to="/notifications">
-    <Bell className="size-5" />
-    <span className="absolute right-1 top-1 size-2 rounded-full bg-destructive" />
-  </Link>
-</Button>
+            <Link to="/notifications">
+              <Bell className="size-5" />
+              <span className="absolute right-1 top-1 size-2 rounded-full bg-destructive" />
+            </Link>
+          </Button>
 
           <Link
             to="/mon-compte"
@@ -226,7 +238,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </p>
             </div>
           </Link>
-          </header>
+        </header>
         <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
