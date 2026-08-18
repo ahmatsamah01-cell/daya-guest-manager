@@ -84,7 +84,7 @@ function AuthPage() {
   }, []);
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-slate-50 overflow-hidden font-sans">
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
 
       {/* ========================================================
           HALOS LUMINEUX
@@ -146,8 +146,10 @@ function AuthPage() {
           absolute
           inset-0
           opacity-[0.025]
+          dark:opacity-[0.05]
           pointer-events-none
           bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)]
+          dark:bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)]
           bg-[size:40px_40px]
         "
       />
@@ -172,15 +174,18 @@ function AuthPage() {
           py-2
           rounded-full
           bg-white/70
+          dark:bg-slate-900/70
           backdrop-blur-xl
           border
           border-white/70
+          dark:border-slate-800/70
           shadow-sm
           text-[9px]
           sm:text-[10px]
           uppercase
           tracking-[0.15em]
           text-emerald-600
+          dark:text-emerald-400
           animate-fade-in
         "
       >
@@ -193,6 +198,7 @@ function AuthPage() {
               w-full
               rounded-full
               bg-emerald-400
+              dark:bg-emerald-500
               opacity-60
               animate-ping
             "
@@ -206,6 +212,7 @@ function AuthPage() {
               w-2
               rounded-full
               bg-emerald-500
+              dark:bg-emerald-400
             "
           />
         </span>
@@ -247,16 +254,21 @@ function AuthPage() {
               p-5
               sm:p-6
               bg-white/45
+              dark:bg-slate-800/45
               backdrop-blur-xl
               border
               border-white/70
+              dark:border-slate-700/70
               rounded-3xl
               shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)]
+              dark:shadow-[0_15px_40px_-10px_rgba(0,0,0,0.3)]
               transition-all
               duration-500
               hover:scale-[1.04]
               hover:border-red-200
+              dark:hover:border-red-900
               hover:shadow-[0_20px_45px_-10px_rgba(220,38,38,0.15)]
+              dark:hover:shadow-[0_20px_45px_-10px_rgba(220,38,38,0.25)]
             "
           >
             <div
@@ -269,6 +281,7 @@ function AuthPage() {
                 bg-gradient-to-r
                 from-transparent
                 via-white
+                dark:via-slate-600
                 to-transparent
               "
             />
@@ -295,15 +308,20 @@ function AuthPage() {
             p-7
             sm:p-8
             bg-white/65
+            dark:bg-slate-800/65
             backdrop-blur-2xl
             border
             border-white/70
+            dark:border-slate-700/70
             rounded-3xl
             shadow-[0_20px_60px_-20px_rgba(15,23,42,0.15)]
+            dark:shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)]
             transition-all
             duration-500
             hover:border-red-200/80
+            dark:hover:border-red-900/80
             hover:shadow-[0_25px_70px_-20px_rgba(220,38,38,0.15)]
+            dark:hover:shadow-[0_25px_70px_-20px_rgba(220,38,38,0.25)]
           "
         >
 
@@ -318,6 +336,7 @@ function AuthPage() {
               bg-gradient-to-r
               from-transparent
               via-white
+              dark:via-slate-600
               to-transparent
               opacity-90
             "
@@ -339,12 +358,15 @@ function AuthPage() {
                 mb-4
                 rounded-full
                 bg-red-50/80
+                dark:bg-red-950/30
                 border
                 border-red-100
+                dark:border-red-900/50
                 text-[9px]
                 uppercase
                 tracking-[0.16em]
                 text-red-600
+                dark:text-red-400
                 font-semibold
               "
             >
@@ -357,6 +379,7 @@ function AuthPage() {
                 text-2xl
                 font-black
                 text-slate-900
+                dark:text-white
                 uppercase
                 tracking-tight
               "
@@ -364,7 +387,7 @@ function AuthPage() {
               Accès Manager
             </h2>
 
-            <p className="text-slate-500 text-sm mt-2">
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
               Authentification sécurisée
             </p>
           </div>
@@ -388,9 +411,11 @@ function AuthPage() {
                   w-5
                   h-5
                   text-slate-400
+                  dark:text-slate-500
                   transition-all
                   duration-300
                   group-focus-within/input:text-red-500
+                  dark:group-focus-within/input:text-red-400
                   group-focus-within/input:scale-110
                 "
               />
@@ -406,14 +431,20 @@ function AuthPage() {
                   pr-4
                   rounded-xl
                   bg-white/55
+                  dark:bg-slate-900/55
                   backdrop-blur-sm
                   border-slate-200/80
+                  dark:border-slate-700/80
                   text-slate-900
+                  dark:text-white
                   placeholder:text-slate-400
+                  dark:placeholder:text-slate-500
                   transition-all
                   duration-300
                   focus:bg-white/80
+                  dark:focus:bg-slate-900/80
                   focus:border-red-500
+                  dark:focus:border-red-500
                   focus:ring-4
                   focus:ring-red-500/10
                   focus:scale-[1.01]
@@ -436,9 +467,11 @@ function AuthPage() {
                   w-5
                   h-5
                   text-slate-400
+                  dark:text-slate-500
                   transition-all
                   duration-300
                   group-focus-within/input:text-red-500
+                  dark:group-focus-within/input:text-red-400
                   group-focus-within/input:scale-110
                 "
               />
@@ -454,14 +487,20 @@ function AuthPage() {
                   pr-11
                   rounded-xl
                   bg-white/55
+                  dark:bg-slate-900/55
                   backdrop-blur-sm
                   border-slate-200/80
+                  dark:border-slate-700/80
                   text-slate-900
+                  dark:text-white
                   placeholder:text-slate-400
+                  dark:placeholder:text-slate-500
                   transition-all
                   duration-300
                   focus:bg-white/80
+                  dark:focus:bg-slate-900/80
                   focus:border-red-500
+                  dark:focus:border-red-500
                   focus:ring-4
                   focus:ring-red-500/10
                   focus:scale-[1.01]
@@ -488,8 +527,11 @@ function AuthPage() {
                   p-1.5
                   rounded-lg
                   text-slate-400
+                  dark:text-slate-500
                   hover:text-red-500
+                  dark:hover:text-red-400
                   hover:bg-red-50
+                  dark:hover:bg-red-950/20
                   transition-all
                   duration-200
                 "
@@ -603,12 +645,14 @@ function AuthPage() {
               pt-5
               border-t
               border-slate-200/70
+              dark:border-slate-700/70
               flex
               items-center
               justify-center
               gap-2
               text-xs
               text-slate-400
+              dark:text-slate-500
             "
           >
             <ShieldCheck size={14} />
@@ -629,6 +673,7 @@ function AuthPage() {
               uppercase
               tracking-[0.14em]
               text-slate-400
+              dark:text-slate-500
             "
           >
             © 2026 LE DAYA — Tous droits réservés
@@ -651,16 +696,21 @@ function AuthPage() {
                 py-2
                 rounded-full
                 bg-white/40
+                dark:bg-slate-800/40
                 backdrop-blur-md
                 border
                 border-white/60
+                dark:border-slate-700/60
                 shadow-sm
                 transition-all
                 duration-500
                 hover:-translate-y-1
                 hover:bg-white/70
+                dark:hover:bg-slate-800/70
                 hover:border-red-200
+                dark:hover:border-red-900
                 hover:shadow-[0_8px_25px_rgba(220,38,38,0.12)]
+                dark:hover:shadow-[0_8px_25px_rgba(220,38,38,0.25)]
               "
             >
 
@@ -699,9 +749,11 @@ function AuthPage() {
                   uppercase
                   tracking-[0.16em]
                   text-slate-400
+                  dark:text-slate-500
                   transition-colors
                   duration-300
                   group-hover/author:text-red-600
+                  dark:group-hover/author:text-red-400
                 "
               >
                 Conçu & développé par
@@ -714,9 +766,11 @@ function AuthPage() {
                   font-bold
                   tracking-[0.06em]
                   text-slate-600
+                  dark:text-slate-400
                   transition-all
                   duration-300
                   group-hover/author:text-red-600
+                  dark:group-hover/author:text-red-400
                 "
               >
                 AHMAT ADOUM AHMAT
