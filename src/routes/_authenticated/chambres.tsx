@@ -342,7 +342,7 @@ function ChambresPage() {
             const statutStyle = statutChambre(c.id);
 
             return (
-              <Card key={c.id} className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
+              <Card key={c.id} className="group overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20">
                 <div className="relative h-32 w-full overflow-hidden bg-gradient-to-br from-red-900 via-red-800 to-stone-900">
                   {c.photo_url ? (
                     <img src={c.photo_url} alt={c.nom} className="h-full w-full object-cover" />
@@ -422,7 +422,7 @@ function ChambresPage() {
           ) : null}
         </div>
       ) : (
-        <Card>
+        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20">
           <CardContent className="overflow-x-auto p-0">
             <Table>
               <TableHeader>
