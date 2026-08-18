@@ -48,13 +48,16 @@ function CaissePage() {
   const qc = useQueryClient();
   const { data: etab } = useEtablissement();
   const [open, setOpen] = useState(false);
-  const [debut, setDebut] = useState(today());
+    const [debut, setDebut] = useState(today());
   const [fin, setFin] = useState(today());
-      const [form, setForm] = useState({
+  const [search, setSearch] = useState("");
+  const [vue, setVue] = useState<"table" | "cartes">("table");
+  const [sensFiltre, setSensFiltre] = useState<string>("tous");
+  const [form, setForm] = useState({
     motif: "",
     montant: "",
     mode_paiement: "especes",
-  });
+  });    
 
   const { data: operations } = useQuery({
     queryKey: ["caisse", debut, fin],
@@ -160,7 +163,13 @@ function CaissePage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
+  const filteredOperations = (operations ?? []).filter((o) => {
+    const matchSearch =
+      o.motif.toLowerCase().includes(search.toLowerCase()) ||
+      o.mode_paiement.toLowerCase().includes(search.toLowerCase());
+    const matchSens = sensFiltre === "tous" || o.sens === sensFiltre;
+    return matchSearch && matchSens;
+  });
 
   const entrees = (operations ?? [])
     .filter((o) => o.sens === "entree")
@@ -300,7 +309,15 @@ function CaissePage() {
         </Card>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-end gap-3">
+            <div className="mb-4 flex flex-wrap items-end gap-3">
+        <div className="space-y-1 flex-1 min-w-[240px]">
+          <Label className="text-xs">Rechercher une opération</Label>
+          <Input
+            placeholder="Filtrer par motif, mode..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         <div className="space-y-1">
           <Label className="text-xs">Du</Label>
           <Input type="date" value={debut} onChange={(e) => setDebut(e.target.value)} />
@@ -325,7 +342,7 @@ function CaissePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(operations ?? []).map((o) => (
+              {filteredOperations.map((o) => (
                 <TableRow key={o.id}>
                   <TableCell className="whitespace-nowrap">
                     {formatDateTime(o.date_operation)}
@@ -375,10 +392,10 @@ function CaissePage() {
 
         </TableRow>
               ))}
-              {(operations ?? []).length === 0 ? (
+                            {filteredOperations.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                    Aucune opération sur la période.
+                    Aucune opération trouvée.
                   </TableCell>
                 </TableRow>
               ) : null}
