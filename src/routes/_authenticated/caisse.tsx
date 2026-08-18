@@ -48,8 +48,8 @@ function CaissePage() {
   const qc = useQueryClient();
   const { data: etab } = useEtablissement();
   const [open, setOpen] = useState(false);
-    const [debut, setDebut] = useState(today());
-  const [fin, setFin] = useState(today());
+      const currentMonth = new Date().toISOString().slice(0, 7); // Format "YYYY-MM"
+  const [mois, setMois] = useState(currentMonth);
   const [search, setSearch] = useState("");
   const [vue, setVue] = useState<"table" | "cartes">("table");
   const [sensFiltre, setSensFiltre] = useState<string>("tous");
@@ -57,7 +57,13 @@ function CaissePage() {
     motif: "",
     montant: "",
     mode_paiement: "especes",
-  });    
+  });
+
+  // Calcul dynamique du premier et dernier jour du mois sélectionné
+  const [annee, numMois] = mois.split("-");
+  const dernierJour = new Date(Number(annee), Number(numMois), 0).getDate();
+  const debut = `${mois}-01`;
+  const fin = `${mois}-${dernierJour}`;
 
   const { data: operations } = useQuery({
     queryKey: ["caisse", debut, fin],
@@ -70,18 +76,6 @@ function CaissePage() {
         .order("date_operation", { ascending: false });
       if (error) throw error;
       return data;
-    },
-  });
-
-  const { data: soldeGlobal } = useQuery({
-    queryKey: ["caisse-solde"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("caisse_operations").select("sens, montant");
-      if (error) throw error;
-      return (data ?? []).reduce(
-        (s, o) => s + (o.sens === "entree" ? Number(o.montant) : -Number(o.montant)),
-        0,
-      );
     },
   });
 
@@ -171,12 +165,15 @@ function CaissePage() {
     return matchSearch && matchSens;
   });
 
-  const entrees = (operations ?? [])
+    const entrees = (operations ?? [])
     .filter((o) => o.sens === "entree")
     .reduce((s, o) => s + Number(o.montant), 0);
   const sorties = (operations ?? [])
     .filter((o) => o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
+  
+  // Solde calculé spécifiquement sur le mois sélectionné (Entrées - Sorties)
+  const soldePeriode = entrees - sorties;
 
   return (
     <div>
@@ -290,26 +287,26 @@ function CaissePage() {
           </CardContent>
         </Card>
 
-        {/* Card Solde Global */}
+                {/* Card Solde Période */}
         <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Solde Global
+              Solde du mois (Entrées - Sorties)
             </CardTitle>
             <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Wallet className="size-5" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="font-display text-2xl font-bold tracking-tight text-foreground">
-              {formatFCFA(soldeGlobal ?? 0)}
+            <div className={`font-display text-2xl font-bold tracking-tight ${soldePeriode >= 0 ? "text-primary" : "text-rose-600"}`}>
+              {formatFCFA(soldePeriode)}
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">Disponible au coffre/caisse</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">Bilan net du mois sélectionné</p>
           </CardContent>
         </Card>
       </div>
 
-                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Button
             size="sm"
@@ -351,12 +348,12 @@ function CaissePage() {
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">Du</Label>
-          <Input type="date" value={debut} onChange={(e) => setDebut(e.target.value)} />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Au</Label>
-          <Input type="date" value={fin} onChange={(e) => setFin(e.target.value)} />
+          <Label className="text-xs">Mois et Année</Label>
+          <Input
+            type="month"
+            value={mois}
+            onChange={(e) => setMois(e.target.value)}
+          />
         </div>
       </div>
 
