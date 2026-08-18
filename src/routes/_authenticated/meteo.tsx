@@ -59,10 +59,10 @@ function MeteoPage() {
     <div className="space-y-6">
       <PageHeader
         title="Météo"
-        description="Prévisions météo pour Port-Gentil, utiles au suivi opérationnel de l’établissement."
+        description="Prévisions météo pour Port-Gentil, utiles au suivi opérationnel de l'établissement."
       />
 
-      <Card>
+      <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20">
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <div>
             <CardTitle className="text-base">Conditions actuelles</CardTitle>
@@ -101,9 +101,12 @@ function MeteoPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20">
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Prévisions sur 3 jours</CardTitle>
+          <div className="flex size-10 items-center justify-center rounded-full bg-blue-600 shadow-[0_0_16px_rgba(37,99,235,0.5)] transition-transform group-hover:scale-110">
+            <Sun className="size-5 text-white" />
+          </div>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3">
           {jours.map((jour) => (
