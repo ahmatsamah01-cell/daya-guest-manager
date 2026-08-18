@@ -220,28 +220,73 @@ function AuthPage() {
       </div>
 
       {/* ========================================================
-          CURSEUR FLOTTANT
-      ======================================================== */}
+    CURSEUR FLOTTANT
+======================================================== */}
 
+<div
+  className="fixed z-[9999] pointer-events-none hidden lg:block"
+  style={{
+    left: cursor.x,
+    top: cursor.y,
+    transform: "translate(-50%, -50%)",
+  }}
+>
+  <div
+    className={`
+      relative
+      flex
+      items-center
+      justify-center
+      w-6
+      h-6
+      rounded-full
+      border
+      border-red-500/50
+      bg-red-500/5
+      backdrop-blur-sm
+      transition-transform
+      duration-150
+      ${
+        clickEffect
+          ? "scale-[2]"
+          : "scale-100"
+      }
+    `}
+  >
+    {/* Point central */}
+    <div
+      className={`
+        w-1.5
+        h-1.5
+        rounded-full
+        bg-red-500
+        shadow-[0_0_12px_rgba(220,38,38,0.9)]
+        transition-transform
+        duration-200
+        ${
+          clickEffect
+            ? "scale-0"
+            : "scale-100"
+        }
+      `}
+    />
+
+    {/* Onde au clic */}
+    {clickEffect && (
       <div
         className="
-          fixed
-          z-50
-          pointer-events-none
-          hidden
-          lg:block
-          transition-transform
-          duration-150
-          ease-out
+          absolute
+          inset-0
+          rounded-full
+          border
+          border-red-400/60
+          animate-ping
         "
-        style={{
-          transform: `translate3d(${cursor.x - 12}px, ${
-            cursor.y - 12
-          }px, 0)`,
-        }}
-      >
-        <div
-          className={`
+      />
+    )}
+  </div>
+</div>
+        className={`
             relative
             flex
             items-center
