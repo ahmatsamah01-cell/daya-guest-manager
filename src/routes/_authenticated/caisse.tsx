@@ -309,7 +309,39 @@ function CaissePage() {
         </Card>
       </div>
 
-            <div className="mb-4 flex flex-wrap items-end gap-3">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant={vue === "table" ? "default" : "outline"}
+            onClick={() => setVue("table")}
+          >
+            Tableau
+          </Button>
+          <Button
+            size="sm"
+            variant={vue === "cartes" ? "default" : "outline"}
+            onClick={() => setVue("cartes")}
+          >
+            Cartes
+          </Button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={sensFiltre} onValueChange={setSensFiltre}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Tous les sens" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="tous">Tous les sens</SelectItem>
+              <SelectItem value="entree">Entrées uniquement</SelectItem>
+              <SelectItem value="sortie">Sorties uniquement</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-end gap-3">
         <div className="space-y-1 flex-1 min-w-[240px]">
           <Label className="text-xs">Rechercher une opération</Label>
           <Input
@@ -328,36 +360,103 @@ function CaissePage() {
         </div>
       </div>
 
-      <Card>
-        <CardContent className="overflow-x-auto p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Motif</TableHead>
-                <TableHead>Mode</TableHead>
-                <TableHead>Sens</TableHead>
-                <TableHead className="text-right">Montant</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOperations.map((o) => (
-                <TableRow key={o.id}>
-                  <TableCell className="whitespace-nowrap">
+      {vue === "table" ? (
+        <Card>
+          <CardContent className="overflow-x-auto p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Motif</TableHead>
+                  <TableHead>Mode</TableHead>
+                  <TableHead>Sens</TableHead>
+                  <TableHead className="text-right">Montant</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredOperations.map((o) => (
+                  <TableRow key={o.id}>
+                    <TableCell className="whitespace-nowrap">
+                      {formatDateTime(o.date_operation)}
+                    </TableCell>
+                    <TableCell>{o.motif}</TableCell>
+                    <TableCell>{o.mode_paiement}</TableCell>
+                    <TableCell>
+                      <Badge variant={o.sens === "entree" ? "secondary" : "destructive"}>
+                        {o.sens === "entree" ? "Entrée" : "Sortie"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right whitespace-nowrap">
+                      {formatFCFA(o.montant)}
+                    </TableCell>
+                    <TableCell className="text-right whitespace-nowrap space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditId(o.id);
+                          setEditForm({
+                            sens: o.sens,
+                            motif: o.motif,
+                            montant: String(o.montant),
+                            mode_paiement: o.mode_paiement,
+                            date_operation: new Date(o.date_operation)
+                              .toISOString()
+                              .slice(0, 16),
+                          });
+                        }}
+                      >
+                        Modifier
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          if (confirm("Êtes-vous sûr de vouloir supprimer cette opération de caisse ?")) {
+                            supprimer.mutate(o.id);
+                          }
+                        }}
+                        disabled={supprimer.isPending}
+                      >
+                        Supprimer
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredOperations.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                      Aucune opération trouvée.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredOperations.map((o) => (
+            <Card key={o.id} className="relative overflow-hidden transition-all duration-300 hover:shadow-md">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Badge variant={o.sens === "entree" ? "secondary" : "destructive"}>
+                    {o.sens === "entree" ? "Entrée" : "Sortie"}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
                     {formatDateTime(o.date_operation)}
-                  </TableCell>
-                  <TableCell>{o.motif}</TableCell>
-                  <TableCell>{o.mode_paiement}</TableCell>
-                                    <TableCell>
-                    <Badge variant={o.sens === "entree" ? "secondary" : "destructive"}>
-                      {o.sens === "entree" ? "Entrée" : "Sortie"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right whitespace-nowrap">
+                  </span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{o.motif}</h4>
+                  <p className="text-xs text-muted-foreground mt-1 capitalize">Mode : {o.mode_paiement}</p>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <span className={`font-display text-lg font-bold ${o.sens === "entree" ? "text-emerald-600" : "text-rose-600"}`}>
                     {formatFCFA(o.montant)}
-                  </TableCell>
-                  <TableCell className="text-right whitespace-nowrap space-x-2">
+                  </span>
+                  <div className="space-x-1">
                     <Button
                       size="sm"
                       variant="outline"
@@ -388,21 +487,18 @@ function CaissePage() {
                     >
                       Supprimer
                     </Button>
-                  </TableCell>
-
-        </TableRow>
-              ))}
-                            {filteredOperations.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                    Aucune opération trouvée.
-                  </TableCell>
-                </TableRow>
-              ) : null}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          {filteredOperations.length === 0 ? (
+            <div className="col-span-full py-12 text-center text-muted-foreground">
+              Aucune opération trouvée.
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
         <DialogContent>
