@@ -326,7 +326,7 @@ function CaissePage() {
     .reduce((s, o) => s + Number(o.montant), 0);
   
   const sortiesAujourdhui = (operations ?? [])
-    .filter((o) => o.date_operation.startsWith(aujourd'hui) && o.sens === "sortie")
+    .filter((o) => o.date_operation.startsWith(aujourdHui) && o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
   
   const sortiesHier = (operations ?? [])
