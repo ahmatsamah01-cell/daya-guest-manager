@@ -202,7 +202,7 @@ function CaissePage() {
     toast.success("Export Excel téléchargé.");
   };
 
-  // Fonction d'export PDF (simple tableau HTML imprimé)
+    // Fonction d'export PDF (simple tableau HTML imprimé)
   const exporterPDF = () => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
@@ -210,64 +210,52 @@ function CaissePage() {
       return;
     }
 
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Export Caisse - ${mois}</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            h1 { color: #7c2d2d; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #7c2d2d; color: white; }
-            tr:nth-child(even) { background-color: #f9f9f9; }
-            .total { font-weight: bold; margin-top: 20px; }
-            @media print {
-              button { display: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <h1>LE DAYA Guest House - Export Caisse</h1>
-          <p>Période : ${mois}</p>
-          <p class="total">Total Entrées : ${formatFCFA(entrees)} | Total Sorties : ${formatFCFA(sorties)} | Solde : ${formatFCFA(soldePeriode)}</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Motif</th>
-                <th>Mode</th>
-                <th>Sens</th>
-                <th>Montant (FCFA)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredOperations
-                .map(
-                  (o) => `
-                <tr>
-                  <td>${new Date(o.date_operation).toLocaleString("fr-FR")}</td>
-                  <td>${o.motif}</td>
-                  <td>${o.mode_paiement}</td>
-                  <td>${o.sens === "entree" ? "Entrée" : "Sortie"}</td>
-                  <td>${formatFCFA(o.montant)}</td>
-                </tr>
-              `,
-                )
-                .join("")}
-            </tbody>
-          </table>
-          <button onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#7c2d2d;color:white;border:none;cursor:pointer;">🖨️ Imprimer</button>
-        </body>
-      </html>
-    `;
+    const html = `<!DOCTYPE html>
+<html>
+  <head>
+    <title>Export Caisse - ${mois}</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 20px; }
+      h1 { color: #7c2d2d; }
+      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+      th { background-color: #7c2d2d; color: white; }
+      tr:nth-child(even) { background-color: #f9f9f9; }
+      .total { font-weight: bold; margin-top: 20px; }
+    </style>
+  </head>
+  <body>
+    <h1>LE DAYA Guest House - Export Caisse</h1>
+    <p>Période : ${mois}</p>
+    <p class="total">Total Entrées : ${formatFCFA(entrees)} | Total Sorties : ${formatFCFA(sorties)} | Solde : ${formatFCFA(soldePeriode)}</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Motif</th>
+          <th>Mode</th>
+          <th>Sens</th>
+          <th>Montant (FCFA)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filteredOperations.map((o) => `<tr>
+          <td>${new Date(o.date_operation).toLocaleString("fr-FR")}</td>
+          <td>${o.motif}</td>
+          <td>${o.mode_paiement}</td>
+          <td>${o.sens === "entree" ? "Entrée" : "Sortie"}</td>
+          <td>${formatFCFA(o.montant)}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table>
+    <button onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#7c2d2d;color:white;border:none;cursor:pointer;">Imprimer</button>
+  </body>
+</html>`;
 
     printWindow.document.write(html);
     printWindow.document.close();
     toast.success("Export PDF prêt à imprimer.");
   };
-
     // Calcul des données pour le graphique d'évolution du solde (jour par jour)
   const donneesGraphique = (() => {
     const joursDansMois = dernierJour;
