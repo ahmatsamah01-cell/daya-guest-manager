@@ -70,21 +70,22 @@ const buttonVariants = cva(
         ],
 
         glow: [
-          "bg-gradient-to-r from-primary via-purple-500 to-pink-500",
-          "text-white shadow-lg shadow-purple-500/30",
-          "hover:-translate-y-1 hover:scale-[1.03]",
-          "hover:shadow-2xl hover:shadow-purple-500/50",
-          "active:translate-y-0 active:scale-[0.98]",
-        ],
+  "bg-gradient-to-r from-primary via-gold to-primary",
+  "text-primary-foreground",
+  "shadow-lg shadow-gold/30",
+  "hover:-translate-y-1 hover:scale-[1.03]",
+  "hover:shadow-2xl hover:shadow-gold/50",
+  "active:translate-y-0 active:scale-[0.98]",
+],
 
-        glass: [
-          "border border-white/30 bg-white/20 text-foreground",
-          "shadow-lg backdrop-blur-xl",
-          "hover:-translate-y-1 hover:scale-[1.02]",
-          "hover:bg-white/35 hover:shadow-xl",
-          "active:translate-y-0 active:scale-[0.98]",
-        ],
-      },
+glass: [
+  "border border-white/30 bg-white/20 text-foreground",
+  "shadow-lg backdrop-blur-xl",
+  "hover:-translate-y-1 hover:scale-[1.02]",
+  "hover:bg-white/35 hover:shadow-xl",
+  "active:translate-y-0 active:scale-[0.98]",
+],
+     },
 
       size: {
         default: "h-10 px-4 py-2",
