@@ -148,27 +148,35 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+// Nouveau composant qui utilise useSettings() et applique le thème global
+function AppContent() {
+  const { customWallpaperUrl, blurIntensity } = useSettings();
+
+  return (
+    <div
+      className="min-h-screen"
+      style={{
+        backgroundImage: customWallpaperUrl
+          ? `url(${customWallpaperUrl})`
+          : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backdropFilter: `blur(${blurIntensity}px)`,
+      }}
+    >
+      <Outlet />
+    </div>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const { customWallpaperUrl, blurIntensity } = useSettings();
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <ButtonThemeProvider>
-          <div
-            className="min-h-screen"
-            style={{
-              backgroundImage: customWallpaperUrl
-                ? `url(${customWallpaperUrl})`
-                : undefined,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backdropFilter: `blur(${blurIntensity}px)`,
-            }}
-          >
-            <Outlet />
-          </div>
+          <AppContent />
         </ButtonThemeProvider>
       </ThemeProvider>
     </QueryClientProvider>
