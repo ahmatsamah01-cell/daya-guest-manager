@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, ArrowDownLeft, ArrowUpRight, Wallet, FileSpreadsheet, Download, TrendingUp, X } from "lucide-react";
+import { Plus, ArrowDownLeft, ArrowUpRight, Wallet, FileSpreadsheet, Download, TrendingUp, X, TrendingDown, Minus } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -268,8 +268,74 @@ function CaissePage() {
     toast.success("Export PDF prêt à imprimer.");
   };
 
-  // Calcul des données pour le graphique d'évolution du solde (jour par jour)
+    // Calcul des données pour le graphique d'évolution du solde (jour par jour)
   const donneesGraphique = (() => {
+    const joursDansMois = dernierJour;
+    const donneesParJour: Record<string, { jour: string; entrees: number; sorties: number; solde: number }> = {};
+
+    // Initialiser tous les jours du mois
+    for (let i = 1; i <= joursDansMois; i++) {
+      const jourStr = i.toString().padStart(2, "0");
+      const dateStr = `${mois}-${jourStr}`;
+      donneesParJour[dateStr] = {
+        jour: jourStr,
+        entrees: 0,
+        sorties: 0,
+        solde: 0,
+      };
+    }
+
+    // Accumuler les opérations jour par jour
+    let soldeCumule = 0;
+    (operations ?? []).forEach((o) => {
+      const dateOp = new Date(o.date_operation);
+      const jourStr = dateOp.getDate().toString().padStart(2, "0");
+      const dateStr = `${mois}-${jourStr}`;
+
+      if (donneesParJour[dateStr]) {
+        if (o.sens === "entree") {
+          donneesParJour[dateStr].entrees += Number(o.montant);
+        } else {
+          donneesParJour[dateStr].sorties += Number(o.montant);
+        }
+      }
+    });
+
+    // Calculer le solde cumulé jour par jour
+    for (let i = 1; i <= joursDansMois; i++) {
+      const jourStr = i.toString().padStart(2, "0");
+      const dateStr = `${mois}-${jourStr}`;
+      const data = donneesParJour[dateStr];
+      soldeCumule += data.entrees - data.sorties;
+      data.solde = soldeCumule;
+    }
+
+    return Object.values(donneesParJour);
+  })();
+
+  // Calcul des comparaisons (aujourd'hui vs hier)
+  const aujourdhui = new Date().toISOString().slice(0, 10);
+  const hier = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  
+  const entreesAujourdhui = (operations ?? [])
+    .filter((o) => o.date_operation.startsWith(aujourd'hui) && o.sens === "entree")
+    .reduce((s, o) => s + Number(o.montant), 0);
+  
+  const entreesHier = (operations ?? [])
+    .filter((o) => o.date_operation.startsWith(hier) && o.sens === "entree")
+    .reduce((s, o) => s + Number(o.montant), 0);
+  
+  const sortiesAujourdhui = (operations ?? [])
+    .filter((o) => o.date_operation.startsWith(aujourd'hui) && o.sens === "sortie")
+    .reduce((s, o) => s + Number(o.montant), 0);
+  
+  const sortiesHier = (operations ?? [])
+    .filter((o) => o.date_operation.startsWith(hier) && o.sens === "sortie")
+    .reduce((s, o) => s + Number(o.montant), 0);
+
+  const variationEntrees = entreesHier > 0 ? ((entreesAujourdhui - entreesHier) / entreesHier) * 100 : 0;
+  const variationSorties = sortiesHier > 0 ? ((sortiesAujourdhui - sortiesHier) / sortiesHier) * 100 : 0;
+  const variationSolde = entreesHier > 0 ? (((entreesAujourdhui - sortiesAujourdhui) - (entreesHier - sortiesHier)) / (entreesHier - sortiesHier)) * 100 : 0;
     const joursDansMois = dernierJour;
     const donneesParJour: Record<string, { jour: string; entrees: number; sorties: number; solde: number }> = {};
 
@@ -437,17 +503,28 @@ function CaissePage() {
         </CardContent>
       </Card>
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-3">
+            <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <div className="group flex items-center gap-3 rounded-xl border bg-gradient-to-br from-emerald-50 to-emerald-100/50 px-4 py-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-emerald-950/40 dark:to-emerald-900/20">
           <div className="flex size-11 items-center justify-center rounded-full bg-emerald-500 shadow-[0_0_16px_rgba(16,185,129,0.5)] transition-transform group-hover:scale-110">
             <ArrowDownLeft className="size-5 text-white" />
           </div>
-          <div>
+          <div className="flex-1">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Entrées (période)</p>
             <p className="font-display text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {formatFCFA(entrees)}
             </p>
-            <p className="text-[11px] text-muted-foreground">Recettes encaissées</p>
+            <div className="flex items-center gap-1 mt-1">
+              {variationEntrees > 0 ? (
+                <TrendingUp className="size-3 text-emerald-600" />
+              ) : variationEntrees < 0 ? (
+                <TrendingDown className="size-3 text-rose-600" />
+              ) : (
+                <Minus className="size-3 text-muted-foreground" />
+              )}
+              <span className={`text-xs font-medium ${variationEntrees > 0 ? "text-emerald-600" : variationEntrees < 0 ? "text-rose-600" : "text-muted-foreground"}`}>
+                {variationEntrees > 0 ? "+" : ""}{variationEntrees.toFixed(1)}% vs hier
+              </span>
+            </div>
           </div>
         </div>
 
@@ -455,12 +532,23 @@ function CaissePage() {
           <div className="flex size-11 items-center justify-center rounded-full bg-rose-500 shadow-[0_0_16px_rgba(244,63,94,0.5)] transition-transform group-hover:scale-110">
             <ArrowUpRight className="size-5 text-white" />
           </div>
-          <div>
+          <div className="flex-1">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Sorties (période)</p>
             <p className="font-display text-2xl font-bold text-rose-600 dark:text-rose-400">
               {formatFCFA(sorties)}
             </p>
-            <p className="text-[11px] text-muted-foreground">Dépenses effectuées</p>
+            <div className="flex items-center gap-1 mt-1">
+              {variationSorties > 0 ? (
+                <TrendingUp className="size-3 text-rose-600" />
+              ) : variationSorties < 0 ? (
+                <TrendingDown className="size-3 text-emerald-600" />
+              ) : (
+                <Minus className="size-3 text-muted-foreground" />
+              )}
+              <span className={`text-xs font-medium ${variationSorties > 0 ? "text-rose-600" : variationSorties < 0 ? "text-emerald-600" : "text-muted-foreground"}`}>
+                {variationSorties > 0 ? "+" : ""}{variationSorties.toFixed(1)}% vs hier
+              </span>
+            </div>
           </div>
         </div>
 
@@ -468,14 +556,25 @@ function CaissePage() {
           <div className="flex size-11 items-center justify-center rounded-full bg-red-600 shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
             <Wallet className="size-5 text-white" />
           </div>
-          <div>
+          <div className="flex-1">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Solde du mois</p>
             <p
               className={`font-display text-2xl font-bold ${soldePeriode >= 0 ? "text-red-700 dark:text-red-400" : "text-rose-600"}`}
             >
               {formatFCFA(soldePeriode)}
             </p>
-            <p className="text-[11px] text-muted-foreground">Entrées − Sorties</p>
+            <div className="flex items-center gap-1 mt-1">
+              {variationSolde > 0 ? (
+                <TrendingUp className="size-3 text-emerald-600" />
+              ) : variationSolde < 0 ? (
+                <TrendingDown className="size-3 text-rose-600" />
+              ) : (
+                <Minus className="size-3 text-muted-foreground" />
+              )}
+              <span className={`text-xs font-medium ${variationSolde > 0 ? "text-emerald-600" : variationSolde < 0 ? "text-rose-600" : "text-muted-foreground"}`}>
+                {variationSolde > 0 ? "+" : ""}{variationSolde.toFixed(1)}% vs hier
+              </span>
+            </div>
           </div>
         </div>
       </div>
