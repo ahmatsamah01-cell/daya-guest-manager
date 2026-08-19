@@ -389,94 +389,94 @@ LE DAYA Guest House`
 
       {/* CARTES DE SYNTHÈSE */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        {/* Total facturé */}
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Total facturé
-                </p>
-                <p className="text-2xl font-bold">
-                  {formatFCFA(totalFacture)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {nbFactures} facture{nbFactures > 1 ? 's' : ''}
-                </p>
-              </div>
-              <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total payé */}
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Total payé
-                </p>
-                <p className="text-2xl font-bold text-emerald-600">
-                  {formatFCFA(totalPaye)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {facturesFiltrees.filter(f => f.statut === 'payee').length} payée{facturesFiltrees.filter(f => f.statut === 'payee').length > 1 ? 's' : ''}
-                </p>
-              </div>
-              <div className="p-3 rounded-full bg-emerald-100 text-emerald-600">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total impayé */}
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Total impayé
-                </p>
-                <p className="text-2xl font-bold text-red-600">
-                  {formatFCFA(totalImpaye)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {facturesFiltrees.filter(f => f.statut !== 'payee').length} impayée{facturesFiltrees.filter(f => f.statut !== 'payee').length > 1 ? 's' : ''}
-                </p>
-              </div>
-              <div className="p-3 rounded-full bg-red-100 text-red-600">
-                <AlertCircle className="w-6 h-6" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Nombre de factures */}
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Nombre de factures
-                </p>
-                <p className="text-2xl font-bold">
-                  {nbFactures}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Période sélectionnée
-                </p>
-              </div>
-              <div className="p-3 rounded-full bg-purple-100 text-purple-600">
-                <FileText className="w-6 h-6" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+  {/* Total facturé */}
+  <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-blue-50 via-white to-blue-100 border-blue-200">
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">
+            Total facturé
+          </p>
+          <p className="text-2xl font-bold mt-1">
+            {formatFCFA(totalFacture)}
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            {nbFactures} facture{nbFactures > 1 ? 's' : ''}
+          </p>
+        </div>
+        <div className="p-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-[0_0_16px_rgba(59,130,246,0.5)] group-hover:shadow-[0_0_24px_rgba(59,130,246,0.7)] transition-shadow duration-300">
+          <TrendingUp className="w-6 h-6" />
+        </div>
       </div>
+    </CardContent>
+  </Card>
+
+  {/* Total payé */}
+  <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-emerald-50 via-white to-emerald-100 border-emerald-200">
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">
+            Total payé
+          </p>
+          <p className="text-2xl font-bold text-emerald-600 mt-1">
+            {formatFCFA(totalPaye)}
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            {facturesFiltrees.filter(f => f.statut === 'payee').length} payée{facturesFiltrees.filter(f => f.statut === 'payee').length > 1 ? 's' : ''}
+          </p>
+        </div>
+        <div className="p-4 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-[0_0_16px_rgba(16,185,129,0.5)] group-hover:shadow-[0_0_24px_rgba(16,185,129,0.7)] transition-shadow duration-300">
+          <CheckCircle2 className="w-6 h-6" />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+
+  {/* Total impayé */}
+  <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-red-50 via-white to-red-100 border-red-200">
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">
+            Total impayé
+          </p>
+          <p className="text-2xl font-bold text-red-600 mt-1">
+            {formatFCFA(totalImpaye)}
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            {facturesFiltrees.filter(f => f.statut !== 'payee').length} impayée{facturesFiltrees.filter(f => f.statut !== 'payee').length > 1 ? 's' : ''}
+          </p>
+        </div>
+        <div className="p-4 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_0_16px_rgba(239,68,68,0.5)] group-hover:shadow-[0_0_24px_rgba(239,68,68,0.7)] transition-shadow duration-300">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+
+  {/* Nombre de factures */}
+  <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-purple-50 via-white to-purple-100 border-purple-200">
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">
+            Nombre de factures
+          </p>
+          <p className="text-2xl font-bold mt-1">
+            {nbFactures}
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Période sélectionnée
+          </p>
+        </div>
+        <div className="p-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-[0_0_16px_rgba(147,51,234,0.5)] group-hover:shadow-[0_0_24px_rgba(147,51,234,0.7)] transition-shadow duration-300">
+          <FileText className="w-6 h-6" />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+</div>
 
       {/* BARRE DE FILTRES */}
       <Card className="mb-6">
