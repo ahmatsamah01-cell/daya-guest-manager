@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -306,12 +307,60 @@ function ParametresPage() {
     toast.success("Paramètres exportés.");
   };
 
+  function ParametresPage() {
+  // tes hooks et tes états...
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 animate-gradient-bg">
-      <div className="relative max-w-7xl mx-auto px-4 py-8">
-        <PageHeader 
-          title="Paramètres" 
-          description="Configuration complète de l'application et de l'établissement"
+    <div>
+      <PageHeader
+        title="Paramètres"
+        description="Configuration de l'application"
+      />
+
+      {/* Bloc temporaire de test */}
+      <div className="mb-6 rounded-2xl border bg-card/80 p-6 shadow-lg backdrop-blur">
+        <h2 className="mb-4 text-lg font-semibold">
+          Test des boutons
+        </h2>
+
+        <div className="flex flex-wrap gap-4">
+          <Button>
+            Principal
+          </Button>
+
+          <Button variant="secondary">
+            Secondaire
+          </Button>
+
+          <Button variant="outline">
+            Contour
+          </Button>
+
+          <Button variant="ghost">
+            Transparent
+          </Button>
+
+          <Button variant="destructive">
+            Supprimer
+          </Button>
+
+          <Button variant="glow">
+            Premium
+          </Button>
+
+          <Button variant="glass">
+            Verre
+          </Button>
+
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Rechercher"
+          >
+            <Search />
+          </Button>
+        </div>
+      </div>
           action={
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={exporterParametres}>
