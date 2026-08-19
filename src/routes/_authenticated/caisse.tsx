@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, ArrowDownLeft, ArrowUpRight, Wallet, FileSpreadsheet, Download, TrendingUp } from "lucide-react";
+import { Plus, ArrowDownLeft, ArrowUpRight, Wallet, FileSpreadsheet, Download, TrendingUp, X } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -528,6 +528,46 @@ function CaissePage() {
           </Select>
         </div>
       </div>
+            {/* Badges des filtres actifs */}
+      {(search || sensFiltre !== "tous") && (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">Filtres actifs :</span>
+          {search && (
+            <Badge variant="secondary" className="gap-1">
+              Recherche : {search}
+              <button
+                onClick={() => setSearch("")}
+                className="ml-1 hover:text-foreground"
+              >
+                <X className="size-3" />
+              </button>
+            </Badge>
+          )}
+          {sensFiltre !== "tous" && (
+            <Badge variant="secondary" className="gap-1">
+              Sens : {sensFiltre === "entree" ? "Entrées" : "Sorties"}
+              <button
+                onClick={() => setSensFiltre("tous")}
+                className="ml-1 hover:text-foreground"
+              >
+                <X className="size-3" />
+              </button>
+            </Badge>
+          )}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-5 text-xs"
+            onClick={() => {
+              setSearch("");
+              setSensFiltre("tous");
+            }}
+          >
+            Tout effacer
+          </Button>
+        </div>
+      )}
+
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <div className="space-y-1 flex-1 min-w-[240px]">
           <Label className="text-xs">Rechercher une opération</Label>
@@ -546,7 +586,6 @@ function CaissePage() {
           />
         </div>
       </div>
-
       {vue === "table" ? (
         <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-950/40 dark:to-slate-900/20">
           <CardContent className="overflow-x-auto p-0">
