@@ -125,7 +125,7 @@ function CaissePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-    const supprimer = useMutation({
+      const supprimer = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("caisse_operations").delete().eq("id", id);
       if (error) throw error;
@@ -136,6 +136,45 @@ function CaissePage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+     const ajouter = useMutation({
+    mutationFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      const { error } = await supabase.from("caisse_operations").insert({
+        etablissement_id: etab!.id,
+        sens: "sortie",
+        motif: form.motif,
+        montant: Number(form.montant),
+        mode_paiement: form.mode_paiement,
+        created_by: u.user?.id ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries();
+      setOpen(false);
+      setForm({ motif: "", montant: "", mode_paiement: "especes" });
+      toast.success("Sortie de caisse enregistrée.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+    const filteredOperations = (operations ?? []).filter((o) => {
+    const matchSearch =
+      o.motif.toLowerCase().includes(search.toLowerCase()) ||
+      o.mode_paiement.toLowerCase().includes(search.toLowerCase());
+    const matchSens = sensFiltre === "tous" || o.sens === sensFiltre;
+    return matchSearch && matchSens;
+  });
+
+  const entrees = (operations ?? [])
+    .filter((o) => o.sens === "entree")
+    .reduce((s, o) => s + Number(o.montant), 0);
+  const sorties = (operations ?? [])
+    .filter((o) => o.sens === "sortie")
+    .reduce((s, o) => s + Number(o.montant), 0);
+
+  // Solde calculé spécifiquement sur le mois sélectionné (Entrées - Sorties)
+  const soldePeriode = entrees - sorties;
 
   // Fonction d'export Excel (CSV)
   const exporterExcel = () => {
@@ -149,9 +188,10 @@ function CaissePage() {
     ]);
 
     const csvContent = [
-  headers.join(";"),
-  ...rows.map((row) => row.map((cell) => `"${cell ?? ''}"`).join(";"))
-].join("\n");
+      headers.join(";"),
+      ...rows.map((row) => row.map((cell) => `"${cell ?? ''}"`).join(";")),
+    ].join("
+");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -228,45 +268,6 @@ function CaissePage() {
     printWindow.document.close();
     toast.success("Export PDF prêt à imprimer.");
   };
-
-     const ajouter = useMutation({
-    mutationFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
-      const { error } = await supabase.from("caisse_operations").insert({
-        etablissement_id: etab!.id,
-        sens: "sortie",
-        motif: form.motif,
-        montant: Number(form.montant),
-        mode_paiement: form.mode_paiement,
-        created_by: u.user?.id ?? null,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries();
-      setOpen(false);
-      setForm({ motif: "", montant: "", mode_paiement: "especes" });
-      toast.success("Sortie de caisse enregistrée.");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-  const filteredOperations = (operations ?? []).filter((o) => {
-    const matchSearch =
-      o.motif.toLowerCase().includes(search.toLowerCase()) ||
-      o.mode_paiement.toLowerCase().includes(search.toLowerCase());
-    const matchSens = sensFiltre === "tous" || o.sens === sensFiltre;
-    return matchSearch && matchSens;
-  });
-
-    const entrees = (operations ?? [])
-    .filter((o) => o.sens === "entree")
-    .reduce((s, o) => s + Number(o.montant), 0);
-  const sorties = (operations ?? [])
-    .filter((o) => o.sens === "sortie")
-    .reduce((s, o) => s + Number(o.montant), 0);
-
-    // Solde calculé spécifiquement sur le mois sélectionné (Entrées - Sorties)
-  const soldePeriode = entrees - sorties;
 
   // Calcul des données pour le graphique d'évolution du solde (jour par jour)
   const donneesGraphique = (() => {
