@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, ArrowDownLeft, ArrowUpRight, Wallet, FileSpreadsheet, Download } from "lucide-react";
+import { Plus, ArrowDownLeft, ArrowUpRight, Wallet, FileSpreadsheet, Download, TrendingUp } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -264,8 +265,53 @@ function CaissePage() {
     .filter((o) => o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
 
-  // Solde calculé spécifiquement sur le mois sélectionné (Entrées - Sorties)
+    // Solde calculé spécifiquement sur le mois sélectionné (Entrées - Sorties)
   const soldePeriode = entrees - sorties;
+
+  // Calcul des données pour le graphique d'évolution du solde (jour par jour)
+  const donneesGraphique = (() => {
+    const joursDansMois = dernierJour;
+    const donneesParJour: Record<string, { jour: string; entrees: number; sorties: number; solde: number }> = {};
+
+    // Initialiser tous les jours du mois
+    for (let i = 1; i <= joursDansMois; i++) {
+      const jourStr = i.toString().padStart(2, "0");
+      const dateStr = `${mois}-${jourStr}`;
+      donneesParJour[dateStr] = {
+        jour: jourStr,
+        entrees: 0,
+        sorties: 0,
+        solde: 0,
+      };
+    }
+
+    // Accumuler les opérations jour par jour
+    let soldeCumule = 0;
+    (operations ?? []).forEach((o) => {
+      const dateOp = new Date(o.date_operation);
+      const jourStr = dateOp.getDate().toString().padStart(2, "0");
+      const dateStr = `${mois}-${jourStr}`;
+      
+      if (donneesParJour[dateStr]) {
+        if (o.sens === "entree") {
+          donneesParJour[dateStr].entrees += Number(o.montant);
+        } else {
+          donneesParJour[dateStr].sorties += Number(o.montant);
+        }
+      }
+    });
+
+    // Calculer le solde cumulé jour par jour
+    for (let i = 1; i <= joursDansMois; i++) {
+      const jourStr = i.toString().padStart(2, "0");
+      const dateStr = `${mois}-${jourStr}`;
+      const data = donneesParJour[dateStr];
+      soldeCumule += data.entrees - data.sorties;
+      data.solde = soldeCumule;
+    }
+
+    return Object.values(donneesParJour);
+  })();
 
   return (
     <div>
@@ -342,7 +388,56 @@ function CaissePage() {
         }
       />
 
-            <div className="mb-6 grid gap-4 sm:grid-cols-3">
+                  {/* Graphique d'évolution du solde */}
+      <Card className="group relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary/90 via-primary to-primary/80 shadow-md">
+              <TrendingUp className="size-4 text-white" />
+            </div>
+            <CardTitle>Évolution du solde — {mois}</CardTitle>
+          </div>
+          <CardDescription>Solde cumulé jour par jour (Entrées − Sorties)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[280px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={donneesGraphique}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="jour"
+                  tick={{ fontSize: 12 }}
+                  label={{ value: "Jour du mois", position: "insideBottom", offset: -5, fontSize: 12 }}
+                />
+                <YAxis
+                  tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                  tick={{ fontSize: 12 }}
+                />
+                <Tooltip
+                  formatter={(value: number) => formatFCFA(value)}
+                  labelFormatter={(label) => `Jour ${label}`}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "var(--radius)",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="solde"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={3}
+                  dot={{ fill: "hsl(var(--primary))", r: 4 }}
+                  activeDot={{ r: 6, strokeWidth: 2 }}
+                  name="Solde"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <div className="group flex items-center gap-3 rounded-xl border bg-gradient-to-br from-emerald-50 to-emerald-100/50 px-4 py-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-emerald-950/40 dark:to-emerald-900/20">
           <div className="flex size-11 items-center justify-center rounded-full bg-emerald-500 shadow-[0_0_16px_rgba(16,185,129,0.5)] transition-transform group-hover:scale-110">
             <ArrowDownLeft className="size-5 text-white" />
