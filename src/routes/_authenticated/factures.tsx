@@ -300,8 +300,7 @@ LE DAYA Guest House`
 
     const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
       .map((el) => el.outerHTML)
-      .join("
-");
+      .join("\n");
 
     fenetre.document.write(`
       <html>
