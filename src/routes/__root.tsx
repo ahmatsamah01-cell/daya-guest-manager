@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "../context/ThemeContext";
 import { ButtonThemeProvider } from "../context/ButtonThemeContext";
+import { useSettings } from "../context/ThemeContext";
 
 function NotFoundComponent() {
   return (
@@ -149,12 +150,25 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { customWallpaperUrl, blurIntensity } = useSettings();
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <ButtonThemeProvider>
-          <Outlet />
+          <div
+            className="min-h-screen"
+            style={{
+              backgroundImage: customWallpaperUrl
+                ? `url(${customWallpaperUrl})`
+                : undefined,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backdropFilter: `blur(${blurIntensity}px)`,
+            }}
+          >
+            <Outlet />
+          </div>
         </ButtonThemeProvider>
       </ThemeProvider>
     </QueryClientProvider>
