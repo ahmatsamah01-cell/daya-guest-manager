@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Cloud, CloudFog, CloudLightning, CloudRain, Droplets, MapPin, Sun, Wind } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/AppLayout";
+import { useSettings } from "../../context/ThemeContext";
 
 export const Route = createFileRoute("/_authenticated/meteo")({
   head: () => ({
@@ -23,6 +24,16 @@ function iconMeteo(code: number) {
 }
 
 function MeteoPage() {
+  const {
+    theme,
+    mode,
+    radius,
+    wallpaper,
+    customWallpaperUrl,
+    blurIntensity,
+    glowEnabled,
+  } = useSettings();
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["meteo-detail-port-gentil"],
     queryFn: async () => {
@@ -56,7 +67,17 @@ function MeteoPage() {
   }));
 
   return (
-    <div className="space-y-6">
+    <div
+      className="min-h-screen space-y-6 p-6"
+      style={{
+        backgroundImage: customWallpaperUrl
+          ? `url(${customWallpaperUrl})`
+          : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backdropFilter: `blur(${blurIntensity}px)`,
+      }}
+    >
       <PageHeader
         title="Météo"
         description="Prévisions météo pour Port-Gentil, utiles au suivi opérationnel de l'établissement."
