@@ -360,19 +360,6 @@ function ParametresPage() {
           </Button>
         </div>
       </div>
-          action={
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={exporterParametres}>
-                <Download className="w-4 h-4 mr-2" />
-                Exporter
-              </Button>
-              <Button variant="outline" size="sm">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Réinitialiser
-              </Button>
-            </div>
-          }
-        />
 
         {/* ONGLETS DE NAVIGATION */}
         <Tabs value={tabActif} onValueChange={setTabActif} className="w-full">
