@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, ArrowDownLeft, ArrowUpRight, Wallet } from "lucide-react";
+import { Plus, ArrowDownLeft, ArrowUpRight, Wallet, FileSpreadsheet, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,7 +124,7 @@ function CaissePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const supprimer = useMutation({
+    const supprimer = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("caisse_operations").delete().eq("id", id);
       if (error) throw error;
@@ -135,6 +135,99 @@ function CaissePage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  // Fonction d'export Excel (CSV)
+  const exporterExcel = () => {
+    const headers = ["Date", "Motif", "Mode de paiement", "Sens", "Montant (FCFA)"];
+    const rows = filteredOperations.map((o) => [
+      new Date(o.date_operation).toLocaleString("fr-FR"),
+      o.motif,
+      o.mode_paiement,
+      o.sens === "entree" ? "Entrée" : "Sortie",
+      o.montant,
+    ]);
+
+    const csvContent = [
+      headers.join(";"),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(";")),
+    ].join("
+");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `caisse_${mois}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Export Excel téléchargé.");
+  };
+
+  // Fonction d'export PDF (simple tableau HTML imprimé)
+  const exporterPDF = () => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Impossible d'ouvrir la fenêtre d'impression");
+      return;
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Export Caisse - ${mois}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #7c2d2d; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #7c2d2d; color: white; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+            .total { font-weight: bold; margin-top: 20px; }
+            @media print {
+              button { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>LE DAYA Guest House - Export Caisse</h1>
+          <p>Période : ${mois}</p>
+          <p class="total">Total Entrées : ${formatFCFA(entrees)} | Total Sorties : ${formatFCFA(sorties)} | Solde : ${formatFCFA(soldePeriode)}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Motif</th>
+                <th>Mode</th>
+                <th>Sens</th>
+                <th>Montant (FCFA)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredOperations
+                .map(
+                  (o) => `
+                <tr>
+                  <td>${new Date(o.date_operation).toLocaleString("fr-FR")}</td>
+                  <td>${o.motif}</td>
+                  <td>${o.mode_paiement}</td>
+                  <td>${o.sens === "entree" ? "Entrée" : "Sortie"}</td>
+                  <td>${formatFCFA(o.montant)}</td>
+                </tr>
+              `,
+                )
+                .join("")}
+            </tbody>
+          </table>
+          <button onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#7c2d2d;color:white;border:none;cursor:pointer;">🖨️ Imprimer</button>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    toast.success("Export PDF prêt à imprimer.");
+  };
 
      const ajouter = useMutation({
     mutationFn: async () => {
@@ -292,7 +385,7 @@ function CaissePage() {
           </div>
         </div>
       </div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Button
             size="sm"
@@ -311,6 +404,24 @@ function CaissePage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={exporterExcel}
+            disabled={filteredOperations.length === 0}
+          >
+            <FileSpreadsheet className="size-4" />
+            Excel
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={exporterPDF}
+            disabled={filteredOperations.length === 0}
+          >
+            <Download className="size-4" />
+            PDF
+          </Button>
           <Select value={sensFiltre} onValueChange={setSensFiltre}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Tous les sens" />
@@ -323,7 +434,6 @@ function CaissePage() {
           </Select>
         </div>
       </div>
-
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <div className="space-y-1 flex-1 min-w-[240px]">
           <Label className="text-xs">Rechercher une opération</Label>
