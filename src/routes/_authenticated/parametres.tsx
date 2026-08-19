@@ -407,12 +407,30 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
         </button>
       ))}
     </div>
+
+    {/* Aperçu en direct */}
+    <div className="pt-2">
+      <p className="text-xs font-medium text-gray-700 mb-2">
+        Aperçu
+      </p>
+      <div className="flex items-center gap-3">
+        <Button>
+          Bouton exemple
+        </Button>
+        <Button variant="outline">
+          Contour
+        </Button>
+      </div>
+      <p className="text-xs text-gray-600 mt-2">
+        Le bouton “Bouton exemple” suit le style global. “Contour” reste fixe.
+      </p>
+    </div>
+
     <p className="text-xs text-gray-600">
       Ce réglage s’applique à tous les boutons de l’application (sauf ceux avec un style explicite).
     </p>
   </CardContent>
 </Card>
-
             {/* Mode d'affichage */}
             <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-blue-50 via-white to-cyan-50 border-blue-200">
               <CardHeader>
