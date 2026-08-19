@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, useMemo } from "react";
+import { useButtonTheme } from "@/context/ButtonThemeContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -93,6 +94,8 @@ function ParametresPage() {
     setGlowEnabled,
     hotelInfo,
   } = useSettings();
+
+const { buttonTheme, setButtonTheme } = useButtonTheme();
 
   const radiusClasses: Record<RadiusType, string> = {
     sm: "rounded-sm",
@@ -313,51 +316,6 @@ function ParametresPage() {
         description="Configuration de l'application"
       />
 
-      {/* Bloc temporaire de test des boutons */}
-      <div className="mb-6 rounded-2xl border bg-card/80 p-6 shadow-lg backdrop-blur">
-        <h2 className="mb-4 text-lg font-semibold">
-          Test des boutons
-        </h2>
-
-        <div className="flex flex-wrap gap-4">
-          <Button>
-            Principal
-          </Button>
-
-          <Button variant="secondary">
-            Secondaire
-          </Button>
-
-          <Button variant="outline">
-            Contour
-          </Button>
-
-          <Button variant="ghost">
-            Transparent
-          </Button>
-
-          <Button variant="destructive">
-            Supprimer
-          </Button>
-
-          <Button variant="glow">
-            Premium
-          </Button>
-
-          <Button variant="glass">
-            Verre
-          </Button>
-
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Rechercher"
-          >
-            <Search />
-          </Button>
-        </div>
-      </div>
-
       {/* ONGLETS DE NAVIGATION */}
       <Tabs value={tabActif} onValueChange={setTabActif} className="w-full">
         <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-6">
@@ -419,6 +377,41 @@ function ParametresPage() {
                 </div>
               </CardContent>
             </Card>
+
+{/* Style des boutons */}
+<Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-indigo-50 via-white to-blue-50 border-indigo-200">
+  <CardHeader>
+    <div className="flex items-center gap-2">
+      <Settings className="w-5 h-5 text-indigo-600" />
+      <CardTitle>Style des boutons</CardTitle>
+    </div>
+    <CardDescription>Apparence globale des boutons</CardDescription>
+  </CardHeader>
+  <CardContent className="space-y-4">
+    <div className="grid grid-cols-3 gap-2">
+      {[
+        { id: "default", label: "Classique" },
+        { id: "glow", label: "Glow ✨" },
+        { id: "glass", label: "Verre 🪟" },
+      ].map((t) => (
+        <button
+          key={t.id}
+          onClick={() => setButtonTheme(t.id as "default" | "glow" | "glass")}
+          className={`py-3 px-2 text-center font-medium border-2 rounded-xl transition-all text-sm ${
+            buttonTheme === t.id
+              ? "border-indigo-500 bg-indigo-100 text-indigo-700 shadow-lg"
+              : "border-gray-200 text-gray-600 hover:border-indigo-300 bg-white/50"
+          }`}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+    <p className="text-xs text-gray-600">
+      Ce réglage s’applique à tous les boutons de l’application (sauf ceux avec un style explicite).
+    </p>
+  </CardContent>
+</Card>
 
             {/* Mode d'affichage */}
             <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-blue-50 via-white to-cyan-50 border-blue-200">
