@@ -1246,6 +1246,5 @@ function ParametresPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
   );
 }
