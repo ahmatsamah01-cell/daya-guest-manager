@@ -164,8 +164,7 @@ function ParametresPage() {
     smtpUser: "",
     smtpPassword: "",
     emailExpediteur: "",
-    signatureEmail: "Cordialement,
-L'équipe LE DAYA Guest House",
+    signatureEmail: "Cordialement,\nL'équipe LE DAYA Guest House",
   });
 
   // Initialisation des données
