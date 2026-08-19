@@ -326,7 +326,7 @@ function CaissePage() {
     .reduce((s, o) => s + Number(o.montant), 0);
   
   const sortiesAujourdhui = (operations ?? [])
-    .filter((o) => o.date_operation.startsWith(aujourdHui) && o.sens === "sortie")
+    .filter((o) => o.date_operation.startsWith(Aujourd'hui) && o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
   
   const sortiesHier = (operations ?? [])
@@ -335,49 +335,7 @@ function CaissePage() {
 
   const variationEntrees = entreesHier > 0 ? ((entreesAujourdhui - entreesHier) / entreesHier) * 100 : 0;
   const variationSorties = sortiesHier > 0 ? ((sortiesAujourdhui - sortiesHier) / sortiesHier) * 100 : 0;
-  const variationSolde = entreesHier > 0 ? (((entreesAujourdhui - sortiesAujourdhui) - (entreesHier - sortiesHier)) / (entreesHier - sortiesHier)) * 100 : 0;
-    const joursDansMois = dernierJour;
-    const donneesParJour: Record<string, { jour: string; entrees: number; sorties: number; solde: number }> = {};
-
-    // Initialiser tous les jours du mois
-    for (let i = 1; i <= joursDansMois; i++) {
-      const jourStr = i.toString().padStart(2, "0");
-      const dateStr = `${mois}-${jourStr}`;
-      donneesParJour[dateStr] = {
-        jour: jourStr,
-        entrees: 0,
-        sorties: 0,
-        solde: 0,
-      };
-    }
-
-    // Accumuler les opérations jour par jour
-    let soldeCumule = 0;
-    (operations ?? []).forEach((o) => {
-      const dateOp = new Date(o.date_operation);
-      const jourStr = dateOp.getDate().toString().padStart(2, "0");
-      const dateStr = `${mois}-${jourStr}`;
-      
-      if (donneesParJour[dateStr]) {
-        if (o.sens === "entree") {
-          donneesParJour[dateStr].entrees += Number(o.montant);
-        } else {
-          donneesParJour[dateStr].sorties += Number(o.montant);
-        }
-      }
-    });
-
-    // Calculer le solde cumulé jour par jour
-    for (let i = 1; i <= joursDansMois; i++) {
-      const jourStr = i.toString().padStart(2, "0");
-      const dateStr = `${mois}-${jourStr}`;
-      const data = donneesParJour[dateStr];
-      soldeCumule += data.entrees - data.sorties;
-      data.solde = soldeCumule;
-    }
-
-    return Object.values(donneesParJour);
-  })();
+    const variationSolde = entreesHier > 0 ? (((entreesAujourdhui - sortiesAujourdhui) - (entreesHier - sortiesHier)) / (entreesHier - sortiesHier)) * 100 : 0;
 
   return (
     <div>
