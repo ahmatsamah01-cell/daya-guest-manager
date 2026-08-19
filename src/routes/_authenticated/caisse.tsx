@@ -306,7 +306,7 @@ function CaissePage() {
   const hier = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
   
   const entreesAujourdhui = (operations ?? [])
-    .filter((o) => o.date_operation.startsWith(aujourd'hui) && o.sens === "entree")
+    .filter((o) => o.date_operation.startsWith(aujourdhui) && o.sens === "entree")
     .reduce((s, o) => s + Number(o.montant), 0);
   
   const entreesHier = (operations ?? [])
@@ -314,7 +314,7 @@ function CaissePage() {
     .reduce((s, o) => s + Number(o.montant), 0);
   
   const sortiesAujourdhui = (operations ?? [])
-    .filter((o) => o.date_operation.startsWith(aujourd'hui) && o.sens === "sortie")
+    .filter((o) => o.date_operation.startsWith(aujourdhui) && o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
   
   const sortiesHier = (operations ?? [])
