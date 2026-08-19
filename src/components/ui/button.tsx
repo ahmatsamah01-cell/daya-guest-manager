@@ -116,8 +116,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     const { buttonTheme } = useButtonTheme();
 
-    // Si variant n'est pas spécifié, on utilise le thème global
-    const resolvedVariant = variant ?? buttonTheme;
+    // On ignore complètement la prop `variant` et on utilise toujours le thème global
+    const resolvedVariant = buttonTheme;
 
     return (
       <Comp
@@ -128,7 +128,3 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
   },
 );
-
-Button.displayName = "Button";
-
-export { Button, buttonVariants };
