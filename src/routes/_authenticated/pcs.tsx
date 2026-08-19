@@ -616,54 +616,50 @@ function PcsPage() {
         </Card>
 
         {/* DIALOG - REÇU */}
-        <Dialog open={!!recu} onOpenChange={(o) => !o && setRecu(null)}>
-          <DialogContent>
-            <DialogHeader className="no-print">
-              <DialogTitle>Reçu — pièce de caisse</DialogTitle>
-            </DialogHeader>
-            {pieceRecu ? (
-              <div className="print-area space-y-3 text-sm">
-                <DocumentHeader
-                  titre={`Pièce de caisse ${pieceRecu.numero}`}
-                  sousTitre={formatDate(pieceRecu.date_piece)}
-                  etablissement={etab}
-                />
-                <div className="divide-y rounded-lg border">
-                  <div className="flex justify-between gap-4 p-3">
-                    <span className="text-muted-foreground">Type</span>
-                    <span>{pieceRecu.type_piece === "entree" ? "Entrée" : "Sortie"}</span>
-                  </div>
-                  <div className="flex justify-between gap-4 p-3">
-                    <span className="text-muted-foreground">Bénéficiaire</span>
-                    <span>{pieceRecu.beneficiaire}</span>
-                  </div>
-                  <div className="flex justify-between gap-4 p-3">
-                    <span className="text-muted-foreground">Motif</span>
-                    <span>{pieceRecu.motif}</span>
-                  </div>
-                  <div className="flex justify-between gap-4 p-3">
-                    <span className="text-muted-foreground">Catégorie</span>
-                    <span className="capitalize">{pieceRecu.categorie || 'Divers'}</span>
-                  </div>
-                </div>
-                <div className="font-display flex justify-between text-lg font-semibold">
-                  <span>Montant</span>
-                  <span>{formatFCFA(pieceRecu.montant)}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-6 pt-6 text-[11px] text-muted-foreground">
-                  <p>Signature bénéficiaire</p>
-                  <p className="text-right">Signature caissier</p>
-                </div>
-              </div>
-            ) : null}
-            <div className="no-print flex justify-end">
-              <Button variant="outline" size="sm" onClick={() => window.print()}>
-                Imprimer / PDF
-              </Button>
-            </div>
-          </Dialog>
-        </Dialog>
+<Dialog open={!!recu} onOpenChange={(o) => !o && setRecu(null)}>
+  <DialogContent className="max-w-2xl">
+    <DialogHeader className="no-print">
+      <DialogTitle>Reçu — pièce de caisse</DialogTitle>
+    </DialogHeader>
+    {pieceRecu ? (
+      <div className="print-area space-y-3 text-sm">
+        <DocumentHeader
+          titre={`Pièce de caisse ${pieceRecu.numero}`}
+          sousTitre={formatDate(pieceRecu.date_piece)}
+          etablissement={etab}
+        />
+        <div className="divide-y rounded-lg border">
+          <div className="flex justify-between gap-4 p-3">
+            <span className="text-muted-foreground">Type</span>
+            <span>{pieceRecu.type_piece === "entree" ? "Entrée" : "Sortie"}</span>
+          </div>
+          <div className="flex justify-between gap-4 p-3">
+            <span className="text-muted-foreground">Bénéficiaire</span>
+            <span>{pieceRecu.beneficiaire}</span>
+          </div>
+          <div className="flex justify-between gap-4 p-3">
+            <span className="text-muted-foreground">Motif</span>
+            <span>{pieceRecu.motif}</span>
+          </div>
+          <div className="flex justify-between gap-4 p-3">
+            <span className="text-muted-foreground">Catégorie</span>
+            <span className="capitalize">{pieceRecu.categorie || 'Divers'}</span>
+          </div>
+        </div>
+        <div className="font-display flex justify-between text-lg font-semibold">
+          <span>Montant</span>
+          <span>{formatFCFA(pieceRecu.montant)}</span>
+        </div>
+        <div className="grid grid-cols-2 gap-6 pt-6 text-[11px] text-muted-foreground">
+          <p>Signature bénéficiaire</p>
+          <p className="text-right">Signature caissier</p>
+        </div>
       </div>
+    ) : null}
+    <div className="no-print flex justify-end mt-4">
+      <Button variant="outline" size="sm" onClick={() => window.print()}>
+        Imprimer / PDF
+      </Button>
     </div>
-  );
-}
+  </DialogContent>
+</Dialog>
