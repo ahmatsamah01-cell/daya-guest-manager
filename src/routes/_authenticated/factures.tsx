@@ -581,144 +581,173 @@ LE DAYA Guest House`
       </Card>
 
       {/* TABLEAU DES FACTURES */}
-      <Card>
-        <CardContent className="overflow-x-auto p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Numéro</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {facturesPage.map((f) => (
-                <TableRow key={f.id}>
-                  <TableCell className="font-medium">{f.numero}</TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">
-                        {f.clients?.prenom} {f.clients?.nom}
-                      </div>
-                      {f.clients?.email && (
-                        <div className="text-xs text-muted-foreground">
-                          {f.clients?.email}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {formatDate(f.date_facture)}
-                  </TableCell>
-                  <TableCell className="font-medium whitespace-nowrap">
-                    {formatFCFA(f.montant_total)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={f.statut === "payee" ? "secondary" : "destructive"}>
-                      {f.statut === "payee" ? "Payée" : "Impayée"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="space-x-2 text-right whitespace-nowrap">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setDetail(f.id)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setFactureEmail(f.id)}
-                    >
-                      <Mail className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setFactureWhatsApp(f.id)}
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setDetail(f.id);
-                        setTimeout(() => imprimerFacture(), 600);
-                      }}
-                    >
-                      <Printer className="w-4 h-4" />
-                    </Button>
-                    {f.statut !== "payee" && (
-                      <Button
-                        size="sm"
-                        onClick={() => payer.mutate(f)}
-                      >
-                        <CreditCard className="w-4 h-4 mr-1" />
-                        Encaisser
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-              {facturesPage.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                    {facturesFiltrees.length === 0
-                      ? "Aucune facture ne correspond aux filtres."
-                      : "Aucune facture."}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-
-        {/* PAGINATION */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t">
-            <div className="text-sm text-muted-foreground">
-              Page {pageActuelle} sur {totalPages} ({facturesFiltrees.length} factures)
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={String(limitePage)}
-                onValueChange={(v) => setLimitePage(Number(v))}
-              >
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10 / page</SelectItem>
-                  <SelectItem value="25">25 / page</SelectItem>
-                  <SelectItem value="50">50 / page</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setPageActuelle(pageActuelle - 1)}
-                disabled={pageActuelle === 1}
-              >
-                Précédent
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setPageActuelle(pageActuelle + 1)}
-                disabled={pageActuelle === totalPages}
-              >
-                Suivant
-              </Button>
-            </div>
+      {/* GRILLE DES FACTURES */}
+<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+  {facturesPage.map((f) => (
+    <Card 
+      key={f.id} 
+      className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer bg-gradient-to-br from-slate-50 via-white to-slate-100 border-slate-200"
+      onClick={() => setDetail(f.id)}
+    >
+      <CardContent className="p-4">
+        {/* En-tête : Numéro + Statut */}
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <p className="font-semibold text-sm">{f.numero}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {formatDate(f.date_facture)}
+            </p>
           </div>
-        )}
-      </Card>
+          <Badge 
+            variant={f.statut === "payee" ? "secondary" : "destructive"}
+            className="text-xs"
+          >
+            {f.statut === "payee" ? "Payée" : "Impayée"}
+          </Badge>
+        </div>
 
+        {/* Client */}
+        <div className="mb-3">
+          <p className="font-medium text-sm truncate">
+            {f.clients?.prenom} {f.clients?.nom}
+          </p>
+          {f.clients?.email && (
+            <p className="text-xs text-muted-foreground truncate mt-0.5">
+              {f.clients?.email}
+            </p>
+          )}
+        </div>
+
+        {/* Montant */}
+        <div className="pt-3 border-t border-slate-200">
+          <p className="text-xs text-muted-foreground">Total</p>
+          <p className="text-lg font-bold text-slate-900 mt-0.5">
+            {formatFCFA(f.montant_total)}
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 mt-4 pt-3 border-t border-slate-200">
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDetail(f.id);
+            }}
+          >
+            <Eye className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFactureEmail(f.id);
+            }}
+          >
+            <Mail className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFactureWhatsApp(f.id);
+            }}
+          >
+            <MessageCircle className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDetail(f.id);
+              setTimeout(() => imprimerFacture(), 600);
+            }}
+          >
+            <Printer className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Bouton Encaisser (si impayée) */}
+        {f.statut !== "payee" && (
+          <Button
+            size="sm"
+            className="w-full mt-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+            onClick={(e) => {
+              e.stopPropagation();
+              payer.mutate(f);
+            }}
+          >
+            <CreditCard className="w-4 h-4 mr-2" />
+            Encaisser
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  ))}
+
+  {facturesPage.length === 0 && (
+    <div className="col-span-full py-12 text-center">
+      <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+      <p className="text-muted-foreground">
+        {facturesFiltrees.length === 0
+          ? "Aucune facture ne correspond aux filtres."
+          : "Aucune facture."}
+      </p>
+    </div>
+  )}
+</div>
+
+{/* PAGINATION */}
+{totalPages > 1 && (
+  <Card className="mt-6">
+    <CardContent className="p-4">
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          Page {pageActuelle} sur {totalPages} ({facturesFiltrees.length} factures)
+        </div>
+        <div className="flex items-center gap-2">
+          <Select
+            value={String(limitePage)}
+            onValueChange={(v) => setLimitePage(Number(v))}
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="25">25 / page</SelectItem>
+              <SelectItem value="50">50 / page</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setPageActuelle(pageActuelle - 1)}
+            disabled={pageActuelle === 1}
+          >
+            ← Précédent
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setPageActuelle(pageActuelle + 1)}
+            disabled={pageActuelle === totalPages}
+          >
+            Suivant →
+          </Button>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+)}
       {/* DIALOG - DÉTAIL FACTURE */}
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
         <DialogContent className="max-w-3xl">
