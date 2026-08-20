@@ -50,4 +50,5 @@ export function useMonRole() {
         estReception: roles.includes("reception"),
         estComptable: roles.includes("comptable"),
         email: userData.user?.email ?? null 
-      }
+      });
+}
