@@ -41,17 +41,18 @@ export function useMonRole() {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) return { roles: [] as string[], estAdmin: false, email: null as string | null };
+      
       const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", uid);
       if (error) throw error;
-     const roles = (data ?? []).map((r) => r.role as string);
+      
+      const roles = (data ?? []).map((r) => r.role as string);
       return { 
         roles, 
         estAdmin: roles.includes("admin"), 
         estReception: roles.includes("reception"),
         estComptable: roles.includes("comptable"),
         email: userData.user?.email ?? null 
-
-     }, 
+      }; 
+    },
   });
 }
-
