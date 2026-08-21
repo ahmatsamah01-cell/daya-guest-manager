@@ -25,6 +25,9 @@ import {
   Hotel,
   Clock,
   CheckCircle,
+  FileText,
+  BarChart3,
+  Settings,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,7 +71,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 // ============================================================
-// COMPOSANT STAT CARD - AVEC COULEURS VARIÉES
+// COMPOSANT STAT CARD - HARMONISÉ AVEC LE RESTE
 // ============================================================
 function StatCard({
   titre,
@@ -77,7 +80,6 @@ function StatCard({
   icon: Icon,
   to,
   variation,
-  couleur,
 }: {
   titre: string;
   valeur: string;
@@ -85,20 +87,11 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
   to?: string;
   variation?: { texte: string; hausse: boolean } | null;
-  couleur: {
-    bg: string;
-    from: string;
-    to: string;
-    shadow: string;
-    text: string;
-  };
 }) {
   const contenu = (
     <Card className="group h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 backdrop-blur-xl border border-white/30 shadow-lg rounded-3xl overflow-hidden">
       <CardContent className="flex h-full items-start gap-4 p-5">
-        <div
-          className={`flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${couleur.from} ${couleur.to} shadow-lg ${couleur.shadow} transition-transform group-hover:scale-110`}
-        >
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25 transition-transform group-hover:scale-110">
           <Icon className="size-5 text-white" />
         </div>
         <div className="min-w-0 flex-1">
@@ -151,6 +144,46 @@ function StatCard({
 }
 
 // ============================================================
+// COMPOSANT POUR L'ÉTAT DES CHAMBRES - HAUTEUR UNIFORME
+// ============================================================
+function ChambreItem({
+  nom,
+  type,
+  statut,
+  prix,
+  couleur,
+  bgCouleur,
+}: {
+  nom: string;
+  type: string;
+  statut: string;
+  prix: string;
+  couleur: string;
+  bgCouleur: string;
+}) {
+  return (
+    <div
+      className={`flex items-center justify-between rounded-xl px-3 py-2.5 ${bgCouleur} transition-colors min-h-[48px]`}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
+          {nom}
+        </span>
+        <span className="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">
+          {type}
+        </span>
+      </div>
+      <div className="flex items-center gap-3 shrink-0">
+        <span className={`text-xs font-medium ${couleur}`}>{statut}</span>
+        <span className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
+          {prix}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // DASHBOARD PRINCIPAL
 // ============================================================
 function Dashboard() {
@@ -173,27 +206,28 @@ function Dashboard() {
   const [rapportPeriode, setRapportPeriode] = useState("mois_actuel");
   const [evolutionVue, setEvolutionVue] = useState<"mois" | "annee">("mois");
   const [actionsRapides, setActionsRapides] = useState([
-    { id: 1, label: "Réservation", to: "/reservations", icon: CalendarCheck },
-    { id: 2, label: "Client", to: "/clients", icon: Users },
-    { id: 3, label: "Encaissement", to: "/caisse", icon: Wallet },
-    { id: 4, label: "Dépense", to: "/depenses", icon: TrendingDown },
+    { id: 1, label: "Réservation", to: "/reservations", icon: CalendarCheck, color: "from-red-500 to-rose-600" },
+    { id: 2, label: "Client", to: "/clients", icon: Users, color: "from-blue-500 to-indigo-600" },
+    { id: 3, label: "Encaissement", to: "/caisse", icon: Wallet, color: "from-emerald-500 to-teal-600" },
+    { id: 4, label: "Dépense", to: "/depenses", icon: TrendingDown, color: "from-amber-500 to-orange-600" },
   ]);
 
   const [showAddAction, setShowAddAction] = useState(false);
 
   const actionsDisponibles = [
-    { label: "Chambres", to: "/chambres", icon: BedDouble },
-    { label: "Facturation", to: "/factures", icon: Sparkles },
-    { label: "Rapports", to: "/rapports", icon: Clock },
-    { label: "Paramètres", to: "/parametres", icon: Hotel },
+    { label: "Chambres", to: "/chambres", icon: BedDouble, color: "from-purple-500 to-violet-600" },
+    { label: "Facturation", to: "/factures", icon: FileText, color: "from-cyan-500 to-blue-600" },
+    { label: "Rapports", to: "/rapports", icon: BarChart3, color: "from-indigo-500 to-purple-600" },
+    { label: "Paramètres", to: "/parametres", icon: Settings, color: "from-slate-500 to-gray-600" },
   ];
 
-  const ajouterAction = (action: { label: string; to: string; icon: any }) => {
+  const ajouterAction = (action: any) => {
     const nouvelleAction = {
       id: Date.now(),
       label: action.label,
       to: action.to,
       icon: action.icon,
+      color: action.color,
     };
     setActionsRapides([...actionsRapides, nouvelleAction]);
     setShowAddAction(false);
@@ -512,42 +546,6 @@ function Dashboard() {
   };
 
   // ============================================================
-  // COULEURS DES STAT CARDS
-  // ============================================================
-  const couleursStatCards = [
-    {
-      from: "from-emerald-500",
-      to: "to-emerald-600",
-      shadow: "shadow-emerald-500/25",
-      text: "text-emerald-500",
-    },
-    {
-      from: "from-amber-500",
-      to: "to-amber-600",
-      shadow: "shadow-amber-500/25",
-      text: "text-amber-500",
-    },
-    {
-      from: "from-blue-500",
-      to: "to-blue-600",
-      shadow: "shadow-blue-500/25",
-      text: "text-blue-500",
-    },
-    {
-      from: "from-red-500",
-      to: "to-red-600",
-      shadow: "shadow-red-500/25",
-      text: "text-red-500",
-    },
-    {
-      from: "from-purple-500",
-      to: "to-purple-600",
-      shadow: "shadow-purple-500/25",
-      text: "text-purple-500",
-    },
-  ];
-
-  // ============================================================
   // RENDU
   // ============================================================
   return (
@@ -584,7 +582,7 @@ function Dashboard() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════
-          KPI CARDS - 5 STATISTIQUES AVEC COULEURS VARIÉES
+          KPI CARDS - TOUTES AVEC LE MÊME STYLE ROUGE
           ═══════════════════════════════════════════════════════ */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
@@ -594,7 +592,6 @@ function Dashboard() {
           icon={BedDouble}
           to="/chambres"
           variation={varOccupation}
-          couleur={couleursStatCards[0]}
         />
         <StatCard
           titre="Arrivées"
@@ -603,7 +600,6 @@ function Dashboard() {
           icon={ArrowDown}
           to="/reservations"
           variation={varArrivees}
-          couleur={couleursStatCards[1]}
         />
         <StatCard
           titre="Départs"
@@ -612,7 +608,6 @@ function Dashboard() {
           icon={ArrowUp}
           to="/reservations"
           variation={varDeparts}
-          couleur={couleursStatCards[2]}
         />
         <StatCard
           titre="CA du mois"
@@ -621,7 +616,6 @@ function Dashboard() {
           icon={Wallet}
           to="/caisse"
           variation={varCA}
-          couleur={couleursStatCards[3]}
         />
         <StatCard
           titre="En cours"
@@ -630,7 +624,6 @@ function Dashboard() {
           icon={Users}
           to="/reservations"
           variation={varEnCours}
-          couleur={couleursStatCards[4]}
         />
       </div>
 
@@ -821,7 +814,7 @@ function Dashboard() {
             <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
               État des chambres
             </CardTitle>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
               <BedDouble className="size-4" />
             </div>
           </CardHeader>
@@ -867,27 +860,15 @@ function Dashboard() {
                   : "bg-emerald-50 dark:bg-emerald-900/20";
 
                 return (
-                  <div
+                  <ChambreItem
                     key={c.id}
-                    className={`flex items-center justify-between rounded-xl px-3 py-2 ${bgCouleur} transition-colors`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                        {c.nom}
-                      </span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                        {c.type}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-xs font-medium ${couleur}`}>
-                        {statut}
-                      </span>
-                      <span className="text-xs text-slate-400 dark:text-slate-500">
-                        {formatFCFA(c.prix_nuit)}
-                      </span>
-                    </div>
-                  </div>
+                    nom={c.nom}
+                    type={c.type || ""}
+                    statut={statut}
+                    prix={formatFCFA(c.prix_nuit)}
+                    couleur={couleur}
+                    bgCouleur={bgCouleur}
+                  />
                 );
               })}
               {data.chambres.length === 0 && (
@@ -912,7 +893,7 @@ function Dashboard() {
             <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
               Activité récente
             </CardTitle>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
               <Users className="size-4" />
             </div>
           </CardHeader>
@@ -925,7 +906,7 @@ function Dashboard() {
               activiteRecente.map((a, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between rounded-xl px-3 py-2 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors"
+                  className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors min-h-[48px]"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span
@@ -952,7 +933,7 @@ function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Actions rapides - AVEC BOUTON + */}
+        {/* Actions rapides - AVEC ICÔNES COLORÉES */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
@@ -1010,7 +991,9 @@ function Dashboard() {
                     to={action.to}
                     className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 dark:border-slate-700/50 px-2 py-4 text-center hover:bg-red-50/50 dark:hover:bg-red-900/20 hover:border-red-200/30 dark:hover:border-red-800/30 transition-all group w-full"
                   >
-                    <div className="flex size-10 items-center justify-center rounded-xl bg-red-500/10 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                    <div
+                      className={`flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${action.color} text-white shadow-lg transition-transform group-hover:scale-110`}
+                    >
                       <action.icon className="size-4" />
                     </div>
                     <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
