@@ -8,11 +8,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BedDouble, CalendarCheck, Wallet, TrendingDown, Users, ArrowDown, ArrowUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import {
+  BedDouble,
+  CalendarCheck,
+  Wallet,
+  TrendingDown,
+  Users,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpRight,
+  ArrowDownRight,
+  Plus,
+  Eye,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Area, AreaChart } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Pie,
+  PieChart,
+  Cell,
+  Area,
+  AreaChart,
+} from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/AppLayout";
 import { BrandLogo, SLOGAN } from "@/components/Brand";
@@ -37,12 +62,14 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
 
+// ============================================================
+// COMPOSANT STAT CARD - HARMONISÉ
+// ============================================================
 function StatCard({
   titre,
   valeur,
   detail,
   icon: Icon,
-  couleur,
   to,
   variation,
 }: {
@@ -50,70 +77,24 @@ function StatCard({
   valeur: string;
   detail?: string;
   icon: React.ComponentType<{ className?: string }>;
-  couleur: string;
   to?: string;
   variation?: { texte: string; hausse: boolean } | null;
 }) {
-  const stylesParCouleur: Record<
-    string,
-    { cardBg: string; iconBg: string; iconShadow: string }
-  > = {
-    "#166534": {
-      cardBg:
-        "bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20",
-      iconBg: "bg-emerald-700",
-      iconShadow: "shadow-[0_0_16px_rgba(22,101,52,0.5)]",
-    },
-    "#ea580c": {
-      cardBg:
-        "bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-orange-900/20",
-      iconBg: "bg-orange-500",
-      iconShadow: "shadow-[0_0_16px_rgba(234,88,12,0.5)]",
-    },
-    "#9333ea": {
-      cardBg:
-        "bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/40 dark:to-purple-900/20",
-      iconBg: "bg-purple-600",
-      iconShadow: "shadow-[0_0_16px_rgba(147,51,234,0.5)]",
-    },
-    "#2563eb": {
-      cardBg:
-        "bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20",
-      iconBg: "bg-blue-600",
-      iconShadow: "shadow-[0_0_16px_rgba(37,99,235,0.5)]",
-    },
-    "#16a34a": {
-      cardBg:
-        "bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20",
-      iconBg: "bg-emerald-600",
-      iconShadow: "shadow-[0_0_16px_rgba(22,163,74,0.5)]",
-    },
-  };
-
-  const styleTheme = stylesParCouleur[couleur] ?? {
-    cardBg:
-      "bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20",
-    iconBg: "bg-amber-500",
-    iconShadow: "shadow-[0_0_16px_rgba(245,158,11,0.5)]",
-  };
-
   const contenu = (
-    <Card className={`group h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${styleTheme.cardBg}`}>
-      <CardContent className="flex h-full items-start gap-3 p-4">
-        <div
-          className={`flex size-10 shrink-0 items-center justify-center rounded-full ${styleTheme.iconBg} ${styleTheme.iconShadow} transition-transform group-hover:scale-110`}
-        >
+    <Card className="group h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+      <CardContent className="flex h-full items-start gap-4 p-5">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25 transition-transform group-hover:scale-110">
           <Icon className="size-5 text-white" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm text-muted-foreground">{titre}</p>
+            <p className="text-sm font-medium text-slate-500">{titre}</p>
             {variation ? (
               <span
-                className={`flex shrink-0 items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                className={`flex shrink-0 items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                   variation.hausse
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
-                    : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-red-100 text-red-700"
                 }`}
               >
                 {variation.hausse ? (
@@ -125,9 +106,11 @@ function StatCard({
               </span>
             ) : null}
           </div>
-          <p className="font-display text-2xl font-bold">{valeur}</p>
+          <p className="font-display text-2xl font-bold text-slate-900 mt-1">
+            {valeur}
+          </p>
           {detail ? (
-            <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>
+            <p className="mt-0.5 text-xs text-slate-400">{detail}</p>
           ) : null}
         </div>
       </CardContent>
@@ -136,7 +119,7 @@ function StatCard({
 
   if (to) {
     return (
-      <Link to={to} className="block h-full rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary">
+      <Link to={to} className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 rounded-2xl">
         {contenu}
       </Link>
     );
@@ -145,12 +128,41 @@ function StatCard({
   return contenu;
 }
 
+// ============================================================
+// COMPOSANT SECTION HEADER
+// ============================================================
+function SectionHeader({
+  title,
+  action,
+}: {
+  title: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-lg font-semibold text-slate-800">{title}</h2>
+      {action}
+    </div>
+  );
+}
+
+// ============================================================
+// DASHBOARD PRINCIPAL
+// ============================================================
 function Dashboard() {
   const jour = today();
-  const debutMoisDernierGlobal = new Date(new Date(jour).getFullYear(), new Date(jour).getMonth() - 1, 1)
+  const debutMoisDernierGlobal = new Date(
+    new Date(jour).getFullYear(),
+    new Date(jour).getMonth() - 1,
+    1
+  )
     .toISOString()
     .slice(0, 10);
-  const finMoisDernierGlobal = new Date(new Date(jour).getFullYear(), new Date(jour).getMonth(), 0)
+  const finMoisDernierGlobal = new Date(
+    new Date(jour).getFullYear(),
+    new Date(jour).getMonth(),
+    0
+  )
     .toISOString()
     .slice(0, 10);
   const [periode, setPeriode] = useState("jour");
@@ -163,10 +175,10 @@ function Dashboard() {
           .toISOString()
           .slice(0, 10)
       : periode === "mois"
-        ? `${jour.slice(0, 7)}-01`
-        : periode === "annee"
-          ? `${jour.slice(0, 4)}-01-01`
-          : jour;
+      ? `${jour.slice(0, 7)}-01`
+      : periode === "annee"
+      ? `${jour.slice(0, 4)}-01-01`
+      : jour;
 
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard", jour, dateDebut],
@@ -181,12 +193,25 @@ function Dashboard() {
           .select("*, clients(nom, prenom), chambres(nom)")
           .neq("statut", "annulee")
           .order("date_arrivee"),
-        supabase.from("caisse_operations").select("*").gte("date_operation", `${new Date(new Date(dateDebut).getTime() - 86400000).toISOString().slice(0, 10)}T00:00:00`),
-        supabase.from("depenses").select("*").gte("date_depense", dateDebut).lte("date_depense", jour), 
+        supabase
+          .from("caisse_operations")
+          .select("*")
+          .gte(
+            "date_operation",
+            `${new Date(new Date(dateDebut).getTime() - 86400000)
+              .toISOString()
+              .slice(0, 10)}T00:00:00`
+          ),
+        supabase
+          .from("depenses")
+          .select("*")
+          .gte("date_depense", dateDebut)
+          .lte("date_depense", jour),
         supabase.from("taxes_sejour").select("*").lte("date_nuitee", jour),
         supabase.from("clients").select("id"),
       ]);
-      for (const r of [chambres, resas, ops, deps, taxes, clients]) if (r.error) throw r.error;
+      for (const r of [chambres, resas, ops, deps, taxes, clients])
+        if (r.error) throw r.error;
       return {
         chambres: chambres.data ?? [],
         reservations: resas.data ?? [],
@@ -217,7 +242,11 @@ function Dashboard() {
     queryFn: async () => {
       const depuis =
         evolutionVue === "mois"
-          ? new Date(new Date(jour).getFullYear(), new Date(jour).getMonth() - 11, 1)
+          ? new Date(
+              new Date(jour).getFullYear(),
+              new Date(jour).getMonth() - 11,
+              1
+            )
               .toISOString()
               .slice(0, 10)
           : `${new Date(jour).getFullYear() - 5}-01-01`;
@@ -232,18 +261,30 @@ function Dashboard() {
   });
 
   if (isLoading || !data) {
-    return <p className="text-sm text-muted-foreground">Chargement…</p>;
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-4">
+          <div className="size-12 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
+          <p className="text-sm text-slate-400">Chargement du tableau de bord...</p>
+        </div>
+      </div>
+    );
   }
 
+  // ============================================================
+  // CALCULS
+  // ============================================================
   const enCours = data.reservations.filter(
-    (r) => r.statut === "en_cours" || (r.date_arrivee <= jour && r.date_depart > jour),
+    (r) =>
+      r.statut === "en_cours" ||
+      (r.date_arrivee <= jour && r.date_depart > jour)
   );
   const occupees = new Set(enCours.map((r) => r.chambre_id));
   const arrivees = data.reservations.filter(
-    (r) => r.date_arrivee >= dateDebut && r.date_arrivee <= jour,
+    (r) => r.date_arrivee >= dateDebut && r.date_arrivee <= jour
   );
   const departs = data.reservations.filter(
-    (r) => r.date_depart >= dateDebut && r.date_depart <= jour,
+    (r) => r.date_depart >= dateDebut && r.date_depart <= jour
   );
 
   const totalChambres = data.chambres.length;
@@ -252,7 +293,7 @@ function Dashboard() {
     totalChambres *
     (Math.floor(
       (new Date(jour).getTime() - new Date(dateDebut).getTime()) /
-        (1000 * 60 * 60 * 24),
+        (1000 * 60 * 60 * 24)
     ) + 1);
 
   const nuitsOccupees = data.reservations.reduce((total, r) => {
@@ -271,43 +312,62 @@ function Dashboard() {
       0,
       Math.floor(
         (finEffectif.getTime() - debutEffectif.getTime()) /
-          (1000 * 60 * 60 * 24),
-      ),
+          (1000 * 60 * 60 * 24)
+      )
     );
 
     return total + nuits;
   }, 0);
 
-  const hier = new Date(new Date(jour).getTime() - 86400000).toISOString().slice(0, 10);
+  const hier = new Date(new Date(jour).getTime() - 86400000)
+    .toISOString()
+    .slice(0, 10);
 
   const occupeesHier = new Set(
     data.reservations
       .filter((r) => r.date_arrivee <= hier && r.date_depart > hier)
-      .map((r) => r.chambre_id),
+      .map((r) => r.chambre_id)
   );
-  const arriveesHier = data.reservations.filter((r) => r.date_arrivee === hier).length;
-  const departsHier = data.reservations.filter((r) => r.date_depart === hier).length;
+  const arriveesHier = data.reservations.filter(
+    (r) => r.date_arrivee === hier
+  ).length;
+  const departsHier = data.reservations.filter((r) => r.date_depart === hier)
+    .length;
   const enCoursHier = occupeesHier.size;
 
   const debutMoisActuel = `${jour.slice(0, 7)}-01`;
   const caMoisActuel = data.operations
-    .filter((o) => o.sens === "entree" && o.date_operation.slice(0, 10) >= debutMoisActuel)
+    .filter(
+      (o) =>
+        o.sens === "entree" &&
+        o.date_operation.slice(0, 10) >= debutMoisActuel
+    )
     .reduce((s, o) => s + Number(o.montant), 0);
 
-  const caMoisDernier = (caMoisDernierData ?? []).reduce((s, o) => s + Number(o.montant), 0);
+  const caMoisDernier = (caMoisDernierData ?? []).reduce(
+    (s, o) => s + Number(o.montant),
+    0
+  );
 
-  function variation(actuel: number, precedent: number): { texte: string; hausse: boolean } | null {
+  function variation(actuel: number, precedent: number): {
+    texte: string;
+    hausse: boolean;
+  } | null {
     if (precedent === 0 && actuel === 0) return null;
     if (precedent === 0) return { texte: "Nouveau", hausse: true };
     const pct = Math.round(((actuel - precedent) / precedent) * 100);
     return { texte: `${pct >= 0 ? "+" : ""}${pct}%`, hausse: pct >= 0 };
   }
 
-  const varOccupation = periode === "jour" ? variation(occupees.size, occupeesHier.size) : null;
-  const varArrivees = periode === "jour" ? variation(arrivees.length, arriveesHier) : null;
-  const varDeparts = periode === "jour" ? variation(departs.length, departsHier) : null;
+  const varOccupation =
+    periode === "jour" ? variation(occupees.size, occupeesHier.size) : null;
+  const varArrivees =
+    periode === "jour" ? variation(arrivees.length, arriveesHier) : null;
+  const varDeparts =
+    periode === "jour" ? variation(departs.length, departsHier) : null;
   const varCA = variation(caMoisActuel, caMoisDernier);
-  const varEnCours = periode === "jour" ? variation(enCours.length, enCoursHier) : null;
+  const varEnCours =
+    periode === "jour" ? variation(enCours.length, enCoursHier) : null;
 
   const maintenant = new Date(jour);
   let rapportDebut: Date;
@@ -316,12 +376,26 @@ function Dashboard() {
 
   if (rapportPeriode === "mois_actuel") {
     rapportDebut = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
-    rapportFin = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 1);
-    rapportLabel = maintenant.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+    rapportFin = new Date(
+      maintenant.getFullYear(),
+      maintenant.getMonth() + 1,
+      1
+    );
+    rapportLabel = maintenant.toLocaleDateString("fr-FR", {
+      month: "long",
+      year: "numeric",
+    });
   } else if (rapportPeriode === "mois_dernier") {
-    rapportDebut = new Date(maintenant.getFullYear(), maintenant.getMonth() - 1, 1);
+    rapportDebut = new Date(
+      maintenant.getFullYear(),
+      maintenant.getMonth() - 1,
+      1
+    );
     rapportFin = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
-    rapportLabel = rapportDebut.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+    rapportLabel = rapportDebut.toLocaleDateString("fr-FR", {
+      month: "long",
+      year: "numeric",
+    });
   } else if (rapportPeriode === "annee_actuelle") {
     rapportDebut = new Date(maintenant.getFullYear(), 0, 1);
     rapportFin = new Date(maintenant.getFullYear() + 1, 0, 1);
@@ -339,14 +413,16 @@ function Dashboard() {
     const finEff = finR < rapportFin ? finR : rapportFin;
     const nuits = Math.max(
       0,
-      Math.round((finEff.getTime() - debutEff.getTime()) / (1000 * 60 * 60 * 24)),
+      Math.round(
+        (finEff.getTime() - debutEff.getTime()) / (1000 * 60 * 60 * 24)
+      )
     );
     return total + nuits;
   }, 0);
 
   const joursDansRapport = Math.max(
     1,
-    Math.round((rapportFin.getTime() - rapportDebut.getTime()) / 86400000),
+    Math.round((rapportFin.getTime() - rapportDebut.getTime()) / 86400000)
   );
 
   const nuitsDisponiblesRapport = totalChambres * joursDansRapport;
@@ -354,10 +430,6 @@ function Dashboard() {
     nuitsDisponiblesRapport > 0
       ? Math.round((nuitsVenduesPeriode / nuitsDisponiblesRapport) * 100)
       : 0;
-
-  const reservees = data.chambres.filter(
-    (c) => !occupees.has(c.id) && data.reservations.some((r) => r.chambre_id === c.id && r.statut === "reservee"),
-  ).length;
 
   const groupesCA: Record<string, number> = {};
   (evolutionData ?? []).forEach((o) => {
@@ -371,133 +443,62 @@ function Dashboard() {
     .map(([cle, montant]) => ({
       label:
         evolutionVue === "mois"
-          ? new Date(`${cle}-01`).toLocaleDateString("fr-FR", { month: "short", year: "2-digit" })
+          ? new Date(`${cle}-01`).toLocaleDateString("fr-FR", {
+              month: "short",
+              year: "2-digit",
+            })
           : cle,
       montant,
     }));
-
-  const reservationsProches = data.reservations.filter(
-    (r) =>
-      r.statut === "reservee" &&
-      r.date_arrivee > jour &&
-      r.date_arrivee <= new Date(new Date(jour).getTime() + 3 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .slice(0, 10),
-  );
-
-  const alertes: { texte: string; icon: typeof CalendarCheck; couleur: string }[] = [];
-
-  reservationsProches.forEach((r) => {
-    alertes.push({
-      texte: `Chambre ${r.chambres?.nom ?? ""} réservée du ${formatDate(r.date_arrivee)} au ${formatDate(r.date_depart)}`,
-      icon: CalendarCheck,
-      couleur: "text-orange-500",
-    });
-  });
-
-  if (arrivees.length === 0) {
-    alertes.push({
-      texte: "Aucune arrivée prévue aujourd'hui",
-      icon: ArrowDown,
-      couleur: "text-blue-500",
-    });
-  }
-
-  if (departs.length === 0) {
-    alertes.push({
-      texte: "Aucun départ prévu aujourd'hui",
-      icon: ArrowUp,
-      couleur: "text-blue-500",
-    });
-  }
-
-  data.operations
-    .filter((o) => o.sens === "entree" && o.date_operation.slice(0, 10) === jour)
-    .forEach((o) => {
-      alertes.push({
-        texte: `Encaissement du jour : ${formatFCFA(Number(o.montant))}${o.motif ? " — " + o.motif : ""}`,
-        icon: Wallet,
-        couleur: "text-blue-600",
-      });
-    });
-
-  data.depenses
-    .filter((d) => d.date_depense === jour)
-    .forEach((d) => {
-      alertes.push({
-        texte: `Dépense du jour : ${formatFCFA(Number(d.montant))}${d.libelle ? " — " + d.libelle : ""}`,
-        icon: TrendingDown,
-        couleur: "text-red-500",
-      });
-    });
-
-  arrivees.forEach((r) => {
-    alertes.push({
-      texte: `Check-in prévu : ${r.clients?.prenom ?? ""} ${r.clients?.nom ?? "Client"} — ${r.chambres?.nom ?? ""}`,
-      icon: ArrowDown,
-      couleur: "text-green-600",
-    });
-  });
-
-  departs.forEach((r) => {
-    alertes.push({
-      texte: `Check-out prévu : ${r.clients?.prenom ?? ""} ${r.clients?.nom ?? "Client"} — ${r.chambres?.nom ?? ""}`,
-      icon: ArrowUp,
-      couleur: "text-orange-600",
-    });
-  });
 
   const activiteRecente = [...data.reservations]
     .filter((r) => r.created_at)
     .sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))
     .slice(0, 5)
     .map((r) => ({
-      texte: `Réservation créée — ${r.clients?.prenom ?? ""} ${r.clients?.nom ?? "Client"} (${r.chambres?.nom ?? ""})`,
+      texte: `${r.clients?.prenom ?? ""} ${r.clients?.nom ?? "Client"} — ${
+        r.chambres?.nom ?? ""
+      }`,
       heure: r.created_at
         ? new Date(r.created_at).toLocaleTimeString("fr-FR", {
             hour: "2-digit",
             minute: "2-digit",
           })
         : "",
+      statut: r.statut,
     }));
 
+  const statutColors: Record<string, string> = {
+    reservee: "bg-amber-500",
+    en_cours: "bg-emerald-500",
+    terminee: "bg-blue-500",
+    annulee: "bg-red-500",
+  };
+
+  // ============================================================
+  // RENDU
+  // ============================================================
   return (
-    <div>
-      <div className="relative overflow-hidden rounded-2xl">
-        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl bg-gradient-to-br from-white via-red-50/40 to-white dark:from-background dark:via-background dark:to-background">
-          <div className="animate-float-slow absolute -left-20 top-10 size-72 rounded-full bg-red-300/20 blur-3xl" />
-          <div className="animate-float-slower absolute right-0 top-1/3 size-96 rounded-full bg-amber-200/20 blur-3xl" />
-          <div className="animate-float-slow absolute bottom-0 left-1/3 size-80 rounded-full bg-red-200/20 blur-3xl" />
+    <div className="space-y-6">
+      {/* ═══════════════════════════════════════════════════════
+          EN-TÊTE AVEC BIENVENUE
+          ═══════════════════════════════════════════════════════ */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+            Tableau de bord
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            {formatDate(jour)} — Vue d'ensemble de votre activité
+          </p>
         </div>
-
-        <Card className="animate-fade-in-up mb-6 overflow-hidden border-none bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20 shadow-md backdrop-blur-sm" style={{ animationDelay: "0ms" }}>
-          <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex size-12 items-center justify-center rounded-full bg-primary shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
-                <BrandLogo className="max-h-8 text-white" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm text-muted-foreground">Bienvenue,</p>
-                <p className="font-display text-2xl font-bold sm:text-3xl">
-                  LE DAYA Guest House
-                </p>
-                <p className="text-sm italic text-muted-foreground">{SLOGAN}</p>
-              </div>
-            </div>
-
-            <div className="relative h-32 w-full overflow-hidden rounded-lg sm:h-36 sm:max-w-md">
-              <img
-                src="/IMG-20260618-WA0011.jpg"
-                alt="LE DAYA Guest House — Réception"
-                className="h-full w-full object-cover"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="mb-4 flex justify-end">
+        <div className="flex items-center gap-3">
+          <Badge className="bg-red-500/10 text-red-500 border-red-200/30 px-3 py-1.5 text-xs font-medium">
+            <span className="size-1.5 rounded-full bg-red-500 animate-pulse mr-1.5" />
+            En direct
+          </Badge>
           <Select value={periode} onValueChange={setPeriode}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[140px] bg-white/70 backdrop-blur-xl border-white/20 rounded-xl">
               <SelectValue placeholder="Période" />
             </SelectTrigger>
             <SelectContent>
@@ -508,65 +509,69 @@ function Dashboard() {
             </SelectContent>
           </Select>
         </div>
+      </div>
 
-        <PageHeader
-          title="Tableau de bord"
-          description={`LE DAYA Guest House — situation du ${formatDate(jour)}`}
+      {/* ═══════════════════════════════════════════════════════
+          KPI CARDS - 5 STATISTIQUES
+          ═══════════════════════════════════════════════════════ */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StatCard
+          titre="Occupation"
+          valeur={`${occupees.size}/${totalChambres}`}
+          detail={`${totalChambres - occupees.size} disponible(s)`}
+          icon={BedDouble}
+          to="/chambres"
+          variation={varOccupation}
         />
+        <StatCard
+          titre="Arrivées"
+          valeur={String(arrivees.length)}
+          detail={arrivees.length === 0 ? "Aucune" : "Prévue(s)"}
+          icon={ArrowDown}
+          to="/reservations"
+          variation={varArrivees}
+        />
+        <StatCard
+          titre="Départs"
+          valeur={String(departs.length)}
+          detail={departs.length === 0 ? "Aucun" : "Prévu(s)"}
+          icon={ArrowUp}
+          to="/reservations"
+          variation={varDeparts}
+        />
+        <StatCard
+          titre="CA du mois"
+          valeur={formatFCFA(caMoisActuel)}
+          detail={`vs ${formatFCFA(caMoisDernier)}`}
+          icon={Wallet}
+          to="/caisse"
+          variation={varCA}
+        />
+        <StatCard
+          titre="En cours"
+          valeur={String(enCours.length)}
+          detail={`${enCours.length} réservation(s)`}
+          icon={Users}
+          to="/reservations"
+          variation={varEnCours}
+        />
+      </div>
 
-        <div className="animate-fade-in-up grid gap-4 sm:grid-cols-2 xl:grid-cols-5" style={{ animationDelay: "80ms" }}>
-          <StatCard
-            titre="Occupation"
-            valeur={`${occupees.size}/${totalChambres}`}
-            detail={`${totalChambres - occupees.size} chambre(s) disponible(s)`}
-            icon={BedDouble}
-            couleur="#166534"
-            to="/chambres"
-            variation={varOccupation}
-          />
-          <StatCard
-            titre="Arrivées du jour"
-            valeur={String(arrivees.length)}
-            detail={arrivees.length === 0 ? "Aucune arrivée" : "Arrivée(s) prévue(s)"}
-            icon={CalendarCheck}
-            couleur="#ea580c"
-            to="/reservations"
-            variation={varArrivees}
-          />
-          <StatCard
-            titre="Départs du jour"
-            valeur={String(departs.length)}
-            detail={departs.length === 0 ? "Aucun départ" : "Départ(s) prévu(s)"}
-            icon={CalendarCheck}
-            couleur="#9333ea"
-            to="/reservations"
-            variation={varDeparts}
-          />
-          <StatCard
-            titre="CA du mois"
-            valeur={formatFCFA(caMoisActuel)}
-            detail={`vs ${formatFCFA(caMoisDernier)} le mois dernier`}
-            icon={Wallet}
-            couleur="#2563eb"
-            to="/caisse"
-            variation={varCA}
-          />
-          <StatCard
-            titre="Réservations en cours"
-            valeur={String(enCours.length)}
-            detail={`${enCours.length} chambre(s) réservée(s)`}
-            icon={Users}
-            couleur="#16a34a"
-            to="/reservations"
-            variation={varEnCours}
-          />
-        </div>
-
-        <Card className="animate-fade-in-up group mt-6 overflow-hidden border-none bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20 shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ animationDelay: "160ms" }}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Évolution du chiffre d'affaires</CardTitle>
-            <Select value={evolutionVue} onValueChange={(v) => setEvolutionVue(v as "mois" | "annee")}>
-              <SelectTrigger className="w-[140px]">
+      {/* ═══════════════════════════════════════════════════════
+          GRAPHIQUE CA + NUITS VENDUES
+          ═══════════════════════════════════════════════════════ */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Évolution CA */}
+        <Card className="bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base font-semibold text-slate-800">
+              Évolution du CA
+            </CardTitle>
+            <Select
+              value={evolutionVue}
+              onValueChange={(v) => setEvolutionVue(v as "mois" | "annee")}
+            >
+              <SelectTrigger className="w-[120px] bg-white/50 border-white/30 rounded-xl text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -576,51 +581,73 @@ function Dashboard() {
             </Select>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={{ montant: { label: "CA", color: "#dc2626" } }} className="h-[280px] w-full">
-              <AreaChart data={evolutionCA} margin={{ left: 0, right: 12, top: 12, bottom: 0 }}>
+            <ChartContainer
+              config={{ montant: { label: "CA", color: "#ef4444" } }}
+              className="h-[220px] w-full"
+            >
+              <AreaChart
+                data={evolutionCA}
+                margin={{ left: 0, right: 12, top: 8, bottom: 0 }}
+              >
                 <defs>
                   <linearGradient id="caGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#dc2626" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="#dc2626" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#ef4444" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="#ef4444" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
-                <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.2} />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={6}
+                  fontSize={11}
+                  tick={{ fill: "#94A3B8" }}
+                />
                 <YAxis
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v) => `${Math.round(Number(v) / 1000)}k`}
-                  fontSize={12}
-                  width={40}
+                  fontSize={11}
+                  width={35}
+                  tick={{ fill: "#94A3B8" }}
                 />
                 <ChartTooltip
-                  content={<ChartTooltipContent formatter={(value) => formatFCFA(Number(value))} />}
+                  content={
+                    <ChartTooltipContent
+                      formatter={(value) => formatFCFA(Number(value))}
+                      className="bg-slate-900/95 text-white border-slate-800 rounded-xl"
+                    />
+                  }
                 />
                 <Area
                   type="monotone"
                   dataKey="montant"
-                  stroke="#dc2626"
-                  strokeWidth={3}
+                  stroke="#ef4444"
+                  strokeWidth={2.5}
                   fill="url(#caGradient)"
                   animationDuration={900}
-                  dot={{ r: 4, fill: "#dc2626", strokeWidth: 0 }}
-                  activeDot={{ r: 6 }}
+                  dot={{ r: 3, fill: "#ef4444", strokeWidth: 0 }}
+                  activeDot={{ r: 5 }}
                 />
               </AreaChart>
             </ChartContainer>
-            {evolutionCA.length === 0 ? (
-              <p className="mt-2 text-center text-sm text-muted-foreground">
+            {evolutionCA.length === 0 && (
+              <p className="mt-2 text-center text-sm text-slate-400">
                 Aucune donnée pour cette période.
               </p>
-            ) : null}
+            )}
           </CardContent>
         </Card>
 
-        <Card className="animate-fade-in-up group relative z-10 mt-6 overflow-hidden border-none bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20 shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ animationDelay: "240ms" }}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Nuits vendues</CardTitle>
+        {/* Nuits vendues */}
+        <Card className="bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base font-semibold text-slate-800">
+              Nuits vendues
+            </CardTitle>
             <Select value={rapportPeriode} onValueChange={setRapportPeriode}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[140px] bg-white/50 border-white/30 rounded-xl text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -631,329 +658,277 @@ function Dashboard() {
               </SelectContent>
             </Select>
           </CardHeader>
-          <CardContent className="flex flex-col items-center gap-6 sm:flex-row sm:justify-around">
-            <div className="relative h-[180px] w-[180px]">
-              <ChartContainer config={{}} className="h-full w-full drop-shadow-[0_0_18px_rgba(220,38,38,0.25)]">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: "Vendues", value: nuitsVenduesPeriode, couleur: "#dc2626" },
-                      {
-                        name: "Disponibles",
-                        value: Math.max(0, nuitsDisponiblesRapport - nuitsVenduesPeriode),
-                        couleur: "#e5e7eb",
-                      },
-                    ]}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={55}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    cornerRadius={6}
-                    animationDuration={800}
-                  >
-                    <Cell fill="#dc2626" stroke="none" />
-                    <Cell fill="#e5e7eb" stroke="none" />
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </PieChart>
-              </ChartContainer>
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-display text-2xl font-bold">{tauxOccupationRapport}%</span>
-                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                  Occupation
-                </span>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <p className="font-display text-3xl font-bold">
-                  {nuitsVenduesPeriode}{" "}
-                  <span className="text-lg font-normal text-muted-foreground">
-                    / {nuitsDisponiblesRapport}
+          <CardContent>
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-around">
+              <div className="relative h-[160px] w-[160px]">
+                <ChartContainer config={{}} className="h-full w-full">
+                  <PieChart>
+                    <Pie
+                      data={[
+                        {
+                          name: "Vendues",
+                          value: nuitsVenduesPeriode,
+                          couleur: "#ef4444",
+                        },
+                        {
+                          name: "Disponibles",
+                          value: Math.max(
+                            0,
+                            nuitsDisponiblesRapport - nuitsVenduesPeriode
+                          ),
+                          couleur: "#E5E7EB",
+                        },
+                      ]}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={50}
+                      outerRadius={72}
+                      paddingAngle={2}
+                      cornerRadius={4}
+                      animationDuration={800}
+                    >
+                      <Cell fill="#ef4444" stroke="none" />
+                      <Cell fill="#E5E7EB" stroke="none" />
+                    </Pie>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                  </PieChart>
+                </ChartContainer>
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="font-display text-2xl font-bold text-slate-900">
+                    {tauxOccupationRapport}%
                   </span>
-                </p>
-                <p className="text-xs text-muted-foreground capitalize">
-                  nuit(s) vendue(s) — {rapportLabel}
-                </p>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400">
+                    Occupation
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="size-3 rounded-full bg-red-600" />
-                <span className="text-muted-foreground">Vendues</span>
-                <span className="font-semibold">{nuitsVenduesPeriode}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="size-3 rounded-full bg-gray-300" />
-                <span className="text-muted-foreground">Disponibles</span>
-                <span className="font-semibold">
-                  {Math.max(0, nuitsDisponiblesRapport - nuitsVenduesPeriode)}
-                </span>
+              <div className="space-y-2">
+                <div>
+                  <p className="font-display text-2xl font-bold text-slate-900">
+                    {nuitsVenduesPeriode}{" "}
+                    <span className="text-base font-normal text-slate-400">
+                      / {nuitsDisponiblesRapport}
+                    </span>
+                  </p>
+                  <p className="text-xs text-slate-400 capitalize">
+                    nuit(s) — {rapportLabel}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="size-2.5 rounded-full bg-red-500" />
+                  <span className="text-slate-500">Vendues</span>
+                  <span className="font-semibold text-slate-700">
+                    {nuitsVenduesPeriode}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="size-2.5 rounded-full bg-gray-300" />
+                  <span className="text-slate-500">Disponibles</span>
+                  <span className="font-semibold text-slate-700">
+                    {Math.max(0, nuitsDisponiblesRapport - nuitsVenduesPeriode)}
+                  </span>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">État des chambres</CardTitle>
-            <div className="flex size-10 items-center justify-center rounded-full bg-primary shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
-              <BedDouble className="size-5 text-white" />
+      {/* ═══════════════════════════════════════════════════════
+          ÉTAT DES CHAMBRES + ACTIVITÉ RÉCENTE + ACTIONS
+          ═══════════════════════════════════════════════════════ */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* État des chambres */}
+        <Card className="bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base font-semibold text-slate-800">
+              État des chambres
+            </CardTitle>
+            <div className="flex size-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+              <BedDouble className="size-4" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-green-600" /> Disponible
+            <div className="mb-3 flex flex-wrap gap-2 text-[10px] text-slate-400">
+              <span className="flex items-center gap-1">
+                <span className="size-2 rounded-full bg-emerald-500" /> Dispo
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-orange-500" /> Réservée
+              <span className="flex items-center gap-1">
+                <span className="size-2 rounded-full bg-amber-500" /> Réservée
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-red-600" /> Occupée
+              <span className="flex items-center gap-1">
+                <span className="size-2 rounded-full bg-red-500" /> Occupée
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-blue-500" /> Nettoyage
+              <span className="flex items-center gap-1">
+                <span className="size-2 rounded-full bg-blue-400" /> Nettoyage
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-purple-600" /> Maintenance
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-gray-400" /> Hors service
+              <span className="flex items-center gap-1">
+                <span className="size-2 rounded-full bg-purple-500" /> Maintenance
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {data.chambres.slice(0, 5).map((c) => {
                 const occupee = occupees.has(c.id);
                 const reservee = data.reservations.some(
-                  (r) => r.chambre_id === c.id && r.statut === "reservee",
+                  (r) => r.chambre_id === c.id && r.statut === "reservee"
                 );
-                const statut = occupee ? "Occupée" : reservee ? "Réservée" : "Disponible";
-                const couleur = occupee
-                  ? "text-red-600"
+                const statut = occupee
+                  ? "Occupée"
                   : reservee
-                    ? "text-orange-500"
-                    : "text-green-600";
+                  ? "Réservée"
+                  : "Disponible";
+                const couleur = occupee
+                  ? "text-red-500"
+                  : reservee
+                  ? "text-amber-500"
+                  : "text-emerald-500";
+                const bgCouleur = occupee
+                  ? "bg-red-50"
+                  : reservee
+                  ? "bg-amber-50"
+                  : "bg-emerald-50";
 
                 return (
                   <div
                     key={c.id}
-                    className="flex items-center justify-between rounded-lg border px-3 py-2"
+                    className={`flex items-center justify-between rounded-xl px-3 py-2 ${bgCouleur} transition-colors`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium">{c.nom}</span>
-                      <span className="text-xs text-muted-foreground">{c.type}</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {c.nom}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {c.type}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className={`text-xs font-medium ${couleur}`}>{statut}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatFCFA(c.prix_nuit)}/nuit
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs font-medium ${couleur}`}>
+                        {statut}
+                      </span>
+                      <span className="text-xs text-slate-400">
+                        {formatFCFA(c.prix_nuit)}
                       </span>
                     </div>
                   </div>
                 );
               })}
-              {data.chambres.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Aucune chambre enregistrée.</p>
-              ) : null}
+              {data.chambres.length === 0 && (
+                <p className="text-sm text-slate-400">Aucune chambre.</p>
+              )}
             </div>
 
-            {data.chambres.length > 5 ? (
+            {data.chambres.length > 5 && (
               <Link
                 to="/chambres"
-                className="mt-3 block text-center text-sm text-primary hover:underline"
+                className="mt-3 flex items-center justify-center gap-1 text-sm text-red-500 hover:text-red-600 transition-colors"
               >
-                Voir toutes les chambres →
+                Voir toutes <Eye className="size-3.5" />
               </Link>
-            ) : null}
-          </CardContent>
-        </Card>
-
-        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-orange-900/20">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Arrivées du jour</CardTitle>
-            <div className="flex size-10 items-center justify-center rounded-full bg-orange-500 shadow-[0_0_16px_rgba(234,88,12,0.5)] transition-transform group-hover:scale-110">
-              <ArrowDown className="size-5 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            {arrivees.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
-                <div className="flex size-14 items-center justify-center rounded-full bg-green-100">
-                  <ArrowDown className="size-7 text-green-600" />
-                </div>
-                <p className="font-medium">Aucune arrivée prévue</p>
-                <p className="text-sm text-muted-foreground">Aucune arrivée aujourd'hui</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {arrivees.slice(0, 8).map((r) => (
-                  <div
-                    key={r.id}
-                    className="flex items-center justify-between rounded-lg border px-3 py-2"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">
-                        {r.clients?.prenom ?? ""} {r.clients?.nom ?? "Client"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {r.chambres?.nom} — dès {formatDate(r.date_arrivee)}
-                      </p>
-                    </div>
-                    <Badge variant="outline">{formatFCFA(r.prix_nuit)}</Badge>
-                  </div>
-                ))}
-              </div>
             )}
-            <Link
-              to="/reservations"
-              className="mt-3 block text-center text-sm text-primary hover:underline"
-            >
-              Voir toutes les arrivées →
-            </Link>
           </CardContent>
         </Card>
 
-        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/40 dark:to-purple-900/20">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Départs du jour</CardTitle>
-            <div className="flex size-10 items-center justify-center rounded-full bg-purple-600 shadow-[0_0_16px_rgba(147,51,234,0.5)] transition-transform group-hover:scale-110">
-              <ArrowUp className="size-5 text-white" />
+        {/* Activité récente */}
+        <Card className="bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base font-semibold text-slate-800">
+              Activité récente
+            </CardTitle>
+            <div className="flex size-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+              <Users className="size-4" />
             </div>
           </CardHeader>
-          <CardContent>
-            {departs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
-                <div className="flex size-14 items-center justify-center rounded-full bg-orange-100">
-                  <ArrowUp className="size-7 text-orange-600" />
-                </div>
-                <p className="font-medium">Aucun départ prévu</p>
-                <p className="text-sm text-muted-foreground">Aucun départ aujourd'hui</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {departs.slice(0, 8).map((r) => (
-                  <div
-                    key={r.id}
-                    className="flex items-center justify-between rounded-lg border px-3 py-2"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">
-                        {r.clients?.prenom ?? ""} {r.clients?.nom ?? "Client"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {r.chambres?.nom} — jusqu'au {formatDate(r.date_depart)}
-                      </p>
-                    </div>
-                    <Badge variant="outline">{formatFCFA(r.prix_nuit)}</Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-            <Link
-              to="/reservations"
-              className="mt-3 block text-center text-sm text-primary hover:underline"
-            >
-              Voir tous les départs →
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/40 dark:to-red-900/20">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Alertes</CardTitle>
-            <div className="flex size-10 items-center justify-center rounded-full bg-red-600 shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
-              <Badge variant="destructive" className="text-white">{alertes.length}</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {alertes.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Aucune alerte pour le moment.</p>
-            ) : (
-              alertes.map((a, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm">
-                  <a.icon className={`mt-0.5 size-4 shrink-0 ${a.couleur}`} />
-                  <span>{a.texte}</span>
-                </div>
-              ))
-            )}
-            <Link
-              to="/reservations"
-              className="block pt-1 text-center text-sm text-primary hover:underline"
-            >
-              Voir toutes les alertes →
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Activité récente</CardTitle>
-            <div className="flex size-10 items-center justify-center rounded-full bg-blue-600 shadow-[0_0_16px_rgba(37,99,235,0.5)] transition-transform group-hover:scale-110">
-              <Users className="size-5 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             {activiteRecente.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Aucune activité récente enregistrée.
+              <p className="text-sm text-slate-400 text-center py-6">
+                Aucune activité récente
               </p>
             ) : (
               activiteRecente.map((a, i) => (
-                <div key={i} className="flex items-center justify-between text-sm">
-                  <span>{a.texte}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground">{a.heure}</span>
+                <div
+                  key={i}
+                  className="flex items-center justify-between rounded-xl px-3 py-2 hover:bg-slate-50/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span
+                      className={`size-2 rounded-full ${
+                        statutColors[a.statut] || "bg-slate-300"
+                      }`}
+                    />
+                    <span className="text-sm text-slate-700 truncate">
+                      {a.texte}
+                    </span>
+                  </div>
+                  <span className="shrink-0 text-xs text-slate-400">
+                    {a.heure}
+                  </span>
                 </div>
               ))
             )}
             <Link
               to="/reservations"
-              className="block pt-1 text-center text-sm text-primary hover:underline"
+              className="flex items-center justify-center gap-1 text-sm text-red-500 hover:text-red-600 transition-colors pt-1"
             >
-              Voir toute l'activité →
+              Voir tout <Eye className="size-3.5" />
             </Link>
           </CardContent>
         </Card>
 
-        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/40 dark:to-green-900/20">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Actions rapides</CardTitle>
-            <div className="flex size-10 items-center justify-center rounded-full bg-green-600 shadow-[0_0_16px_rgba(22,163,74,0.5)] transition-transform group-hover:scale-110">
-              <CalendarCheck className="size-5 text-white" />
+        {/* Actions rapides */}
+        <Card className="bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base font-semibold text-slate-800">
+              Actions rapides
+            </CardTitle>
+            <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+              <Plus className="size-4" />
             </div>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-2">
             <Link
               to="/reservations"
-              className="flex flex-col items-center gap-1 rounded-lg border px-2 py-3 text-center text-xs hover:bg-accent"
+              className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 px-2 py-4 text-center hover:bg-red-50/50 hover:border-red-200/30 transition-all group"
             >
-              <CalendarCheck className="size-4" />
-              Nouvelle réservation
+              <div className="flex size-10 items-center justify-center rounded-xl bg-red-500/10 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                <CalendarCheck className="size-4" />
+              </div>
+              <span className="text-xs font-medium text-slate-600">
+                Réservation
+              </span>
             </Link>
             <Link
               to="/clients"
-              className="flex flex-col items-center gap-1 rounded-lg border px-2 py-3 text-center text-xs hover:bg-accent"
+              className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 px-2 py-4 text-center hover:bg-blue-50/50 hover:border-blue-200/30 transition-all group"
             >
-              <Users className="size-4" />
-              Nouveau client
+              <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                <Users className="size-4" />
+              </div>
+              <span className="text-xs font-medium text-slate-600">
+                Client
+              </span>
             </Link>
             <Link
               to="/caisse"
-              className="flex flex-col items-center gap-1 rounded-lg border px-2 py-3 text-center text-xs hover:bg-accent"
+              className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 px-2 py-4 text-center hover:bg-emerald-50/50 hover:border-emerald-200/30 transition-all group"
             >
-              <Wallet className="size-4" />
-              Encaissement
+              <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                <Wallet className="size-4" />
+              </div>
+              <span className="text-xs font-medium text-slate-600">
+                Encaissement
+              </span>
             </Link>
             <Link
               to="/depenses"
-              className="flex flex-col items-center gap-1 rounded-lg border px-2 py-3 text-center text-xs hover:bg-accent"
+              className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 px-2 py-4 text-center hover:bg-amber-50/50 hover:border-amber-200/30 transition-all group"
             >
-              <TrendingDown className="size-4" />
-              Nouvelle dépense
+              <div className="flex size-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                <TrendingDown className="size-4" />
+              </div>
+              <span className="text-xs font-medium text-slate-600">
+                Dépense
+              </span>
             </Link>
           </CardContent>
         </Card>
