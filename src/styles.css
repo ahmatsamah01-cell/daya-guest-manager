@@ -188,10 +188,6 @@
     display: none !important;
   }
 
-[data-radix-dialog-overlay] {
-    display: none !important;
-  }
-
   [data-radix-dialog-overlay] {
     display: none !important;
   }
@@ -223,4 +219,212 @@
     border: 0;
     box-shadow: none;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STYLES SPÉCIFIQUES POUR LE DESIGN "THE DAYA"
+   ═══════════════════════════════════════════════════════════ */
+
+/* Animation d'ouverture des items du menu mobile */
+@keyframes daya-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-daya-item-in {
+  animation: daya-item-in 0.35s ease-out forwards;
+}
+
+/* Effet de glassmorphism pour la sidebar */
+.sidebar-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-right: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+/* Style du logo "D" en dégradé rouge */
+.daya-logo {
+  background: linear-gradient(135deg, #ef4444 0%, #e11d48 100%);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
+}
+
+/* Items de menu actifs en rouge */
+.daya-menu-active {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25) !important;
+}
+
+.daya-menu-active:hover {
+  background: #dc2626 !important;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35) !important;
+}
+
+/* Items de menu en survol */
+.daya-menu-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.daya-menu-hover:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Sidebar mobile - coins arrondis à droite */
+.sidebar-mobile-rounded {
+  border-top-right-radius: 32px;
+  border-bottom-right-radius: 32px;
+  overflow: hidden;
+}
+
+/* Overlay de superposition */
+.sidebar-overlay {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Animation de glissement depuis la gauche */
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.slide-in-left {
+  animation: slide-in-left 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.slide-out-left {
+  animation: slide-out-left 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* Scrollbar personnalisée pour la sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 10px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* Suppression de la scrollbar pour Firefox */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+/* Effet de reflet en haut de la sidebar */
+.sidebar-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+  pointer-events: none;
+}
+
+/* Style premium pour les badges de notification */
+.daya-badge {
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Transition fluide pour le contenu principal */
+.main-content-transition {
+  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ============================================
+   SUPPRESSION DE LA SCROLLBAR DANS LA SIDEBAR
+   ============================================ */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   STYLES POUR LE BOUTON DE DÉCONNEXION
+   ============================================ */
+.daya-logout-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.daya-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+
+/* ============================================
+   STYLES POUR L'AVATAR UTILISATEUR
+   ============================================ */
+.daya-avatar {
+  background: linear-gradient(135deg, #ef4444 0%, #e11d48 100%);
+  box-shadow: 0 2px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* ============================================
+   STYLES POUR LA BARRE DE RECHERCHE
+   ============================================ */
+.daya-search-input:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* ============================================
+   STYLES POUR LE BOUTON MENU MOBILE
+   ============================================ */
+.daya-menu-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.daya-menu-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.2);
 }
