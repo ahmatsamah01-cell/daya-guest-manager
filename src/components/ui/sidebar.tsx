@@ -12,6 +12,7 @@ import {
   SheetContent,
   SheetDescription,
   SheetHeader,
+  SheetOverlay,
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -181,13 +182,15 @@ const Sidebar = React.forwardRef<
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+          {/* Overlay avec effet de superposition premium */}
+          <SheetOverlay className="bg-black/40 backdrop-blur-sm transition-all duration-300" />
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-(--sidebar-width) bg-white/90 backdrop-blur-2xl p-0 text-slate-800 border-r border-slate-200/80 [&>button]:hidden shadow-2xl"
+            className="w-[85%] max-w-[320px] bg-white/95 backdrop-blur-3xl p-0 text-slate-800 border-r-0 rounded-r-[32px] shadow-[20px_0_60px_-20px_rgba(0,0,0,0.2)] [&>button]:hidden"
             style={
               {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+                "--sidebar-width": "85%",
               } as React.CSSProperties
             }
             side={side}
@@ -196,7 +199,9 @@ const Sidebar = React.forwardRef<
               <SheetTitle>Sidebar</SheetTitle>
               <SheetDescription>Displays the mobile sidebar.</SheetDescription>
             </SheetHeader>
-            <div className="flex h-full w-full flex-col">{children}</div>
+            <div className="flex h-full w-full flex-col overflow-hidden rounded-r-[32px]">
+              {children}
+            </div>
           </SheetContent>
         </Sheet>
       );
@@ -345,7 +350,10 @@ const SidebarHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<"div
       <div
         ref={ref}
         data-sidebar="header"
-        className={cn("flex flex-col gap-2 p-5", className)}
+        className={cn(
+          "flex flex-col gap-1 px-5 pt-8 pb-4 border-b border-slate-200/60",
+          className
+        )}
         {...props}
       />
     );
@@ -353,13 +361,46 @@ const SidebarHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<"div
 );
 SidebarHeader.displayName = "SidebarHeader";
 
+// ═══════════════════════════════════════════════════════════
+// NOUVEAU COMPOSANT : SidebarBrand pour l'en-tête "THE DAYA"
+// ═══════════════════════════════════════════════════════════
+const SidebarBrand = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        data-sidebar="brand"
+        className={cn(
+          "flex items-center gap-3 px-5 py-3",
+          "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+          className
+        )}
+        {...props}
+      >
+        <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/20 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+          D
+        </div>
+        <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
+          <span className="text-sm font-bold text-slate-900 tracking-tight">THE DAYA</span>
+          <span className="text-[10px] font-medium text-slate-500 tracking-[0.1em] uppercase">Hotel Manager</span>
+        </div>
+      </div>
+    );
+  },
+);
+SidebarBrand.displayName = "SidebarBrand";
+
 const SidebarFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
   ({ className, ...props }, ref) => {
     return (
       <div
         ref={ref}
         data-sidebar="footer"
-        className={cn("flex flex-col gap-2 p-4 bg-white/30 backdrop-blur-md border-t border-slate-200/60", className)}
+        className={cn(
+          "flex flex-col gap-2 p-4 mt-auto bg-white/50 backdrop-blur-md border-t border-slate-200/60",
+          "rounded-b-r-[32px] group-data-[collapsible=icon]:rounded-b-none",
+          className
+        )}
         {...props}
       />
     );
@@ -389,7 +430,7 @@ const SidebarContent = React.forwardRef<HTMLDivElement, React.ComponentProps<"di
         ref={ref}
         data-sidebar="content"
         className={cn(
-          "flex min-h-0 flex-1 flex-col gap-2 overflow-auto px-3 py-2 group-data-[collapsible=icon]:overflow-hidden scrollbar-none",
+          "flex min-h-0 flex-1 flex-col gap-1 overflow-auto px-3 py-4 group-data-[collapsible=icon]:overflow-hidden scrollbar-none",
           className,
         )}
         {...props}
@@ -492,8 +533,11 @@ const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li
 );
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
+// ═══════════════════════════════════════════════════════════
+// MODIFICATION : Variants avec état actif en rouge
+// ═══════════════════════════════════════════════════════════
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-2xl px-3.5 py-3 text-left text-xs font-semibold outline-none cursor-pointer transition-all duration-300 hover:bg-white/90 hover:text-slate-900 hover:shadow-sm active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 data-[active=true]:bg-slate-900 data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-slate-900/15 group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!p-3 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-2xl px-3.5 py-3 text-left text-xs font-semibold outline-none cursor-pointer transition-all duration-300 hover:bg-white/90 hover:text-slate-900 hover:shadow-sm active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 data-[active=true]:bg-red-500 data-[active=true]:text-white data-[active=true]:shadow-lg data-[active=true]:shadow-red-500/25 group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!p-3 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -707,8 +751,12 @@ const SidebarMenuSubButton = React.forwardRef<
 });
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
 
+// ═══════════════════════════════════════════════════════════
+// EXPORT : Ajout de SidebarBrand
+// ═══════════════════════════════════════════════════════════
 export {
   Sidebar,
+  SidebarBrand,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
