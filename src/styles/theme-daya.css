@@ -1,0 +1,119 @@
+/* ═══════════════════════════════════════════════════════════
+   THEME DAYA - STYLES GLOBAUX FORCÉS
+   ═══════════════════════════════════════════════════════════ */
+
+/* ============================================
+   FORCE - Arrière-plan global
+   ============================================ */
+body {
+  background: #F8F7F4 !important;
+  min-height: 100vh !important;
+  color: #1A1A2E !important;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html {
+  background: #F8F7F4 !important;
+  min-height: 100vh !important;
+}
+
+/* ============================================
+   FORCE - Tous les boutons
+   ============================================ */
+button:not(.no-force):not([class*="daya-ignore"]) {
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease-in-out !important;
+  background: #0B3D2C !important;
+  color: #FFFFFF !important;
+  padding: 0.625rem 1.5rem !important;
+  box-shadow: 0 4px 16px rgba(11, 61, 44, 0.15) !important;
+  border: none !important;
+}
+
+button:not(.no-force):not([class*="daya-ignore"]):hover {
+  background: #1A5D45 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 24px rgba(11, 61, 44, 0.25) !important;
+}
+
+/* Boutons rouges (destructive) */
+button:not(.no-force):not([class*="daya-ignore"])[data-variant="destructive"],
+button:not(.no-force):not([class*="daya-ignore"])[class*="destructive"] {
+  background: #EF4444 !important;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2) !important;
+}
+
+button:not(.no-force):not([class*="daya-ignore"])[data-variant="destructive"]:hover,
+button:not(.no-force):not([class*="daya-ignore"])[class*="destructive"]:hover {
+  background: #DC2626 !important;
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Boutons outline */
+button:not(.no-force):not([class*="daya-ignore"])[data-variant="outline"] {
+  background: transparent !important;
+  color: #1A1A2E !important;
+  border: 1.5px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow: none !important;
+}
+
+button:not(.no-force):not([class*="daya-ignore"])[data-variant="outline"]:hover {
+  background: #F8F7F4 !important;
+  border-color: #0B3D2C !important;
+}
+
+/* Boutons ghost */
+button:not(.no-force):not([class*="daya-ignore"])[data-variant="ghost"] {
+  background: transparent !important;
+  color: #4A4A5A !important;
+  box-shadow: none !important;
+}
+
+button:not(.no-force):not([class*="daya-ignore"])[data-variant="ghost"]:hover {
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #EF4444 !important;
+}
+
+/* ============================================
+   FORCE - Inputs
+   ============================================ */
+input:not(.no-force):not([class*="daya-ignore"]),
+select:not(.no-force):not([class*="daya-ignore"]),
+textarea:not(.no-force):not([class*="daya-ignore"]) {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(226, 232, 240, 0.8) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.625rem 1rem !important;
+  color: #1A1A2E !important;
+  transition: all 0.2s ease-in-out !important;
+  font-size: 0.875rem !important;
+  width: 100% !important;
+}
+
+input:not(.no-force):not([class*="daya-ignore"]):focus,
+select:not(.no-force):not([class*="daya-ignore"]):focus,
+textarea:not(.no-force):not([class*="daya-ignore"]):focus {
+  outline: none !important;
+  border-color: #0B3D2C !important;
+  box-shadow: 0 0 0 3px rgba(11, 61, 44, 0.15) !important;
+}
+
+input:not(.no-force):not([class*="daya-ignore"])::placeholder {
+  color: #8E8E9A !important;
+}
+
+/* ============================================
+   UTILITAIRES - Pour ignorer le force
+   ============================================ */
+.daya-ignore,
+.no-force {
+  all: revert !important;
+}
+
+.daya-ignore *,
+.no-force * {
+  all: revert !important;
+}
