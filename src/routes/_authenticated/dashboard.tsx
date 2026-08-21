@@ -20,6 +20,11 @@ import {
   ArrowDownRight,
   Plus,
   Eye,
+  X,
+  Sparkles,
+  Hotel,
+  Clock,
+  CheckCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,7 +68,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 // ============================================================
-// COMPOSANT STAT CARD - HARMONISÉ
+// COMPOSANT STAT CARD - AVEC COULEURS VARIÉES
 // ============================================================
 function StatCard({
   titre,
@@ -72,6 +77,7 @@ function StatCard({
   icon: Icon,
   to,
   variation,
+  couleur,
 }: {
   titre: string;
   valeur: string;
@@ -79,22 +85,33 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
   to?: string;
   variation?: { texte: string; hausse: boolean } | null;
+  couleur: {
+    bg: string;
+    from: string;
+    to: string;
+    shadow: string;
+    text: string;
+  };
 }) {
   const contenu = (
-    <Card className="group h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+    <Card className="group h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 backdrop-blur-xl border border-white/30 shadow-lg rounded-3xl overflow-hidden">
       <CardContent className="flex h-full items-start gap-4 p-5">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25 transition-transform group-hover:scale-110">
+        <div
+          className={`flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${couleur.from} ${couleur.to} shadow-lg ${couleur.shadow} transition-transform group-hover:scale-110`}
+        >
           <Icon className="size-5 text-white" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-slate-500">{titre}</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              {titre}
+            </p>
             {variation ? (
               <span
                 className={`flex shrink-0 items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                   variation.hausse
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-red-100 text-red-700"
+                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                    : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
                 }`}
               >
                 {variation.hausse ? (
@@ -106,11 +123,13 @@ function StatCard({
               </span>
             ) : null}
           </div>
-          <p className="font-display text-2xl font-bold text-slate-900 mt-1">
+          <p className="font-display text-2xl font-bold text-slate-900 dark:text-white mt-1">
             {valeur}
           </p>
           {detail ? (
-            <p className="mt-0.5 text-xs text-slate-400">{detail}</p>
+            <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+              {detail}
+            </p>
           ) : null}
         </div>
       </CardContent>
@@ -119,31 +138,16 @@ function StatCard({
 
   if (to) {
     return (
-      <Link to={to} className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 rounded-2xl">
+      <Link
+        to={to}
+        className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 rounded-3xl"
+      >
         {contenu}
       </Link>
     );
   }
 
   return contenu;
-}
-
-// ============================================================
-// COMPOSANT SECTION HEADER
-// ============================================================
-function SectionHeader({
-  title,
-  action,
-}: {
-  title: string;
-  action?: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="text-lg font-semibold text-slate-800">{title}</h2>
-      {action}
-    </div>
-  );
 }
 
 // ============================================================
@@ -168,6 +172,36 @@ function Dashboard() {
   const [periode, setPeriode] = useState("jour");
   const [rapportPeriode, setRapportPeriode] = useState("mois_actuel");
   const [evolutionVue, setEvolutionVue] = useState<"mois" | "annee">("mois");
+  const [actionsRapides, setActionsRapides] = useState([
+    { id: 1, label: "Réservation", to: "/reservations", icon: CalendarCheck },
+    { id: 2, label: "Client", to: "/clients", icon: Users },
+    { id: 3, label: "Encaissement", to: "/caisse", icon: Wallet },
+    { id: 4, label: "Dépense", to: "/depenses", icon: TrendingDown },
+  ]);
+
+  const [showAddAction, setShowAddAction] = useState(false);
+
+  const actionsDisponibles = [
+    { label: "Chambres", to: "/chambres", icon: BedDouble },
+    { label: "Facturation", to: "/factures", icon: Sparkles },
+    { label: "Rapports", to: "/rapports", icon: Clock },
+    { label: "Paramètres", to: "/parametres", icon: Hotel },
+  ];
+
+  const ajouterAction = (action: { label: string; to: string; icon: any }) => {
+    const nouvelleAction = {
+      id: Date.now(),
+      label: action.label,
+      to: action.to,
+      icon: action.icon,
+    };
+    setActionsRapides([...actionsRapides, nouvelleAction]);
+    setShowAddAction(false);
+  };
+
+  const supprimerAction = (id: number) => {
+    setActionsRapides(actionsRapides.filter((a) => a.id !== id));
+  };
 
   const dateDebut =
     periode === "semaine"
@@ -265,7 +299,9 @@ function Dashboard() {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
           <div className="size-12 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
-          <p className="text-sm text-slate-400">Chargement du tableau de bord...</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">
+            Chargement du tableau de bord...
+          </p>
         </div>
       </div>
     );
@@ -476,6 +512,42 @@ function Dashboard() {
   };
 
   // ============================================================
+  // COULEURS DES STAT CARDS
+  // ============================================================
+  const couleursStatCards = [
+    {
+      from: "from-emerald-500",
+      to: "to-emerald-600",
+      shadow: "shadow-emerald-500/25",
+      text: "text-emerald-500",
+    },
+    {
+      from: "from-amber-500",
+      to: "to-amber-600",
+      shadow: "shadow-amber-500/25",
+      text: "text-amber-500",
+    },
+    {
+      from: "from-blue-500",
+      to: "to-blue-600",
+      shadow: "shadow-blue-500/25",
+      text: "text-blue-500",
+    },
+    {
+      from: "from-red-500",
+      to: "to-red-600",
+      shadow: "shadow-red-500/25",
+      text: "text-red-500",
+    },
+    {
+      from: "from-purple-500",
+      to: "to-purple-600",
+      shadow: "shadow-purple-500/25",
+      text: "text-purple-500",
+    },
+  ];
+
+  // ============================================================
   // RENDU
   // ============================================================
   return (
@@ -485,20 +557,20 @@ function Dashboard() {
           ═══════════════════════════════════════════════════════ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
             Tableau de bord
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
             {formatDate(jour)} — Vue d'ensemble de votre activité
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Badge className="bg-red-500/10 text-red-500 border-red-200/30 px-3 py-1.5 text-xs font-medium">
+        <div className="flex items-center gap-3 flex-wrap">
+          <Badge className="bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-400 border-red-200/30 px-3 py-1.5 text-xs font-medium rounded-full">
             <span className="size-1.5 rounded-full bg-red-500 animate-pulse mr-1.5" />
             En direct
           </Badge>
           <Select value={periode} onValueChange={setPeriode}>
-            <SelectTrigger className="w-[140px] bg-white/70 backdrop-blur-xl border-white/20 rounded-xl">
+            <SelectTrigger className="w-[140px] bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border-white/20 dark:border-slate-700/50 rounded-2xl">
               <SelectValue placeholder="Période" />
             </SelectTrigger>
             <SelectContent>
@@ -512,9 +584,9 @@ function Dashboard() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════
-          KPI CARDS - 5 STATISTIQUES
+          KPI CARDS - 5 STATISTIQUES AVEC COULEURS VARIÉES
           ═══════════════════════════════════════════════════════ */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           titre="Occupation"
           valeur={`${occupees.size}/${totalChambres}`}
@@ -522,6 +594,7 @@ function Dashboard() {
           icon={BedDouble}
           to="/chambres"
           variation={varOccupation}
+          couleur={couleursStatCards[0]}
         />
         <StatCard
           titre="Arrivées"
@@ -530,6 +603,7 @@ function Dashboard() {
           icon={ArrowDown}
           to="/reservations"
           variation={varArrivees}
+          couleur={couleursStatCards[1]}
         />
         <StatCard
           titre="Départs"
@@ -538,6 +612,7 @@ function Dashboard() {
           icon={ArrowUp}
           to="/reservations"
           variation={varDeparts}
+          couleur={couleursStatCards[2]}
         />
         <StatCard
           titre="CA du mois"
@@ -546,6 +621,7 @@ function Dashboard() {
           icon={Wallet}
           to="/caisse"
           variation={varCA}
+          couleur={couleursStatCards[3]}
         />
         <StatCard
           titre="En cours"
@@ -554,6 +630,7 @@ function Dashboard() {
           icon={Users}
           to="/reservations"
           variation={varEnCours}
+          couleur={couleursStatCards[4]}
         />
       </div>
 
@@ -562,16 +639,16 @@ function Dashboard() {
           ═══════════════════════════════════════════════════════ */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Évolution CA */}
-        <Card className="bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-semibold text-slate-800">
+            <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
               Évolution du CA
             </CardTitle>
             <Select
               value={evolutionVue}
               onValueChange={(v) => setEvolutionVue(v as "mois" | "annee")}
             >
-              <SelectTrigger className="w-[120px] bg-white/50 border-white/30 rounded-xl text-xs">
+              <SelectTrigger className="w-[120px] bg-white/50 dark:bg-slate-700/50 border-white/30 dark:border-slate-600/50 rounded-xl text-xs dark:text-slate-300">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -580,7 +657,7 @@ function Dashboard() {
               </SelectContent>
             </Select>
           </CardHeader>
-          <CardContent>
+          <CardContent className="w-full overflow-hidden">
             <ChartContainer
               config={{ montant: { label: "CA", color: "#ef4444" } }}
               className="h-[220px] w-full"
@@ -595,7 +672,7 @@ function Dashboard() {
                     <stop offset="100%" stopColor="#ef4444" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.2} />
+                <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.15} />
                 <XAxis
                   dataKey="label"
                   tickLine={false}
@@ -616,7 +693,7 @@ function Dashboard() {
                   content={
                     <ChartTooltipContent
                       formatter={(value) => formatFCFA(Number(value))}
-                      className="bg-slate-900/95 text-white border-slate-800 rounded-xl"
+                      className="bg-slate-900/95 text-white border-slate-800 rounded-xl dark:bg-slate-900 dark:text-white"
                     />
                   }
                 />
@@ -633,7 +710,7 @@ function Dashboard() {
               </AreaChart>
             </ChartContainer>
             {evolutionCA.length === 0 && (
-              <p className="mt-2 text-center text-sm text-slate-400">
+              <p className="mt-2 text-center text-sm text-slate-400 dark:text-slate-500">
                 Aucune donnée pour cette période.
               </p>
             )}
@@ -641,13 +718,13 @@ function Dashboard() {
         </Card>
 
         {/* Nuits vendues */}
-        <Card className="bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-semibold text-slate-800">
+            <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
               Nuits vendues
             </CardTitle>
             <Select value={rapportPeriode} onValueChange={setRapportPeriode}>
-              <SelectTrigger className="w-[140px] bg-white/50 border-white/30 rounded-xl text-xs">
+              <SelectTrigger className="w-[140px] bg-white/50 dark:bg-slate-700/50 border-white/30 dark:border-slate-600/50 rounded-xl text-xs dark:text-slate-300">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -694,37 +771,37 @@ function Dashboard() {
                   </PieChart>
                 </ChartContainer>
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="font-display text-2xl font-bold text-slate-900">
+                  <span className="font-display text-2xl font-bold text-slate-900 dark:text-white">
                     {tauxOccupationRapport}%
                   </span>
-                  <span className="text-[10px] uppercase tracking-wider text-slate-400">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Occupation
                   </span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div>
-                  <p className="font-display text-2xl font-bold text-slate-900">
+                  <p className="font-display text-2xl font-bold text-slate-900 dark:text-white">
                     {nuitsVenduesPeriode}{" "}
-                    <span className="text-base font-normal text-slate-400">
+                    <span className="text-base font-normal text-slate-400 dark:text-slate-500">
                       / {nuitsDisponiblesRapport}
                     </span>
                   </p>
-                  <p className="text-xs text-slate-400 capitalize">
+                  <p className="text-xs text-slate-400 dark:text-slate-500 capitalize">
                     nuit(s) — {rapportLabel}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <span className="size-2.5 rounded-full bg-red-500" />
-                  <span className="text-slate-500">Vendues</span>
-                  <span className="font-semibold text-slate-700">
+                  <span className="text-slate-500 dark:text-slate-400">Vendues</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
                     {nuitsVenduesPeriode}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="size-2.5 rounded-full bg-gray-300" />
-                  <span className="text-slate-500">Disponibles</span>
-                  <span className="font-semibold text-slate-700">
+                  <span className="size-2.5 rounded-full bg-gray-300 dark:bg-slate-600" />
+                  <span className="text-slate-500 dark:text-slate-400">Disponibles</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
                     {Math.max(0, nuitsDisponiblesRapport - nuitsVenduesPeriode)}
                   </span>
                 </div>
@@ -739,17 +816,17 @@ function Dashboard() {
           ═══════════════════════════════════════════════════════ */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* État des chambres */}
-        <Card className="bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-semibold text-slate-800">
+            <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
               État des chambres
             </CardTitle>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
               <BedDouble className="size-4" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="mb-3 flex flex-wrap gap-2 text-[10px] text-slate-400">
+            <div className="mb-3 flex flex-wrap gap-2 text-[10px] text-slate-400 dark:text-slate-500">
               <span className="flex items-center gap-1">
                 <span className="size-2 rounded-full bg-emerald-500" /> Dispo
               </span>
@@ -779,15 +856,15 @@ function Dashboard() {
                   ? "Réservée"
                   : "Disponible";
                 const couleur = occupee
-                  ? "text-red-500"
+                  ? "text-red-500 dark:text-red-400"
                   : reservee
-                  ? "text-amber-500"
-                  : "text-emerald-500";
+                  ? "text-amber-500 dark:text-amber-400"
+                  : "text-emerald-500 dark:text-emerald-400";
                 const bgCouleur = occupee
-                  ? "bg-red-50"
+                  ? "bg-red-50 dark:bg-red-900/20"
                   : reservee
-                  ? "bg-amber-50"
-                  : "bg-emerald-50";
+                  ? "bg-amber-50 dark:bg-amber-900/20"
+                  : "bg-emerald-50 dark:bg-emerald-900/20";
 
                 return (
                   <div
@@ -795,10 +872,10 @@ function Dashboard() {
                     className={`flex items-center justify-between rounded-xl px-3 py-2 ${bgCouleur} transition-colors`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-slate-700">
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                         {c.nom}
                       </span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500">
                         {c.type}
                       </span>
                     </div>
@@ -806,7 +883,7 @@ function Dashboard() {
                       <span className={`text-xs font-medium ${couleur}`}>
                         {statut}
                       </span>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
                         {formatFCFA(c.prix_nuit)}
                       </span>
                     </div>
@@ -814,7 +891,7 @@ function Dashboard() {
                 );
               })}
               {data.chambres.length === 0 && (
-                <p className="text-sm text-slate-400">Aucune chambre.</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500">Aucune chambre.</p>
               )}
             </div>
 
@@ -830,9 +907,9 @@ function Dashboard() {
         </Card>
 
         {/* Activité récente */}
-        <Card className="bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-semibold text-slate-800">
+            <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
               Activité récente
             </CardTitle>
             <div className="flex size-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
@@ -841,14 +918,14 @@ function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-2">
             {activiteRecente.length === 0 ? (
-              <p className="text-sm text-slate-400 text-center py-6">
+              <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-6">
                 Aucune activité récente
               </p>
             ) : (
               activiteRecente.map((a, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between rounded-xl px-3 py-2 hover:bg-slate-50/50 transition-colors"
+                  className="flex items-center justify-between rounded-xl px-3 py-2 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span
@@ -856,11 +933,11 @@ function Dashboard() {
                         statutColors[a.statut] || "bg-slate-300"
                       }`}
                     />
-                    <span className="text-sm text-slate-700 truncate">
+                    <span className="text-sm text-slate-700 dark:text-slate-300 truncate">
                       {a.texte}
                     </span>
                   </div>
-                  <span className="shrink-0 text-xs text-slate-400">
+                  <span className="shrink-0 text-xs text-slate-400 dark:text-slate-500">
                     {a.heure}
                   </span>
                 </div>
@@ -875,61 +952,80 @@ function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Actions rapides */}
-        <Card className="bg-white/70 backdrop-blur-xl border border-white/20 shadow-md">
+        {/* Actions rapides - AVEC BOUTON + */}
+        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-semibold text-slate-800">
+            <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
               Actions rapides
             </CardTitle>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+            <button
+              onClick={() => setShowAddAction(!showAddAction)}
+              className="flex size-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+            >
               <Plus className="size-4" />
-            </div>
+            </button>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-2">
-            <Link
-              to="/reservations"
-              className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 px-2 py-4 text-center hover:bg-red-50/50 hover:border-red-200/30 transition-all group"
-            >
-              <div className="flex size-10 items-center justify-center rounded-xl bg-red-500/10 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors">
-                <CalendarCheck className="size-4" />
+          <CardContent>
+            {showAddAction && (
+              <div className="mb-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600/50">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                  Ajouter une action :
+                </p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {actionsDisponibles
+                    .filter(
+                      (a) =>
+                        !actionsRapides.some(
+                          (existing) => existing.label === a.label
+                        )
+                    )
+                    .map((action) => (
+                      <button
+                        key={action.label}
+                        onClick={() => ajouterAction(action)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors border border-slate-100 dark:border-slate-600/30"
+                      >
+                        <action.icon className="size-3.5" />
+                        {action.label}
+                      </button>
+                    ))}
+                  {actionsDisponibles.filter(
+                    (a) =>
+                      !actionsRapides.some(
+                        (existing) => existing.label === a.label
+                      )
+                  ).length === 0 && (
+                    <p className="text-xs text-slate-400 dark:text-slate-500 col-span-2 text-center py-2">
+                      Toutes les actions sont déjà ajoutées
+                    </p>
+                  )}
+                </div>
               </div>
-              <span className="text-xs font-medium text-slate-600">
-                Réservation
-              </span>
-            </Link>
-            <Link
-              to="/clients"
-              className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 px-2 py-4 text-center hover:bg-blue-50/50 hover:border-blue-200/30 transition-all group"
-            >
-              <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                <Users className="size-4" />
-              </div>
-              <span className="text-xs font-medium text-slate-600">
-                Client
-              </span>
-            </Link>
-            <Link
-              to="/caisse"
-              className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 px-2 py-4 text-center hover:bg-emerald-50/50 hover:border-emerald-200/30 transition-all group"
-            >
-              <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                <Wallet className="size-4" />
-              </div>
-              <span className="text-xs font-medium text-slate-600">
-                Encaissement
-              </span>
-            </Link>
-            <Link
-              to="/depenses"
-              className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 px-2 py-4 text-center hover:bg-amber-50/50 hover:border-amber-200/30 transition-all group"
-            >
-              <div className="flex size-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                <TrendingDown className="size-4" />
-              </div>
-              <span className="text-xs font-medium text-slate-600">
-                Dépense
-              </span>
-            </Link>
+            )}
+
+            <div className="grid grid-cols-2 gap-2">
+              {actionsRapides.map((action) => (
+                <div key={action.id} className="relative group">
+                  <Link
+                    to={action.to}
+                    className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 dark:border-slate-700/50 px-2 py-4 text-center hover:bg-red-50/50 dark:hover:bg-red-900/20 hover:border-red-200/30 dark:hover:border-red-800/30 transition-all group w-full"
+                  >
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-red-500/10 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                      <action.icon className="size-4" />
+                    </div>
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                      {action.label}
+                    </span>
+                  </Link>
+                  <button
+                    onClick={() => supprimerAction(action.id)}
+                    className="absolute -top-1 -right-1 size-5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
