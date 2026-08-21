@@ -65,11 +65,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// ---------------------------------------------------------------------------
-// Couleurs de la sidebar (identiques à la maquette)
-// ---------------------------------------------------------------------------
-const SIDEBAR_BG =
-  "bg-gradient-to-b from-[#0B3D2C] via-[#0C4230] to-[#0A3527]";
+// ═══════════════════════════════════════════════════════════
+// COULEURS DE LA SIDEBAR - DESIGN "THE DAYA" (blanc/crème)
+// ═══════════════════════════════════════════════════════════
+const SIDEBAR_BG = "bg-white/95 backdrop-blur-3xl";
+const SIDEBAR_TEXT = "text-slate-800";
+const SIDEBAR_BORDER = "border-slate-200/60";
 
 type NavItem = {
   to: string;
@@ -91,9 +92,9 @@ const NAV: NavItem[] = [
   { to: "/parametres", label: "Paramètres", icon: Settings },
 ];
 
-// ---------------------------------------------------------------------------
-// Contenu de la sidebar (partagé desktop + mobile)
-// ---------------------------------------------------------------------------
+// ═══════════════════════════════════════════════════════════
+// CONTENU DE LA SIDEBAR - STYLE "THE DAYA"
+// ═══════════════════════════════════════════════════════════
 function SidebarContent({
   onNavigate,
   onClose,
@@ -123,59 +124,72 @@ function SidebarContent({
   };
 
   return (
-    <div className={cn("flex h-full flex-col text-white", SIDEBAR_BG)}>
-      {/* En-tête / logo */}
-      <div className="relative flex items-center gap-3 px-5 py-5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10">
-          <BrandLogo className="size-6" />
+    <div
+      className={cn(
+        "flex h-full w-full flex-col",
+        SIDEBAR_BG,
+        SIDEBAR_TEXT,
+        mobile ? "rounded-r-[32px]" : "rounded-none",
+      )}
+    >
+      {/* Ligne de reflet supérieure subtile */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
+
+      {/* ═══════════════════════════════════════ */}
+      {/* EN-TÊTE "THE DAYA" - STYLE FIGMA */}
+      {/* ═══════════════════════════════════════ */}
+      <div className="flex items-center gap-3 px-5 pt-8 pb-4 border-b border-slate-200/60">
+        <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/20 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+          D
         </div>
 
-        <div className="min-w-0">
-          <p className="truncate text-sm font-bold leading-tight">
-            THE DAYA
-          </p>
-          <p className="truncate text-[11px] leading-tight text-white/70">
-            Hotel Manager
-          </p>
+        <div className="flex flex-col leading-tight">
+          <span className="text-sm font-bold text-slate-900 tracking-tight">THE DAYA</span>
+          <span className="text-[10px] font-medium text-slate-500 tracking-[0.1em] uppercase">Hotel Manager</span>
         </div>
 
         {mobile && onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="ml-auto flex size-8 shrink-0 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+            className="ml-auto flex size-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
           >
             <X className="size-5" />
           </button>
         )}
       </div>
 
+      {/* Profil utilisateur - version mobile */}
       {mobile && (
-        <div className="flex items-center gap-3 border-b border-white/10 px-5 pb-4">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/10">
-            <Users className="size-5 text-white/70" />
+        <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-200/60">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-red-500/10 to-rose-600/10 text-red-500 font-semibold text-sm">
+            {(role?.email?.[0] ?? "A").toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">Administrateur</p>
-            <p className="flex items-center gap-1 truncate text-xs text-white/60">
+            <p className="truncate text-sm font-semibold text-slate-900">Administrateur</p>
+            <p className="flex items-center gap-1.5 truncate text-xs text-slate-500">
               Gestionnaire
-              <span className="size-1.5 rounded-full bg-emerald-400" />
+              <span className="size-1.5 rounded-full bg-emerald-500" />
             </p>
           </div>
         </div>
       )}
 
+      {/* Slogan - version desktop */}
       {!mobile && (
-        <p className="-mt-2 truncate px-5 pb-3 text-[11px] italic text-white/50">
+        <p className="px-5 py-2 text-[11px] italic text-slate-400 border-b border-slate-200/60">
           {SLOGAN} · {etab?.nom ?? "…"}
         </p>
       )}
 
-      {/* Favoris */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
+      {/* ═══════════════════════════════════════ */}
+      {/* MENU DE NAVIGATION - STYLE FIGMA */}
+      {/* ═══════════════════════════════════════ */}
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 scrollbar-none">
+        {/* FAVORIS */}
         {favoris.length > 0 && (
           <div className="mb-3">
-            <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-white/40">
+            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
               Favoris
             </p>
 
@@ -192,10 +206,10 @@ function SidebarContent({
                     to={item.to}
                     onClick={onNavigate}
                     className={cn(
-                      "flex flex-1 items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                      "flex flex-1 items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-semibold transition-all duration-300",
                       active
-                        ? "bg-white font-semibold text-[#0B3D2C]"
-                        : "text-white/85 hover:bg-white/10",
+                        ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
+                        : "text-slate-600 hover:bg-white/90 hover:text-slate-900 hover:shadow-sm",
                     )}
                   >
                     <Icon className="size-[18px] shrink-0" />
@@ -215,7 +229,7 @@ function SidebarContent({
           </div>
         )}
 
-        {/* Liste principale */}
+        {/* LISTE PRINCIPALE */}
         {NAV.map((item, index) => {
           const Icon = item.icon;
           const active = pathname === item.to;
@@ -240,10 +254,10 @@ function SidebarContent({
                     to={item.to}
                     onClick={onNavigate}
                     className={cn(
-                      "flex flex-1 items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                      "flex flex-1 items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-semibold transition-all duration-300",
                       active
-                        ? "bg-white font-semibold text-[#0B3D2C]"
-                        : "text-white/85 hover:bg-white/10",
+                        ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
+                        : "text-slate-600 hover:bg-white/90 hover:text-slate-900 hover:shadow-sm",
                     )}
                   >
                     <Icon className="size-[18px] shrink-0" />
@@ -251,7 +265,9 @@ function SidebarContent({
                   </Link>
                 </TooltipTrigger>
 
-                <TooltipContent side="right">{item.label}</TooltipContent>
+                <TooltipContent side="right" className="bg-slate-900 text-white border-slate-800 rounded-xl px-3 py-1.5 text-xs font-medium">
+                  {item.label}
+                </TooltipContent>
               </Tooltip>
 
               <button
@@ -265,7 +281,7 @@ function SidebarContent({
                 <Star
                   className={cn(
                     "mx-auto size-3",
-                    estFavori ? "fill-yellow-400 text-yellow-400" : "text-white/40",
+                    estFavori ? "fill-yellow-400 text-yellow-400" : "text-slate-300",
                   )}
                 />
               </button>
@@ -273,7 +289,8 @@ function SidebarContent({
           );
         })}
 
-        <p className="mb-1 mt-4 px-2 text-[10px] font-semibold uppercase tracking-wider text-white/40">
+        {/* SECTION "AUTRES" */}
+        <p className="mb-1 mt-4 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
           Autres
         </p>
 
@@ -281,10 +298,10 @@ function SidebarContent({
           to="/notifications"
           onClick={onNavigate}
           className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+            "flex items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-semibold transition-all duration-300",
             pathname === "/notifications"
-              ? "bg-white font-semibold text-[#0B3D2C]"
-              : "text-white/85 hover:bg-white/10",
+              ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
+              : "text-slate-600 hover:bg-white/90 hover:text-slate-900 hover:shadow-sm",
           )}
         >
           <Bell className="size-[18px] shrink-0" />
@@ -292,18 +309,24 @@ function SidebarContent({
         </Link>
       </nav>
 
-      {/* Profil + déconnexion */}
-      <div className="border-t border-white/10 p-3">
+      {/* ═══════════════════════════════════════ */}
+      {/* PIED DE PAGE - PROFIL + DÉCONNEXION */}
+      {/* ═══════════════════════════════════════ */}
+      <div className={cn(
+        "border-t border-slate-200/60 p-4 bg-white/50 backdrop-blur-md",
+        mobile && "rounded-b-r-[32px]"
+      )}>
+        {/* Profil - version desktop */}
         {!mobile && (
-          <div className="mb-2 flex items-center gap-3 px-2">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10">
-              <Users className="size-4 text-white/70" />
+          <div className="mb-3 flex items-center gap-3 px-2">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-red-500/10 to-rose-600/10 text-red-500 font-semibold text-sm">
+              {(role?.email?.[0] ?? "A").toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">Administrateur</p>
-              <p className="flex items-center gap-1 truncate text-xs text-white/60">
+              <p className="truncate text-sm font-semibold text-slate-900">Administrateur</p>
+              <p className="flex items-center gap-1.5 truncate text-xs text-slate-500">
                 Gestionnaire
-                <span className="size-1.5 rounded-full bg-emerald-400" />
+                <span className="size-1.5 rounded-full bg-emerald-500" />
               </p>
             </div>
           </div>
@@ -312,20 +335,20 @@ function SidebarContent({
         <Button
           type="button"
           variant="ghost"
-          className="w-full justify-start gap-3 text-white/85 hover:bg-white/10 hover:text-white"
+          className="w-full justify-start gap-3 rounded-2xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
           onClick={handleLogout}
         >
           <LogOut className="size-4" />
-          Déconnexion
+          <span className="text-xs font-semibold">Déconnexion</span>
         </Button>
       </div>
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Météo
-// ---------------------------------------------------------------------------
+// ═══════════════════════════════════════════════════════════
+// MÉTÉO - inchangée
+// ═══════════════════════════════════════════════════════════
 function iconMeteo(code: number) {
   if (code === 0) return { Icon: Sun, label: "Ensoleillé" };
   if ([1, 2, 3].includes(code)) return { Icon: Cloud, label: "Nuageux" };
@@ -372,9 +395,9 @@ function MeteoWidget() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Recherche globale
-// ---------------------------------------------------------------------------
+// ═══════════════════════════════════════════════════════════
+// RECHERCHE GLOBALE - inchangée
+// ═══════════════════════════════════════════════════════════
 function RechercheGlobale({
   open,
   onClose,
@@ -456,9 +479,9 @@ function RechercheGlobale({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Layout principal
-// ---------------------------------------------------------------------------
+// ═══════════════════════════════════════════════════════════
+// LAYOUT PRINCIPAL
+// ═══════════════════════════════════════════════════════════
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
@@ -547,16 +570,30 @@ export function AppLayout({ children }: { children: ReactNode }) {
       `}</style>
 
       <div className="min-h-screen bg-gray-50 lg:flex">
-        {/* Sidebar desktop, fixe dans le flux */}
-        <aside className="no-print hidden w-64 shrink-0 shadow-xl lg:sticky lg:top-0 lg:block lg:h-screen">
+        {/* ═══════════════════════════════════════════ */}
+        {/* SIDEBAR DESKTOP - STYLE "THE DAYA" */}
+        {/* ═══════════════════════════════════════════ */}
+        <aside className="no-print hidden w-[280px] shrink-0 shadow-[10px_0_30px_-15px_rgba(15,23,42,0.08)] lg:sticky lg:top-0 lg:block lg:h-screen">
           <SidebarContent favoris={favoris} toggleFavori={toggleFavori} />
         </aside>
 
-        {/* Sidebar mobile, positionnée derrière le contenu, révélée au décalage */}
+        {/* ═══════════════════════════════════════════ */}
+        {/* SIDEBAR MOBILE - OVERLAY AVEC EFFET */}
+        {/* ═══════════════════════════════════════════ */}
+        {/* Overlay sombre */}
         <div
           className={cn(
-            "fixed inset-y-0 left-0 z-40 w-72 lg:hidden",
-            mobileOpen ? "pointer-events-auto" : "pointer-events-none",
+            "fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-all duration-300 lg:hidden",
+            mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+          )}
+          onClick={() => setMobileOpen(false)}
+        />
+
+        {/* Sidebar mobile */}
+        <div
+          className={cn(
+            "fixed inset-y-0 left-0 z-50 w-[85%] max-w-[320px] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] lg:hidden",
+            mobileOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
           <SidebarContent
@@ -569,26 +606,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
           />
         </div>
 
-        {/* Colonne de contenu : header + main. C'est elle qui se décale/rétrécit sur mobile */}
+        {/* ═══════════════════════════════════════════ */}
+        {/* COLONNE DE CONTENU */}
+        {/* ═══════════════════════════════════════════ */}
         <div
           className={cn(
-            "relative flex min-w-0 flex-1 flex-col bg-background",
-            "transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
-            mobileOpen && "translate-x-[288px] scale-[0.96] rounded-2xl shadow-2xl overflow-hidden",
-            "lg:translate-x-0 lg:scale-100 lg:rounded-none lg:shadow-none lg:overflow-visible",
+            "relative flex min-w-0 flex-1 flex-col bg-background transition-all duration-300",
+            mobileOpen && "lg:translate-x-0",
           )}
         >
-          {/* Overlay sombre progressif au-dessus du contenu décalé */}
-          <div
-            aria-hidden
-            onClick={() => setMobileOpen(false)}
-            className={cn(
-              "pointer-events-none absolute inset-0 z-40 bg-black/0 transition-colors duration-300 lg:hidden",
-              mobileOpen && "pointer-events-auto bg-black/45",
-            )}
-          />
-
+          {/* HEADER */}
           <header className="no-print sticky top-0 z-30 flex flex-wrap items-center justify-between gap-3 border-b bg-card/80 px-4 py-2 shadow-sm backdrop-blur-md">
+            {/* Bouton menu mobile */}
             <Button
               type="button"
               variant="outline"
@@ -599,6 +628,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <Menu className="size-5" />
             </Button>
 
+            {/* Logo */}
             <div className="flex min-w-0 items-center gap-2">
               <div className="rounded-lg bg-white p-1.5 shadow-md">
                 <BrandLogo className="max-h-8" />
@@ -608,6 +638,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </span>
             </div>
 
+            {/* Date */}
             <span className="hidden text-sm text-muted-foreground sm:block">
               {new Date().toLocaleDateString("fr-FR", {
                 weekday: "long",
@@ -617,8 +648,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
               })}
             </span>
 
+            {/* Météo */}
             <MeteoWidget />
 
+            {/* Notifications */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button type="button" variant="ghost" size="icon" className="relative" asChild>
@@ -642,6 +675,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </TooltipContent>
             </Tooltip>
 
+            {/* Recherche */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -659,6 +693,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <TooltipContent>Recherche globale</TooltipContent>
             </Tooltip>
 
+            {/* Profil - Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -666,7 +701,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   variant="ghost"
                   className="hidden items-center gap-2 rounded-lg px-2 py-1 sm:flex"
                 >
-                  <div className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                  <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-sm font-semibold text-white shadow-md shadow-red-500/20">
                     {(role?.email?.[0] ?? "U").toUpperCase()}
                   </div>
                   <div className="hidden text-left lg:block">
@@ -700,6 +735,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </DropdownMenu>
           </header>
 
+          {/* MAIN */}
           <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
         </div>
 
@@ -709,6 +745,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
   );
 }
 
+// ═══════════════════════════════════════════════════════════
+// PAGE HEADER - inchangé
+// ═══════════════════════════════════════════════════════════
 export function PageHeader({
   title,
   description,
