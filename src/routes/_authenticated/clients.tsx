@@ -2,7 +2,26 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Printer, History, Eye, Users2, BedDouble, Wallet, Landmark, FileText } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Printer,
+  History,
+  Eye,
+  Users2,
+  BedDouble,
+  Wallet,
+  Landmark,
+  FileText,
+  Search,
+  User,
+  Phone,
+  Mail,
+  IdCard,
+  Globe,
+  MapPin,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +35,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
 import { useEtablissement, useMonRole } from "@/hooks/use-hotel";
 import { formatFCFA, formatDate, nbNuits, today } from "@/lib/format";
@@ -27,7 +53,8 @@ export const Route = createFileRoute("/_authenticated/clients")({
       { title: "Clients — LE DAYA Hotel Manager" },
       {
         name: "description",
-        content: "Fichier clients de LE DAYA Guest House : coordonnées, pièce d'identité et nationalité.",
+        content:
+          "Fichier clients de LE DAYA Guest House : coordonnées, pièce d'identité et nationalité.",
       },
       { property: "og:title", content: "Clients — LE DAYA Hotel Manager" },
       { property: "og:description", content: "Base de données des clients de l'établissement." },
@@ -67,7 +94,7 @@ function ClientsPage() {
   const [form, setForm] = useState<Form>(vide);
   const [recherche, setRecherche] = useState("");
 
- const [dateDebutFiltre, setDateDebutFiltre] = useState(`${today().slice(0, 7)}-01`);
+  const [dateDebutFiltre, setDateDebutFiltre] = useState(`${today().slice(0, 7)}-01`);
   const [dateFinFiltre, setDateFinFiltre] = useState(today());
 
   const { data: sejours } = useQuery({
@@ -75,7 +102,9 @@ function ClientsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("reservations")
-        .select("*, clients(nom, prenom, telephone, type_piece, numero_piece, nationalite), chambres(nom, type)")
+        .select(
+          "*, clients(nom, prenom, telephone, type_piece, numero_piece, nationalite), chambres(nom, type)"
+        )
         .neq("statut", "annulee")
         .gte("date_arrivee", dateDebutFiltre)
         .lte("date_arrivee", dateFinFiltre)
@@ -100,7 +129,7 @@ function ClientsPage() {
 
   const [ficheClient, setFicheClient] = useState<string | null>(null);
 
-function imprimerFichePolice(sejour: any, client: any) {
+  function imprimerFichePolice(sejour: any, client: any) {
     const n = nbNuits(sejour.date_arrivee, sejour.date_depart);
     const total = n * Number(sejour.prix_nuit) + n * Number(sejour.taxe_nuit ?? 0);
 
@@ -260,7 +289,8 @@ function imprimerFichePolice(sejour: any, client: any) {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-   const statsHistorique = (sejours ?? []).reduce(
+
+  const statsHistorique = (sejours ?? []).reduce(
     (acc, s) => {
       const n = nbNuits(s.date_arrivee, s.date_depart);
       acc.nuitees += n;
@@ -268,7 +298,7 @@ function imprimerFichePolice(sejour: any, client: any) {
       acc.taxes += n * Number(s.taxe_nuit ?? 0);
       return acc;
     },
-    { nuitees: 0, total: 0, taxes: 0 },
+    { nuitees: 0, total: 0, taxes: 0 }
   );
 
   function infosClient(clientId: string) {
@@ -276,12 +306,19 @@ function imprimerFichePolice(sejour: any, client: any) {
     const dernier = historique[0];
     const totalDepense = historique.reduce(
       (s, r) => s + nbNuits(r.date_arrivee, r.date_depart) * Number(r.prix_nuit),
-      0,
+      0
     );
     return { nbSejours: historique.length, dernier, totalDepense, historique };
   }
 
-  const COULEURS_AVATAR = ["#dc2626", "#2563eb", "#16a34a", "#9333ea", "#ea580c", "#0891b2"];
+  const COULEURS_AVATAR = [
+    "#dc2626",
+    "#2563eb",
+    "#16a34a",
+    "#9333ea",
+    "#ea580c",
+    "#0891b2",
+  ];
   function couleurAvatar(nom: string) {
     let hash = 0;
     for (let i = 0; i < nom.length; i++) hash = nom.charCodeAt(i) + ((hash << 5) - hash);
@@ -335,7 +372,7 @@ function imprimerFichePolice(sejour: any, client: any) {
   });
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Clients"
         description="Fichier clients de l'établissement"
@@ -348,13 +385,15 @@ function imprimerFichePolice(sejour: any, client: any) {
             }}
           >
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="size-4" /> Nouveau client
+              <Button className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-5 py-2.5">
+                <Plus className="size-4 mr-2" /> Nouveau client
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{form.id ? "Modifier le client" : "Nouveau client"}</DialogTitle>
+                <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+                  {form.id ? "Modifier le client" : "Nouveau client"}
+                </DialogTitle>
               </DialogHeader>
               <form
                 className="grid gap-4 sm:grid-cols-2"
@@ -364,66 +403,78 @@ function imprimerFichePolice(sejour: any, client: any) {
                 }}
               >
                 <div className="space-y-2">
-                  <Label>Nom</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Nom *</Label>
                   <Input
                     required
                     value={form.nom}
                     onChange={(e) => setForm({ ...form, nom: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Prénom</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Prénom</Label>
                   <Input
                     value={form.prenom}
                     onChange={(e) => setForm({ ...form, prenom: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Téléphone</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Téléphone</Label>
                   <Input
                     value={form.telephone}
                     onChange={(e) => setForm({ ...form, telephone: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>E-mail</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">E-mail</Label>
                   <Input
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Type de pièce</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Type de pièce</Label>
                   <Input
                     placeholder="CNI, passeport…"
                     value={form.type_piece}
                     onChange={(e) => setForm({ ...form, type_piece: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>N° de pièce</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">N° de pièce</Label>
                   <Input
                     value={form.numero_piece}
                     onChange={(e) => setForm({ ...form, numero_piece: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Nationalité</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Nationalité</Label>
                   <Input
                     value={form.nationalite}
                     onChange={(e) => setForm({ ...form, nationalite: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Adresse</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Adresse</Label>
                   <Input
                     value={form.adresse}
                     onChange={(e) => setForm({ ...form, adresse: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <DialogFooter className="sm:col-span-2">
-                  <Button type="submit" disabled={enregistrer.isPending || !etab}>
+                  <Button
+                    type="submit"
+                    disabled={enregistrer.isPending || !etab}
+                    className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
+                  >
                     Enregistrer
                   </Button>
                 </DialogFooter>
@@ -433,48 +484,63 @@ function imprimerFichePolice(sejour: any, client: any) {
         }
       />
 
-      <Card className="mb-6">
-        <CardContent className="space-y-4 p-4">
+      {/* ═══════════════════════════════════════════════════════
+          HISTORIQUE DES SÉJOURS
+          ═══════════════════════════════════════════════════════ */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+        <CardContent className="p-5 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <History className="size-4 text-muted-foreground" />
-              <p className="font-display font-semibold">Historique des séjours</p>
+              <div className="flex size-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+                <History className="size-4" />
+              </div>
+              <p className="font-display font-semibold text-slate-800 dark:text-white">
+                Historique des séjours
+              </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:flex sm:gap-4">
-              <div className="group flex min-w-[130px] items-center gap-3 rounded-xl border bg-gradient-to-br from-blue-50 to-blue-100/50 px-4 py-3 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-blue-950/40 dark:to-blue-900/20">
-                <div className="flex size-10 items-center justify-center rounded-full bg-blue-500 shadow-[0_0_16px_rgba(59,130,246,0.5)] transition-transform group-hover:scale-110">
-                  <Users2 className="size-5 text-white" />
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:gap-3">
+              <div className="group flex min-w-[120px] items-center gap-3 rounded-2xl bg-white/60 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 px-4 py-2.5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+                  <Users2 className="size-4" />
                 </div>
                 <div>
-                  <p className="font-display text-xl font-bold leading-none">{(sejours ?? []).length}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Séjours</p>
+                  <p className="font-display text-lg font-bold text-slate-900 dark:text-white leading-none">
+                    {(sejours ?? []).length}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">Séjours</p>
                 </div>
               </div>
-              <div className="group flex min-w-[130px] items-center gap-3 rounded-xl border bg-gradient-to-br from-green-50 to-green-100/50 px-4 py-3 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-green-950/40 dark:to-green-900/20">
-                <div className="flex size-10 items-center justify-center rounded-full bg-green-500 shadow-[0_0_16px_rgba(34,197,94,0.5)] transition-transform group-hover:scale-110">
-                  <BedDouble className="size-5 text-white" />
+              <div className="group flex min-w-[120px] items-center gap-3 rounded-2xl bg-white/60 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 px-4 py-2.5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+                  <BedDouble className="size-4" />
                 </div>
                 <div>
-                  <p className="font-display text-xl font-bold leading-none">{statsHistorique.nuitees}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Nuitées</p>
+                  <p className="font-display text-lg font-bold text-slate-900 dark:text-white leading-none">
+                    {statsHistorique.nuitees}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">Nuitées</p>
                 </div>
               </div>
-              <div className="group flex min-w-[150px] items-center gap-3 rounded-xl border bg-gradient-to-br from-amber-50 to-amber-100/50 px-4 py-3 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-amber-950/40 dark:to-amber-900/20">
-                <div className="flex size-10 items-center justify-center rounded-full bg-amber-500 shadow-[0_0_16px_rgba(245,158,11,0.5)] transition-transform group-hover:scale-110">
-                  <Wallet className="size-5 text-white" />
+              <div className="group flex min-w-[140px] items-center gap-3 rounded-2xl bg-white/60 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 px-4 py-2.5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+                  <Wallet className="size-4" />
                 </div>
                 <div>
-                  <p className="font-display text-xl font-bold leading-none">{formatFCFA(statsHistorique.total)}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Total</p>
+                  <p className="font-display text-lg font-bold text-slate-900 dark:text-white leading-none">
+                    {formatFCFA(statsHistorique.total)}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">Total</p>
                 </div>
               </div>
-              <div className="group flex min-w-[150px] items-center gap-3 rounded-xl border bg-gradient-to-br from-purple-50 to-purple-100/50 px-4 py-3 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-purple-950/40 dark:to-purple-900/20">
-                <div className="flex size-10 items-center justify-center rounded-full bg-purple-500 shadow-[0_0_16px_rgba(147,51,234,0.5)] transition-transform group-hover:scale-110">
-                  <Landmark className="size-5 text-white" />
+              <div className="group flex min-w-[140px] items-center gap-3 rounded-2xl bg-white/60 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 px-4 py-2.5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500">
+                  <Landmark className="size-4" />
                 </div>
                 <div>
-                  <p className="font-display text-xl font-bold leading-none">{formatFCFA(statsHistorique.taxes)}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Taxes</p>
+                  <p className="font-display text-lg font-bold text-slate-900 dark:text-white leading-none">
+                    {formatFCFA(statsHistorique.taxes)}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">Taxes</p>
                 </div>
               </div>
             </div>
@@ -482,44 +548,48 @@ function imprimerFichePolice(sejour: any, client: any) {
 
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1">
-              <Label className="text-xs">Du</Label>
+              <Label className="text-xs text-slate-500 dark:text-slate-400">Du</Label>
               <Input
                 type="date"
                 value={dateDebutFiltre}
                 onChange={(e) => setDateDebutFiltre(e.target.value)}
-                className="w-[160px]"
+                className="w-[160px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Au</Label>
+              <Label className="text-xs text-slate-500 dark:text-slate-400">Au</Label>
               <Input
                 type="date"
                 value={dateFinFiltre}
                 onChange={(e) => setDateFinFiltre(e.target.value)}
-                className="w-[160px]"
+                className="w-[160px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
               />
             </div>
-            <Button variant="outline" onClick={imprimerHistorique} className="gap-2">
+            <Button
+              variant="outline"
+              onClick={imprimerHistorique}
+              className="gap-2 rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+            >
               <Printer className="size-4" /> Imprimer
             </Button>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border">
+          <div className="overflow-x-auto rounded-xl border border-slate-200/50 dark:border-slate-700/50">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-10">N°</TableHead>
-                  <TableHead>Nom et prénom</TableHead>
-                  <TableHead>Téléphone</TableHead>
-                  <TableHead>Pièce</TableHead>
-                  <TableHead>Nationalité</TableHead>
-                  <TableHead>Type chambre</TableHead>
-                  <TableHead>N° chambre</TableHead>
-                  <TableHead>Période de séjour</TableHead>
-                  <TableHead className="text-center">Nuits</TableHead>
-                  <TableHead className="text-right">Prix unitaire</TableHead>
-                  <TableHead className="text-right">Taxe de séjour</TableHead>
-                  <TableHead className="text-right">Prix total</TableHead>
+                <TableRow className="border-b border-slate-100 dark:border-slate-700/50">
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">N°</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">Nom et prénom</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">Téléphone</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">Pièce</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">Nationalité</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">Type chambre</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">N° chambre</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">Période</TableHead>
+                  <TableHead className="text-center text-slate-600 dark:text-slate-300 font-semibold">Nuits</TableHead>
+                  <TableHead className="text-right text-slate-600 dark:text-slate-300 font-semibold">Prix U.</TableHead>
+                  <TableHead className="text-right text-slate-600 dark:text-slate-300 font-semibold">Taxe</TableHead>
+                  <TableHead className="text-right text-slate-600 dark:text-slate-300 font-semibold">Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -527,25 +597,42 @@ function imprimerFichePolice(sejour: any, client: any) {
                   const n = nbNuits(s.date_arrivee, s.date_depart);
                   const taxe = n * Number(s.taxe_nuit ?? 0);
                   return (
-                    <TableRow key={s.id}>
-                      <TableCell>{i + 1}</TableCell>
-                      <TableCell className="font-medium whitespace-nowrap">
+                    <TableRow
+                      key={s.id}
+                      className="border-b border-slate-100/50 dark:border-slate-700/30 hover:bg-slate-50/50 dark:hover:bg-slate-700/20"
+                    >
+                      <TableCell className="text-slate-600 dark:text-slate-300">{i + 1}</TableCell>
+                      <TableCell className="font-medium whitespace-nowrap text-slate-900 dark:text-white">
                         {s.clients?.prenom} {s.clients?.nom}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">{s.clients?.telephone ?? "—"}</TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {s.clients?.type_piece ? `${s.clients.type_piece} ${s.clients.numero_piece ?? ""}` : "—"}
+                      <TableCell className="whitespace-nowrap text-slate-600 dark:text-slate-300">
+                        {s.clients?.telephone ?? "—"}
                       </TableCell>
-                      <TableCell>{s.clients?.nationalite ?? "—"}</TableCell>
-                      <TableCell>{s.chambres?.type ?? "—"}</TableCell>
-                      <TableCell>{s.chambres?.nom ?? "—"}</TableCell>
-                      <TableCell className="whitespace-nowrap">
+                      <TableCell className="whitespace-nowrap text-slate-600 dark:text-slate-300">
+                        {s.clients?.type_piece
+                          ? `${s.clients.type_piece} ${s.clients.numero_piece ?? ""}`
+                          : "—"}
+                      </TableCell>
+                      <TableCell className="text-slate-600 dark:text-slate-300">
+                        {s.clients?.nationalite ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-slate-600 dark:text-slate-300">
+                        {s.chambres?.type ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-slate-600 dark:text-slate-300">
+                        {s.chambres?.nom ?? "—"}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-slate-600 dark:text-slate-300">
                         {formatDate(s.date_arrivee)} → {formatDate(s.date_depart)}
                       </TableCell>
-                      <TableCell className="text-center">{n}</TableCell>
-                      <TableCell className="text-right whitespace-nowrap">{formatFCFA(s.prix_nuit)}</TableCell>
-                      <TableCell className="text-right whitespace-nowrap">{formatFCFA(taxe)}</TableCell>
-                      <TableCell className="text-right whitespace-nowrap font-medium">
+                      <TableCell className="text-center text-slate-600 dark:text-slate-300">{n}</TableCell>
+                      <TableCell className="text-right whitespace-nowrap text-slate-600 dark:text-slate-300">
+                        {formatFCFA(s.prix_nuit)}
+                      </TableCell>
+                      <TableCell className="text-right whitespace-nowrap text-slate-600 dark:text-slate-300">
+                        {formatFCFA(taxe)}
+                      </TableCell>
+                      <TableCell className="text-right whitespace-nowrap font-medium text-slate-900 dark:text-white">
                         {formatFCFA(n * Number(s.prix_nuit) + taxe)}
                       </TableCell>
                     </TableRow>
@@ -553,7 +640,10 @@ function imprimerFichePolice(sejour: any, client: any) {
                 })}
                 {(sejours ?? []).length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={12} className="py-8 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={12}
+                      className="py-8 text-center text-slate-400 dark:text-slate-500"
+                    >
                       Aucun séjour sur cette période.
                     </TableCell>
                   </TableRow>
@@ -565,8 +655,9 @@ function imprimerFichePolice(sejour: any, client: any) {
           <div className="historique-print hidden">
             <div className="mb-4 text-center">
               <p className="font-display text-lg font-bold">{etab?.nom ?? "LE DAYA Guest House"}</p>
-              <p className="text-sm text-muted-foreground">
-                Historique des séjours — du {formatDate(dateDebutFiltre)} au {formatDate(dateFinFiltre)}
+              <p className="text-sm text-slate-500">
+                Historique des séjours — du {formatDate(dateDebutFiltre)} au{" "}
+                {formatDate(dateFinFiltre)}
               </p>
             </div>
             <table>
@@ -602,7 +693,9 @@ function imprimerFichePolice(sejour: any, client: any) {
                       </td>
                       <td>{s.clients?.telephone ?? "—"}</td>
                       <td>
-                        {s.clients?.type_piece ? `${s.clients.type_piece} ${s.clients.numero_piece ?? ""}` : "—"}
+                        {s.clients?.type_piece
+                          ? `${s.clients.type_piece} ${s.clients.numero_piece ?? ""}`
+                          : "—"}
                       </td>
                       <td>{s.clients?.nationalite ?? "—"}</td>
                       <td>{s.chambres?.type ?? "—"}</td>
@@ -613,7 +706,9 @@ function imprimerFichePolice(sejour: any, client: any) {
                       <td>{n}</td>
                       <td style={{ textAlign: "right" }}>{formatFCFA(s.prix_nuit)}</td>
                       <td style={{ textAlign: "right" }}>{formatFCFA(taxe)}</td>
-                      <td style={{ textAlign: "right" }}>{formatFCFA(n * Number(s.prix_nuit) + taxe)}</td>
+                      <td style={{ textAlign: "right" }}>
+                        {formatFCFA(n * Number(s.prix_nuit) + taxe)}
+                      </td>
                     </tr>
                   );
                 })}
@@ -623,75 +718,88 @@ function imprimerFichePolice(sejour: any, client: any) {
         </CardContent>
       </Card>
 
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+      {/* ═══════════════════════════════════════════════════════
+          FICHIER CLIENTS
+          ═══════════════════════════════════════════════════════ */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-semibold">Fichier clients</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="font-display text-lg font-semibold text-slate-800 dark:text-white">
+            Fichier clients
+          </h2>
+          <p className="text-sm text-slate-400 dark:text-slate-500">
             Consultez et gérez les informations des clients de l'établissement.
           </p>
         </div>
-        <div className="max-w-sm">
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <Input
             placeholder="Rechercher un client…"
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
+            className="pl-9 rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
           />
         </div>
       </div>
 
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filtres.map((c) => {
           const infos = infosClient(c.id);
           const nomComplet = `${c.prenom ?? ""} ${c.nom}`.trim();
           return (
             <Card
               key={c.id}
-              className="group cursor-pointer overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg"
+              className="group cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-lg"
               onClick={() => setFicheClient(c.id)}
             >
-              <CardContent className="p-4">
+              <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
                     <span
-                      className="flex size-12 shrink-0 items-center justify-center rounded-full text-lg font-semibold text-white shadow-md"
+                      className="flex size-12 shrink-0 items-center justify-center rounded-2xl text-lg font-semibold text-white shadow-lg"
                       style={{ backgroundColor: couleurAvatar(nomComplet) }}
                     >
                       {nomComplet[0]?.toUpperCase() ?? "?"}
                     </span>
                     <div className="min-w-0">
-                      <p className="truncate font-display font-semibold">{nomComplet}</p>
-                      <p className="truncate text-xs text-muted-foreground">
+                      <p className="truncate font-display font-bold text-slate-900 dark:text-white">
+                        {nomComplet}
+                      </p>
+                      <p className="truncate text-xs text-slate-400 dark:text-slate-500">
                         {c.nationalite ?? "Nationalité —"}
                       </p>
                     </div>
                   </div>
-                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                  <span className="shrink-0 rounded-full bg-red-500/10 px-3 py-1 text-[10px] font-semibold text-red-500 border border-red-200/30">
                     {infos.nbSejours} séj.
                   </span>
                 </div>
 
-                <div className="mt-3 space-y-1 text-xs text-muted-foreground">
-                  <p>📞 {c.telephone ?? "—"}</p>
-                  <p>
-                    🪪 {c.type_piece ? `${c.type_piece} ${c.numero_piece ?? ""}` : "—"}
+                <div className="mt-3 space-y-1.5 text-xs text-slate-500 dark:text-slate-400">
+                  <p className="flex items-center gap-1.5">
+                    <Phone className="size-3" /> {c.telephone ?? "—"}
                   </p>
-                  <p>
-                    🗓️{" "}
+                  <p className="flex items-center gap-1.5">
+                    <IdCard className="size-3" /> {c.type_piece ? `${c.type_piece} ${c.numero_piece ?? ""}` : "—"}
+                  </p>
+                  <p className="flex items-center gap-1.5">
+                    <CalendarDays className="size-3" />{" "}
                     {infos.dernier
-                      ? `${formatDate(infos.dernier.date_arrivee)} → ${formatDate(infos.dernier.date_depart)}`
+                      ? `${formatDate(infos.dernier.date_arrivee)} → ${formatDate(
+                          infos.dernier.date_depart
+                        )}`
                       : "Aucun séjour"}
                   </p>
                 </div>
 
-                <div className="mt-3 flex items-center justify-between border-t pt-3">
-                  <p className="text-sm font-semibold text-primary">
+                <div className="mt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-700/50 pt-3">
+                  <p className="text-sm font-bold text-red-500">
                     {formatFCFA(infos.totalDepense)}
                   </p>
                   <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-8"
+                      className="size-8 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
                       onClick={() => {
                         setForm({
                           id: c.id,
@@ -713,18 +821,18 @@ function imprimerFichePolice(sejour: any, client: any) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-8"
+                        className="size-8 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
                         onClick={() => {
                           if (
                             window.confirm(
-                              `Supprimer ${nomComplet} ? Toutes ses réservations, factures et taxes de séjour seront également supprimées définitivement.`,
+                              `Supprimer ${nomComplet} ? Toutes ses réservations, factures et taxes de séjour seront également supprimées définitivement.`
                             )
                           ) {
                             supprimer.mutate(c.id);
                           }
                         }}
                       >
-                        <Trash2 className="size-3.5 text-destructive" />
+                        <Trash2 className="size-3.5 text-red-500" />
                       </Button>
                     ) : null}
                   </div>
@@ -734,69 +842,92 @@ function imprimerFichePolice(sejour: any, client: any) {
           );
         })}
         {filtres.length === 0 ? (
-          <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
+          <p className="col-span-full py-16 text-center text-sm text-slate-400 dark:text-slate-500">
             Aucun client enregistré.
           </p>
         ) : null}
       </div>
 
+      {/* ═══════════════════════════════════════════════════════
+          FICHE CLIENT - DIALOG
+          ═══════════════════════════════════════════════════════ */}
       <Dialog open={!!ficheClient} onOpenChange={(o) => !o && setFicheClient(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
               Fiche client — {clientFiche?.prenom} {clientFiche?.nom}
             </DialogTitle>
           </DialogHeader>
           {clientFiche && infosFiche ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div className="rounded-lg border p-3 text-center">
-                  <p className="text-lg font-bold">{infosFiche.nbSejours}</p>
-                  <p className="text-[10px] text-muted-foreground">Séjours</p>
+                <div className="rounded-2xl bg-white/60 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 p-3 text-center">
+                  <p className="text-lg font-bold text-slate-900 dark:text-white">
+                    {infosFiche.nbSejours}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">Séjours</p>
                 </div>
-                <div className="rounded-lg border p-3 text-center">
-                  <p className="text-lg font-bold">{formatFCFA(infosFiche.totalDepense)}</p>
-                  <p className="text-[10px] text-muted-foreground">Total dépensé</p>
+                <div className="rounded-2xl bg-white/60 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 p-3 text-center">
+                  <p className="text-lg font-bold text-red-500">
+                    {formatFCFA(infosFiche.totalDepense)}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">Total dépensé</p>
                 </div>
-                <div className="rounded-lg border p-3 text-center">
-                  <p className="text-sm font-bold">{clientFiche.telephone ?? "—"}</p>
-                  <p className="text-[10px] text-muted-foreground">Téléphone</p>
+                <div className="rounded-2xl bg-white/60 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 p-3 text-center">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {clientFiche.telephone ?? "—"}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">Téléphone</p>
                 </div>
-                <div className="rounded-lg border p-3 text-center">
-                  <p className="text-sm font-bold">{clientFiche.nationalite ?? "—"}</p>
-                  <p className="text-[10px] text-muted-foreground">Nationalité</p>
+                <div className="rounded-2xl bg-white/60 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 p-3 text-center">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {clientFiche.nationalite ?? "—"}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">Nationalité</p>
                 </div>
               </div>
 
               <div>
-                <p className="mb-2 text-sm font-semibold">Historique des séjours</p>
+                <p className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Historique des séjours
+                </p>
                 <div className="max-h-64 space-y-2 overflow-y-auto">
                   {infosFiche.historique.map((s) => (
-                    <div key={s.id} className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm">
+                    <div
+                      key={s.id}
+                      className="flex items-center justify-between rounded-2xl bg-white/60 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 px-4 py-2.5 text-sm"
+                    >
                       <div>
-                        <p className="font-medium">{s.chambres?.nom ?? "—"}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="font-medium text-slate-900 dark:text-white">
+                          {s.chambres?.nom ?? "—"}
+                        </p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">
                           {formatDate(s.date_arrivee)} → {formatDate(s.date_depart)}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">
-                          {formatFCFA(nbNuits(s.date_arrivee, s.date_depart) * Number(s.prix_nuit))}
+                        <span className="font-medium text-slate-900 dark:text-white">
+                          {formatFCFA(
+                            nbNuits(s.date_arrivee, s.date_depart) * Number(s.prix_nuit)
+                          )}
                         </span>
                         {s.statut === "terminee" ? (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => imprimerFichePolice(s, clientFiche)}
+                            className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
                           >
-                            <FileText className="size-3.5" /> Fiche
+                            <FileText className="size-3.5 mr-1" /> Fiche
                           </Button>
                         ) : null}
                       </div>
                     </div>
                   ))}
                   {infosFiche.historique.length === 0 ? (
-                    <p className="py-4 text-center text-sm text-muted-foreground">Aucun séjour enregistré.</p>
+                    <p className="py-4 text-center text-sm text-slate-400 dark:text-slate-500">
+                      Aucun séjour enregistré.
+                    </p>
                   ) : null}
                 </div>
               </div>
