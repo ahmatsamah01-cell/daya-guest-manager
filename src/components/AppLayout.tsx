@@ -183,9 +183,9 @@ function SidebarContent({
       )}
 
       {/* ═══════════════════════════════════════ */}
-      {/* MENU DE NAVIGATION - STYLE FIGMA */}
+      {/* MENU DE NAVIGATION - STYLE FIGMA AVEC SCROLL */}
       {/* ═══════════════════════════════════════ */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 scrollbar-none">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 sidebar-scroll">
         {/* FAVORIS */}
         {favoris.length > 0 && (
           <div className="mb-3">
