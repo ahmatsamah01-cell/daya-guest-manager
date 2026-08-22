@@ -2,8 +2,31 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, ArrowDownLeft, ArrowUpRight, Wallet, FileSpreadsheet, Download, TrendingUp, X, TrendingDown, Minus } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  Plus,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Wallet,
+  FileSpreadsheet,
+  Download,
+  TrendingUp,
+  X,
+  TrendingDown,
+  Minus,
+  CalendarDays,
+  Search,
+  Filter,
+  Eye,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +48,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
 import { formatFCFA, formatDateTime, today } from "@/lib/format";
 import { useEtablissement } from "@/hooks/use-hotel";
@@ -36,7 +66,8 @@ export const Route = createFileRoute("/_authenticated/caisse")({
       { title: "Caisse — LE DAYA Hotel Manager" },
       {
         name: "description",
-        content: "Suivi des entrées et sorties de caisse de LE DAYA Guest House, en FCFA.",
+        content:
+          "Suivi des entrées et sorties de caisse de LE DAYA Guest House, en FCFA.",
       },
       { property: "og:title", content: "Caisse — LE DAYA Hotel Manager" },
       { property: "og:description", content: "Mouvements et solde de caisse au quotidien." },
@@ -49,7 +80,7 @@ function CaissePage() {
   const qc = useQueryClient();
   const { data: etab } = useEtablissement();
   const [open, setOpen] = useState(false);
-      const currentMonth = new Date().toISOString().slice(0, 7); // Format "YYYY-MM"
+  const currentMonth = new Date().toISOString().slice(0, 7);
   const [mois, setMois] = useState(currentMonth);
   const [search, setSearch] = useState("");
   const [vue, setVue] = useState<"table" | "cartes">("table");
@@ -60,7 +91,6 @@ function CaissePage() {
     mode_paiement: "especes",
   });
 
-  // Calcul dynamique du premier et dernier jour du mois sélectionné
   const [annee, numMois] = mois.split("-");
   const dernierJour = new Date(Number(annee), Number(numMois), 0).getDate();
   const debut = `${mois}-01`;
@@ -93,7 +123,6 @@ function CaissePage() {
     },
   });
 
-
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     sens: "entree",
@@ -103,7 +132,7 @@ function CaissePage() {
     date_operation: "",
   });
 
-    const modifier = useMutation({
+  const modifier = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
         .from("caisse_operations")
@@ -125,7 +154,7 @@ function CaissePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-      const supprimer = useMutation({
+  const supprimer = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("caisse_operations").delete().eq("id", id);
       if (error) throw error;
@@ -137,7 +166,7 @@ function CaissePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-     const ajouter = useMutation({
+  const ajouter = useMutation({
     mutationFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       const { error } = await supabase.from("caisse_operations").insert({
@@ -158,7 +187,8 @@ function CaissePage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-    const filteredOperations = (operations ?? []).filter((o) => {
+
+  const filteredOperations = (operations ?? []).filter((o) => {
     const matchSearch =
       o.motif.toLowerCase().includes(search.toLowerCase()) ||
       o.mode_paiement.toLowerCase().includes(search.toLowerCase());
@@ -172,11 +202,8 @@ function CaissePage() {
   const sorties = (operations ?? [])
     .filter((o) => o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
-
-  // Solde calculé spécifiquement sur le mois sélectionné (Entrées - Sorties)
   const soldePeriode = entrees - sorties;
 
-  // Fonction d'export Excel (CSV)
   const exporterExcel = () => {
     const headers = ["Date", "Motif", "Mode de paiement", "Sens", "Montant (FCFA)"];
     const rows = filteredOperations.map((o) => [
@@ -202,7 +229,6 @@ function CaissePage() {
     toast.success("Export Excel téléchargé.");
   };
 
-    // Fonction d'export PDF (simple tableau HTML imprimé)
   const exporterPDF = () => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
@@ -239,13 +265,17 @@ function CaissePage() {
         </tr>
       </thead>
       <tbody>
-        ${filteredOperations.map((o) => `<tr>
+        ${filteredOperations
+          .map(
+            (o) => `<tr>
           <td>${new Date(o.date_operation).toLocaleString("fr-FR")}</td>
           <td>${o.motif}</td>
           <td>${o.mode_paiement}</td>
           <td>${o.sens === "entree" ? "Entrée" : "Sortie"}</td>
           <td>${formatFCFA(o.montant)}</td>
-        </tr>`).join("")}
+        </tr>`
+          )
+          .join("")}
       </tbody>
     </table>
     <button onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#7c2d2d;color:white;border:none;cursor:pointer;">Imprimer</button>
@@ -256,12 +286,14 @@ function CaissePage() {
     printWindow.document.close();
     toast.success("Export PDF prêt à imprimer.");
   };
-    // Calcul des données pour le graphique d'évolution du solde (jour par jour)
+
   const donneesGraphique = (() => {
     const joursDansMois = dernierJour;
-    const donneesParJour: Record<string, { jour: string; entrees: number; sorties: number; solde: number }> = {};
+    const donneesParJour: Record<
+      string,
+      { jour: string; entrees: number; sorties: number; solde: number }
+    > = {};
 
-    // Initialiser tous les jours du mois
     for (let i = 1; i <= joursDansMois; i++) {
       const jourStr = i.toString().padStart(2, "0");
       const dateStr = `${mois}-${jourStr}`;
@@ -273,7 +305,6 @@ function CaissePage() {
       };
     }
 
-    // Accumuler les opérations jour par jour
     let soldeCumule = 0;
     (operations ?? []).forEach((o) => {
       const dateOp = new Date(o.date_operation);
@@ -289,7 +320,6 @@ function CaissePage() {
       }
     });
 
-    // Calculer le solde cumulé jour par jour
     for (let i = 1; i <= joursDansMois; i++) {
       const jourStr = i.toString().padStart(2, "0");
       const dateStr = `${mois}-${jourStr}`;
@@ -301,84 +331,94 @@ function CaissePage() {
     return Object.values(donneesParJour);
   })();
 
-  // Calcul des comparaisons (aujourd'hui vs hier)
   const aujourdhui = new Date().toISOString().slice(0, 10);
   const hier = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  
+
   const entreesAujourdhui = (operations ?? [])
     .filter((o) => o.date_operation.startsWith(aujourdhui) && o.sens === "entree")
     .reduce((s, o) => s + Number(o.montant), 0);
-  
+
   const entreesHier = (operations ?? [])
     .filter((o) => o.date_operation.startsWith(hier) && o.sens === "entree")
     .reduce((s, o) => s + Number(o.montant), 0);
-  
+
   const sortiesAujourdhui = (operations ?? [])
     .filter((o) => o.date_operation.startsWith(aujourdhui) && o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
-  
+
   const sortiesHier = (operations ?? [])
     .filter((o) => o.date_operation.startsWith(hier) && o.sens === "sortie")
     .reduce((s, o) => s + Number(o.montant), 0);
 
-  const variationEntrees = entreesHier > 0 ? ((entreesAujourdhui - entreesHier) / entreesHier) * 100 : 0;
-  const variationSorties = sortiesHier > 0 ? ((sortiesAujourdhui - sortiesHier) / sortiesHier) * 100 : 0;
-    const variationSolde = entreesHier > 0 ? (((entreesAujourdhui - sortiesAujourdhui) - (entreesHier - sortiesHier)) / (entreesHier - sortiesHier)) * 100 : 0;
+  const variationEntrees =
+    entreesHier > 0 ? ((entreesAujourdhui - entreesHier) / entreesHier) * 100 : 0;
+  const variationSorties =
+    sortiesHier > 0 ? ((sortiesAujourdhui - sortiesHier) / sortiesHier) * 100 : 0;
+  const variationSolde =
+    entreesHier > 0
+      ? ((entreesAujourdhui - sortiesAujourdhui - (entreesHier - sortiesHier)) /
+          (entreesHier - sortiesHier)) *
+        100
+      : 0;
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Caisse"
         description="Encaissements et décaissements"
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="size-4" /> Nouvelle opération
+              <Button className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-5 py-2.5">
+                <Plus className="size-4 mr-2" /> Nouvelle opération
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl">
               <DialogHeader>
-                <DialogTitle>Opération de caisse</DialogTitle>
+                <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+                  Opération de caisse
+                </DialogTitle>
               </DialogHeader>
-                            <form
+              <form
                 className="space-y-4"
                 onSubmit={(e) => {
                   e.preventDefault();
                   ajouter.mutate();
                 }}
               >
-                <div className="rounded-lg bg-destructive/10 p-3 text-xs text-destructive font-medium">
-                  Note : Ce formulaire sert uniquement à enregistrer une **Sortie de caisse** (dépense, décaissement). Les entrées sont générées automatiquement lors du check-out des réservations.
+                <div className="rounded-2xl bg-red-50/80 dark:bg-red-900/20 p-4 text-sm text-red-600 dark:text-red-400 border border-red-200/30">
+                  <span className="font-medium">📌 Note :</span> Ce formulaire sert uniquement
+                  à enregistrer une <strong>Sortie de caisse</strong> (dépense, décaissement).
+                  Les entrées sont générées automatiquement lors du check-out.
                 </div>
                 <div className="space-y-2">
-                  <Label>Motif de la sortie</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Motif de la sortie</Label>
                   <Input
                     required
                     placeholder="Ex: Achat fournitures, maintenance..."
                     value={form.motif}
                     onChange={(e) => setForm({ ...form, motif: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Montant (FCFA)</Label>
-
-
+                  <Label className="text-slate-700 dark:text-slate-300">Montant (FCFA)</Label>
                   <Input
                     type="number"
                     min="0"
                     required
                     value={form.montant}
                     onChange={(e) => setForm({ ...form, montant: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Mode de paiement</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Mode de paiement</Label>
                   <Select
                     value={form.mode_paiement}
                     onValueChange={(v) => setForm({ ...form, mode_paiement: v })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -390,7 +430,11 @@ function CaissePage() {
                   </Select>
                 </div>
                 <DialogFooter>
-                  <Button type="submit" disabled={ajouter.isPending || !etab}>
+                  <Button
+                    type="submit"
+                    disabled={ajouter.isPending || !etab}
+                    className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
+                  >
                     Enregistrer
                   </Button>
                 </DialogFooter>
@@ -400,47 +444,62 @@ function CaissePage() {
         }
       />
 
-                  {/* Graphique d'évolution du solde */}
-      <Card className="group relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary/90 via-primary to-primary/80 shadow-md">
+      {/* ═══════════════════════════════════════════════════════
+          GRAPHIQUE ÉVOLUTION DU SOLDE
+          ═══════════════════════════════════════════════════════ */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25">
               <TrendingUp className="size-4 text-white" />
             </div>
-            <CardTitle>Évolution du solde — {mois}</CardTitle>
+            <div>
+              <CardTitle className="text-lg font-semibold text-slate-800 dark:text-white">
+                Évolution du solde — {mois}
+              </CardTitle>
+              <CardDescription className="text-slate-500 dark:text-slate-400">
+                Solde cumulé jour par jour (Entrées − Sorties)
+              </CardDescription>
+            </div>
           </div>
-          <CardDescription>Solde cumulé jour par jour (Entrées − Sorties)</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={donneesGraphique}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.4} />
                 <XAxis
                   dataKey="jour"
-                  tick={{ fontSize: 12 }}
-                  label={{ value: "Jour du mois", position: "insideBottom", offset: -5, fontSize: 12 }}
+                  tick={{ fontSize: 11, fill: "#94A3B8" }}
+                  label={{
+                    value: "Jour du mois",
+                    position: "insideBottom",
+                    offset: -5,
+                    fontSize: 11,
+                    fill: "#94A3B8",
+                  }}
                 />
                 <YAxis
                   tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 11, fill: "#94A3B8" }}
                 />
                 <Tooltip
                   formatter={(value: number) => formatFCFA(value)}
                   labelFormatter={(label) => `Jour ${label}`}
                   contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)",
+                    backgroundColor: "rgba(255,255,255,0.9)",
+                    border: "1px solid rgba(226,232,240,0.8)",
+                    borderRadius: "12px",
+                    backdropFilter: "blur(12px)",
                   }}
                 />
                 <Line
                   type="monotone"
                   dataKey="solde"
-                  stroke="hsl(var(--primary))"
+                  stroke="#ef4444"
                   strokeWidth={3}
-                  dot={{ fill: "hsl(var(--primary))", r: 4 }}
-                  activeDot={{ r: 6, strokeWidth: 2 }}
+                  dot={{ fill: "#ef4444", r: 4 }}
+                  activeDot={{ r: 6, strokeWidth: 2, stroke: "#ef4444" }}
                   name="Solde"
                 />
               </LineChart>
@@ -449,94 +508,146 @@ function CaissePage() {
         </CardContent>
       </Card>
 
-            <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <div className="group flex items-center gap-3 rounded-xl border bg-gradient-to-br from-emerald-50 to-emerald-100/50 px-4 py-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-emerald-950/40 dark:to-emerald-900/20">
-          <div className="flex size-11 items-center justify-center rounded-full bg-emerald-500 shadow-[0_0_16px_rgba(16,185,129,0.5)] transition-transform group-hover:scale-110">
-            <ArrowDownLeft className="size-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Entrées (période)</p>
-            <p className="font-display text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {formatFCFA(entrees)}
-            </p>
-            <div className="flex items-center gap-1 mt-1">
-              {variationEntrees > 0 ? (
-                <TrendingUp className="size-3 text-emerald-600" />
-              ) : variationEntrees < 0 ? (
-                <TrendingDown className="size-3 text-rose-600" />
-              ) : (
-                <Minus className="size-3 text-muted-foreground" />
-              )}
-              <span className={`text-xs font-medium ${variationEntrees > 0 ? "text-emerald-600" : variationEntrees < 0 ? "text-rose-600" : "text-muted-foreground"}`}>
-                {variationEntrees > 0 ? "+" : ""}{variationEntrees.toFixed(1)}% vs hier
-              </span>
+      {/* ═══════════════════════════════════════════════════════
+          STATISTIQUES - 3 CARTES KPI
+          ═══════════════════════════════════════════════════════ */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 transition-transform group-hover:scale-110">
+              <ArrowDownLeft className="size-5 text-white" />
             </div>
-          </div>
-        </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Entrées
+              </p>
+              <p className="font-display text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                {formatFCFA(entrees)}
+              </p>
+              <div className="flex items-center gap-1 mt-1">
+                {variationEntrees > 0 ? (
+                  <TrendingUp className="size-3 text-emerald-600" />
+                ) : variationEntrees < 0 ? (
+                  <TrendingDown className="size-3 text-rose-600" />
+                ) : (
+                  <Minus className="size-3 text-slate-400" />
+                )}
+                <span
+                  className={`text-xs font-medium ${
+                    variationEntrees > 0
+                      ? "text-emerald-600"
+                      : variationEntrees < 0
+                      ? "text-rose-600"
+                      : "text-slate-400"
+                  }`}
+                >
+                  {variationEntrees > 0 ? "+" : ""}
+                  {variationEntrees.toFixed(1)}% vs hier
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="group flex items-center gap-3 rounded-xl border bg-gradient-to-br from-rose-50 to-rose-100/50 px-4 py-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-rose-950/40 dark:to-rose-900/20">
-          <div className="flex size-11 items-center justify-center rounded-full bg-rose-500 shadow-[0_0_16px_rgba(244,63,94,0.5)] transition-transform group-hover:scale-110">
-            <ArrowUpRight className="size-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Sorties (période)</p>
-            <p className="font-display text-2xl font-bold text-rose-600 dark:text-rose-400">
-              {formatFCFA(sorties)}
-            </p>
-            <div className="flex items-center gap-1 mt-1">
-              {variationSorties > 0 ? (
-                <TrendingUp className="size-3 text-rose-600" />
-              ) : variationSorties < 0 ? (
-                <TrendingDown className="size-3 text-emerald-600" />
-              ) : (
-                <Minus className="size-3 text-muted-foreground" />
-              )}
-              <span className={`text-xs font-medium ${variationSorties > 0 ? "text-rose-600" : variationSorties < 0 ? "text-emerald-600" : "text-muted-foreground"}`}>
-                {variationSorties > 0 ? "+" : ""}{variationSorties.toFixed(1)}% vs hier
-              </span>
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25 transition-transform group-hover:scale-110">
+              <ArrowUpRight className="size-5 text-white" />
             </div>
-          </div>
-        </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Sorties
+              </p>
+              <p className="font-display text-2xl font-bold text-amber-600 dark:text-amber-400">
+                {formatFCFA(sorties)}
+              </p>
+              <div className="flex items-center gap-1 mt-1">
+                {variationSorties > 0 ? (
+                  <TrendingUp className="size-3 text-amber-600" />
+                ) : variationSorties < 0 ? (
+                  <TrendingDown className="size-3 text-emerald-600" />
+                ) : (
+                  <Minus className="size-3 text-slate-400" />
+                )}
+                <span
+                  className={`text-xs font-medium ${
+                    variationSorties > 0
+                      ? "text-amber-600"
+                      : variationSorties < 0
+                      ? "text-emerald-600"
+                      : "text-slate-400"
+                  }`}
+                >
+                  {variationSorties > 0 ? "+" : ""}
+                  {variationSorties.toFixed(1)}% vs hier
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="group flex items-center gap-3 rounded-xl border bg-gradient-to-br from-red-50 to-red-100/50 px-4 py-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:from-red-950/40 dark:to-red-900/20">
-          <div className="flex size-11 items-center justify-center rounded-full bg-red-600 shadow-[0_0_16px_rgba(220,38,38,0.5)] transition-transform group-hover:scale-110">
-            <Wallet className="size-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Solde du mois</p>
-            <p
-              className={`font-display text-2xl font-bold ${soldePeriode >= 0 ? "text-red-700 dark:text-red-400" : "text-rose-600"}`}
-            >
-              {formatFCFA(soldePeriode)}
-            </p>
-            <div className="flex items-center gap-1 mt-1">
-              {variationSolde > 0 ? (
-                <TrendingUp className="size-3 text-emerald-600" />
-              ) : variationSolde < 0 ? (
-                <TrendingDown className="size-3 text-rose-600" />
-              ) : (
-                <Minus className="size-3 text-muted-foreground" />
-              )}
-              <span className={`text-xs font-medium ${variationSolde > 0 ? "text-emerald-600" : variationSolde < 0 ? "text-rose-600" : "text-muted-foreground"}`}>
-                {variationSolde > 0 ? "+" : ""}{variationSolde.toFixed(1)}% vs hier
-              </span>
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25 transition-transform group-hover:scale-110">
+              <Wallet className="size-5 text-white" />
             </div>
-          </div>
-        </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Solde
+              </p>
+              <p
+                className={`font-display text-2xl font-bold ${
+                  soldePeriode >= 0
+                    ? "text-red-600 dark:text-red-400"
+                    : "text-rose-600 dark:text-rose-400"
+                }`}
+              >
+                {formatFCFA(soldePeriode)}
+              </p>
+              <div className="flex items-center gap-1 mt-1">
+                {variationSolde > 0 ? (
+                  <TrendingUp className="size-3 text-emerald-600" />
+                ) : variationSolde < 0 ? (
+                  <TrendingDown className="size-3 text-rose-600" />
+                ) : (
+                  <Minus className="size-3 text-slate-400" />
+                )}
+                <span
+                  className={`text-xs font-medium ${
+                    variationSolde > 0
+                      ? "text-emerald-600"
+                      : variationSolde < 0
+                      ? "text-rose-600"
+                      : "text-slate-400"
+                  }`}
+                >
+                  {variationSolde > 0 ? "+" : ""}
+                  {variationSolde.toFixed(1)}% vs hier
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+
+      {/* ═══════════════════════════════════════════════════════
+          FILTRES ET RECHERCHE
+          ═══════════════════════════════════════════════════════ */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-1.5 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-1">
           <Button
             size="sm"
-            variant={vue === "table" ? "default" : "outline"}
+            variant={vue === "table" ? "default" : "ghost"}
             onClick={() => setVue("table")}
+            className={vue === "table" ? "bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl" : "rounded-xl"}
           >
             Tableau
           </Button>
           <Button
             size="sm"
-            variant={vue === "cartes" ? "default" : "outline"}
+            variant={vue === "cartes" ? "default" : "ghost"}
             onClick={() => setVue("cartes")}
+            className={vue === "cartes" ? "bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl" : "rounded-xl"}
           >
             Cartes
           </Button>
@@ -548,8 +659,9 @@ function CaissePage() {
             variant="outline"
             onClick={exporterExcel}
             disabled={filteredOperations.length === 0}
+            className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
           >
-            <FileSpreadsheet className="size-4" />
+            <FileSpreadsheet className="size-4 mr-1.5" />
             Excel
           </Button>
           <Button
@@ -557,12 +669,13 @@ function CaissePage() {
             variant="outline"
             onClick={exporterPDF}
             disabled={filteredOperations.length === 0}
+            className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
           >
-            <Download className="size-4" />
+            <Download className="size-4 mr-1.5" />
             PDF
           </Button>
           <Select value={sensFiltre} onValueChange={setSensFiltre}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[160px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
               <SelectValue placeholder="Tous les sens" />
             </SelectTrigger>
             <SelectContent>
@@ -573,27 +686,36 @@ function CaissePage() {
           </Select>
         </div>
       </div>
-            {/* Badges des filtres actifs */}
+
+      {/* Filtres actifs */}
       {(search || sensFiltre !== "tous") && (
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground">Filtres actifs :</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            Filtres actifs :
+          </span>
           {search && (
-            <Badge variant="secondary" className="gap-1">
+            <Badge
+              variant="secondary"
+              className="gap-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+            >
               Recherche : {search}
               <button
                 onClick={() => setSearch("")}
-                className="ml-1 hover:text-foreground"
+                className="ml-1 hover:text-slate-900 dark:hover:text-white"
               >
                 <X className="size-3" />
               </button>
             </Badge>
           )}
           {sensFiltre !== "tous" && (
-            <Badge variant="secondary" className="gap-1">
+            <Badge
+              variant="secondary"
+              className="gap-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+            >
               Sens : {sensFiltre === "entree" ? "Entrées" : "Sorties"}
               <button
                 onClick={() => setSensFiltre("tous")}
-                className="ml-1 hover:text-foreground"
+                className="ml-1 hover:text-slate-900 dark:hover:text-white"
               >
                 <X className="size-3" />
               </button>
@@ -602,7 +724,7 @@ function CaissePage() {
           <Button
             size="sm"
             variant="ghost"
-            className="h-5 text-xs"
+            className="h-6 text-xs rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
             onClick={() => {
               setSearch("");
               setSensFiltre("tous");
@@ -613,58 +735,97 @@ function CaissePage() {
         </div>
       )}
 
-      <div className="mb-4 flex flex-wrap items-end gap-3">
-        <div className="space-y-1 flex-1 min-w-[240px]">
-          <Label className="text-xs">Rechercher une opération</Label>
-          <Input
-            placeholder="Filtrer par motif, mode..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="space-y-1 flex-1 min-w-[200px]">
+          <Label className="text-xs text-slate-500 dark:text-slate-400">Rechercher</Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+            <Input
+              placeholder="Motif, mode..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+            />
+          </div>
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">Mois et Année</Label>
+          <Label className="text-xs text-slate-500 dark:text-slate-400">Mois</Label>
           <Input
             type="month"
             value={mois}
             onChange={(e) => setMois(e.target.value)}
+            className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
           />
         </div>
       </div>
+
+      {/* ═══════════════════════════════════════════════════════
+          LISTE DES OPÉRATIONS
+          ═══════════════════════════════════════════════════════ */}
       {vue === "table" ? (
-        <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-950/40 dark:to-slate-900/20">
+        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
           <CardContent className="overflow-x-auto p-0">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Motif</TableHead>
-                  <TableHead>Mode</TableHead>
-                  <TableHead>Sens</TableHead>
-                  <TableHead className="text-right">Montant</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                <TableRow className="border-b border-slate-100 dark:border-slate-700/50">
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                    Date
+                  </TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                    Motif
+                  </TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                    Mode
+                  </TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                    Sens
+                  </TableHead>
+                  <TableHead className="text-right text-slate-600 dark:text-slate-300 font-semibold">
+                    Montant
+                  </TableHead>
+                  <TableHead className="text-right text-slate-600 dark:text-slate-300 font-semibold">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredOperations.map((o) => (
-                  <TableRow key={o.id}>
-                    <TableCell className="whitespace-nowrap">
+                  <TableRow
+                    key={o.id}
+                    className="border-b border-slate-100/50 dark:border-slate-700/30 hover:bg-slate-50/50 dark:hover:bg-slate-700/20"
+                  >
+                    <TableCell className="whitespace-nowrap text-slate-600 dark:text-slate-300">
                       {formatDateTime(o.date_operation)}
                     </TableCell>
-                    <TableCell>{o.motif}</TableCell>
-                    <TableCell>{o.mode_paiement}</TableCell>
-                    <TableCell>
-                      <Badge variant={o.sens === "entree" ? "secondary" : "destructive"}>
-                        {o.sens === "entree" ? "Entrée" : "Sortie"}
-                      </Badge>
+                    <TableCell className="text-slate-700 dark:text-slate-300">{o.motif}</TableCell>
+                    <TableCell className="text-slate-600 dark:text-slate-300 capitalize">
+                      {o.mode_paiement}
                     </TableCell>
-                    <TableCell className="text-right whitespace-nowrap">
+                    <TableCell>
+                      <span
+                        className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                          o.sens === "entree"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border border-emerald-200/30"
+                            : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200/30"
+                        }`}
+                      >
+                        {o.sens === "entree" ? "Entrée" : "Sortie"}
+                      </span>
+                    </TableCell>
+                    <TableCell
+                      className={`text-right whitespace-nowrap font-medium ${
+                        o.sens === "entree"
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-red-600 dark:text-red-400"
+                      }`}
+                    >
                       {formatFCFA(o.montant)}
                     </TableCell>
-                    <TableCell className="text-right whitespace-nowrap space-x-2">
+                    <TableCell className="text-right whitespace-nowrap space-x-1.5">
                       <Button
                         size="sm"
                         variant="outline"
+                        className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
                         onClick={() => {
                           setEditId(o.id);
                           setEditForm({
@@ -682,9 +843,13 @@ function CaissePage() {
                       </Button>
                       <Button
                         size="sm"
-                        variant="destructive"
+                        className="rounded-xl bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25"
                         onClick={() => {
-                          if (confirm("Êtes-vous sûr de vouloir supprimer cette opération de caisse ?")) {
+                          if (
+                            confirm(
+                              "Êtes-vous sûr de vouloir supprimer cette opération de caisse ?"
+                            )
+                          ) {
                             supprimer.mutate(o.id);
                           }
                         }}
@@ -697,7 +862,10 @@ function CaissePage() {
                 ))}
                 {filteredOperations.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={6}
+                      className="py-8 text-center text-slate-400 dark:text-slate-500"
+                    >
                       Aucune opération trouvée.
                     </TableCell>
                   </TableRow>
@@ -707,30 +875,50 @@ function CaissePage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filteredOperations.map((o) => (
-            <Card key={o.id} className="group relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-violet-50 to-violet-100/50 dark:from-violet-950/40 dark:to-violet-900/20">
-              <CardContent className="p-5 space-y-3">
+            <Card
+              key={o.id}
+              className="group overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-lg"
+            >
+              <CardContent className="p-5 space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <Badge variant={o.sens === "entree" ? "secondary" : "destructive"}>
+                  <span
+                    className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                      o.sens === "entree"
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border border-emerald-200/30"
+                        : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200/30"
+                    }`}
+                  >
                     {o.sens === "entree" ? "Entrée" : "Sortie"}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
+                  </span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">
                     {formatDateTime(o.date_operation)}
                   </span>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-sm">{o.motif}</h4>
-                  <p className="text-xs text-muted-foreground mt-1 capitalize">Mode : {o.mode_paiement}</p>
+                  <h4 className="font-semibold text-sm text-slate-900 dark:text-white">
+                    {o.motif}
+                  </h4>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 capitalize">
+                    Mode : {o.mode_paiement}
+                  </p>
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <span className={`font-display text-lg font-bold ${o.sens === "entree" ? "text-emerald-600" : "text-rose-600"}`}>
+                <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-700/50">
+                  <span
+                    className={`font-display text-lg font-bold ${
+                      o.sens === "entree"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
                     {formatFCFA(o.montant)}
                   </span>
-                  <div className="space-x-1">
+                  <div className="space-x-1.5">
                     <Button
                       size="sm"
                       variant="outline"
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
                       onClick={() => {
                         setEditId(o.id);
                         setEditForm({
@@ -748,9 +936,13 @@ function CaissePage() {
                     </Button>
                     <Button
                       size="sm"
-                      variant="destructive"
+                      className="rounded-xl bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25"
                       onClick={() => {
-                        if (confirm("Êtes-vous sûr de vouloir supprimer cette opération de caisse ?")) {
+                        if (
+                          confirm(
+                            "Êtes-vous sûr de vouloir supprimer cette opération de caisse ?"
+                          )
+                        ) {
                           supprimer.mutate(o.id);
                         }
                       }}
@@ -764,17 +956,22 @@ function CaissePage() {
             </Card>
           ))}
           {filteredOperations.length === 0 ? (
-            <div className="col-span-full py-12 text-center text-muted-foreground">
+            <div className="col-span-full py-16 text-center text-sm text-slate-400 dark:text-slate-500">
               Aucune opération trouvée.
             </div>
           ) : null}
         </div>
       )}
 
+      {/* ═══════════════════════════════════════════════════════
+          DIALOG MODIFICATION
+          ═══════════════════════════════════════════════════════ */}
       <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
-        <DialogContent>
+        <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifier l'opération</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Modifier l'opération
+            </DialogTitle>
           </DialogHeader>
           <form
             className="space-y-4"
@@ -784,21 +981,22 @@ function CaissePage() {
             }}
           >
             <div className="space-y-2">
-              <Label>Date et heure</Label>
+              <Label className="text-slate-700 dark:text-slate-300">Date et heure</Label>
               <Input
                 type="datetime-local"
                 required
                 value={editForm.date_operation}
                 onChange={(e) => setEditForm({ ...editForm, date_operation: e.target.value })}
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
               />
             </div>
             <div className="space-y-2">
-              <Label>Sens</Label>
+              <Label className="text-slate-700 dark:text-slate-300">Sens</Label>
               <Select
                 value={editForm.sens}
                 onValueChange={(v) => setEditForm({ ...editForm, sens: v })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -808,30 +1006,32 @@ function CaissePage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Motif</Label>
+              <Label className="text-slate-700 dark:text-slate-300">Motif</Label>
               <Input
                 required
                 value={editForm.motif}
                 onChange={(e) => setEditForm({ ...editForm, motif: e.target.value })}
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
               />
             </div>
             <div className="space-y-2">
-              <Label>Montant (FCFA)</Label>
+              <Label className="text-slate-700 dark:text-slate-300">Montant (FCFA)</Label>
               <Input
                 type="number"
                 min="0"
                 required
                 value={editForm.montant}
                 onChange={(e) => setEditForm({ ...editForm, montant: e.target.value })}
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
               />
             </div>
             <div className="space-y-2">
-              <Label>Mode de paiement</Label>
+              <Label className="text-slate-700 dark:text-slate-300">Mode de paiement</Label>
               <Select
                 value={editForm.mode_paiement}
                 onValueChange={(v) => setEditForm({ ...editForm, mode_paiement: v })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -843,7 +1043,11 @@ function CaissePage() {
               </Select>
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={modifier.isPending}>
+              <Button
+                type="submit"
+                disabled={modifier.isPending}
+                className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
+              >
                 Enregistrer les modifications
               </Button>
             </DialogFooter>
