@@ -125,19 +125,29 @@ function AuthPage() {
           console.error("Erreur chambres:", e2);
         }
 
-        // Récupérer les réservations en cours
+        // Récupérer les réservations en cours (même logique que le Dashboard)
         const aujourdhui = new Date().toISOString().split("T")[0];
-        const { count: enCours, error: e3 } = await supabase
+        const { data: resasEnCours, error: e3 } = await supabase
           .from("reservations")
-          .select("*", { count: "exact", head: true })
-          .eq("statut", "en_cours");
+          .select("chambre_id, statut, date_arrivee, date_depart")
+          .neq("statut", "annulee");
 
         if (e3) {
           console.error("Erreur enCours:", e3);
         }
 
+        const chambresOccupees = new Set(
+          (resasEnCours || [])
+            .filter(
+              (r) =>
+                r.statut === "en_cours" ||
+                (r.date_arrivee <= aujourdhui && r.date_depart > aujourdhui)
+            )
+            .map((r) => r.chambre_id)
+        );
+
         const totalChambres = chambres || 1;
-        const occupation = Math.round(((enCours || 0) / totalChambres) * 100);
+        const occupation = Math.round((chambresOccupees.size / totalChambres) * 100);
 
         return {
           reservations: reservations || 0,
