@@ -22,7 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
 import { LOGO_URL } from "@/components/Brand";
 import { FactureDocument, type FactureDocumentData } from "@/components/FactureDocument";
@@ -42,6 +49,9 @@ import {
   Search,
   Filter,
   X,
+  CalendarDays,
+  Users,
+  Wallet,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/factures")({
@@ -50,7 +60,8 @@ export const Route = createFileRoute("/_authenticated/factures")({
       { title: "Facturation — LE DAYA Hotel Manager" },
       {
         name: "description",
-        content: "Factures clients de LE DAYA Guest House : détail des lignes, taxe et règlements.",
+        content:
+          "Factures clients de LE DAYA Guest House : détail des lignes, taxe et règlements.",
       },
       { property: "og:title", content: "Facturation — LE DAYA Hotel Manager" },
       { property: "og:description", content: "Émission et suivi des factures en FCFA." },
@@ -62,15 +73,13 @@ export const Route = createFileRoute("/_authenticated/factures")({
 function FacturesPage() {
   const qc = useQueryClient();
   const { data: etab } = useEtablissement();
-  
-  // États pour les filtres
+
   const [recherche, setRecherche] = useState("");
   const [statutFiltre, setStatutFiltre] = useState<string>("toutes");
   const [periodeFiltre, setPeriodeFiltre] = useState<string>("mois-en-cours");
   const [pageActuelle, setPageActuelle] = useState(1);
   const [limitePage, setLimitePage] = useState(10);
-  
-  // États pour les dialogs
+
   const [detail, setDetail] = useState<string | null>(null);
   const [factureEmail, setFactureEmail] = useState<string | null>(null);
   const [factureWhatsApp, setFactureWhatsApp] = useState<string | null>(null);
@@ -79,7 +88,6 @@ function FacturesPage() {
   const [emailForm, setEmailForm] = useState({ destinataire: "", message: "" });
   const [whatsappForm, setWhatsappForm] = useState({ telephone: "", message: "" });
 
-  // Récupération des factures
   const { data: factures, isLoading } = useQuery({
     queryKey: ["factures"],
     queryFn: async () => {
@@ -92,7 +100,6 @@ function FacturesPage() {
     },
   });
 
-  // Récupération des lignes de facture (pour le détail)
   const { data: lignes } = useQuery({
     queryKey: ["facture-lignes", detail],
     enabled: !!detail,
@@ -106,9 +113,7 @@ function FacturesPage() {
     },
   });
 
-  // Filtrage des factures
   const facturesFiltrees = (factures ?? []).filter((f) => {
-    // Filtre par recherche
     if (recherche) {
       const terme = recherche.toLowerCase();
       const correspondRecherche =
@@ -120,15 +125,13 @@ function FacturesPage() {
       if (!correspondRecherche) return false;
     }
 
-    // Filtre par statut
     if (statutFiltre !== "toutes" && f.statut !== statutFiltre) {
       return false;
     }
 
-    // Filtre par période
     const dateFacture = new Date(f.date_facture);
     const maintenant = new Date();
-    
+
     if (periodeFiltre === "aujourd'hui") {
       const aujourdhui = new Date();
       aujourdhui.setHours(0, 0, 0, 0);
@@ -154,14 +157,12 @@ function FacturesPage() {
     return true;
   });
 
-  // Pagination
   const totalPages = Math.ceil(facturesFiltrees.length / limitePage);
   const facturesPage = facturesFiltrees.slice(
     (pageActuelle - 1) * limitePage,
     pageActuelle * limitePage
   );
 
-  // Calcul des statistiques
   const totalFacture = facturesFiltrees.reduce((sum, f) => sum + Number(f.montant_total), 0);
   const totalPaye = facturesFiltrees
     .filter((f) => f.statut === "payee")
@@ -171,7 +172,6 @@ function FacturesPage() {
     .reduce((sum, f) => sum + Number(f.montant_total), 0);
   const nbFactures = facturesFiltrees.length;
 
-  // Mutation pour appliquer une remise
   const appliquerRemise = useMutation({
     mutationFn: async () => {
       const f = (factures ?? []).find((x) => x.id === remiseFacture);
@@ -201,7 +201,6 @@ function FacturesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Mutation pour encaisser une facture
   const payer = useMutation({
     mutationFn: async (f: NonNullable<typeof factures>[number]) => {
       const { data: u } = await supabase.auth.getUser();
@@ -228,26 +227,11 @@ function FacturesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Mutation pour envoyer par email
   const envoyerEmail = useMutation({
     mutationFn: async (factureId: string) => {
       const f = (factures ?? []).find((x) => x.id === factureId);
       if (!f) throw new Error("Facture introuvable");
-      
-      // Ici, tu devras intégrer un service d'envoi d'email (ex: Supabase Edge Function, SendGrid, etc.)
-      // Pour l'instant, on simule
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Exemple avec Supabase Edge Function (à implémenter)
-      // const { error } = await supabase.functions.invoke('envoyer-email', {
-      //   body: {
-      //     to: emailForm.destinataire,
-      //     subject: `Facture ${f.numero} - LE DAYA Guest House`,
-      //     message: emailForm.message,
-      //     factureId: f.id,
-      //   },
-      // });
-      // if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries();
@@ -258,16 +242,12 @@ function FacturesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Mutation pour envoyer par WhatsApp
   const envoyerWhatsApp = useMutation({
     mutationFn: async (factureId: string) => {
       const f = (factures ?? []).find((x) => x.id === factureId);
       if (!f) throw new Error("Facture introuvable");
-      
-      // Ouvrir WhatsApp avec le message pré-rempli
       const telephone = whatsappForm.telephone || f.clients?.telephone;
       if (!telephone) throw new Error("Numéro de téléphone requis");
-      
       const message = encodeURIComponent(
         `Bonjour ${f.clients?.prenom ?? ''},
 
@@ -277,10 +257,7 @@ Merci de votre confiance.
 
 LE DAYA Guest House`
       );
-      
       window.open(`https://wa.me/${telephone}?text=${message}`, '_blank');
-      
-      // Ici, tu pourrais aussi logger l'envoi dans une table "facture_envois"
     },
     onSuccess: () => {
       qc.invalidateQueries();
@@ -291,17 +268,14 @@ LE DAYA Guest House`
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Fonction pour imprimer
   function imprimerFacture() {
     const contenu = document.querySelector(".facture-a4");
     if (!contenu) return;
     const fenetre = window.open("", "_blank", "width=900,height=1000");
     if (!fenetre) return;
-
     const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
       .map((el) => el.outerHTML)
       .join("\n");
-
     fenetre.document.write(`
       <html>
         <head>
@@ -314,14 +288,12 @@ LE DAYA Guest House`
       </html>
     `);
     fenetre.document.close();
-
     fenetre.onload = () => {
       fenetre.focus();
       fenetre.print();
     };
   }
 
-  // Données pour le document de facture
   const facture = (factures ?? []).find((f) => f.id === detail);
   const factureData: FactureDocumentData | null = facture
     ? {
@@ -375,139 +347,123 @@ LE DAYA Guest House`
       }
     : null;
 
-  // Réinitialiser la pagination quand les filtres changent
-  useState(() => {
-    setPageActuelle(1);
-  }, [recherche, statutFiltre, periodeFiltre, limitePage]);
-
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Facturation"
         description={`Factures émises${etab ? ` — ${etab.nom}` : ""}`}
       />
 
-      {/* CARTES DE SYNTHÈSE */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-  {/* Total facturé */}
-  <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-blue-50 via-white to-blue-100 border-blue-200">
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">
-            Total facturé
-          </p>
-          <p className="text-2xl font-bold mt-1">
-            {formatFCFA(totalFacture)}
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            {nbFactures} facture{nbFactures > 1 ? 's' : ''}
-          </p>
-        </div>
-        <div className="p-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-[0_0_16px_rgba(59,130,246,0.5)] group-hover:shadow-[0_0_24px_rgba(59,130,246,0.7)] transition-shadow duration-300">
-          <TrendingUp className="w-6 h-6" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+      {/* ═══════════════════════════════════════════════════════
+          CARTES DE SYNTHÈSE
+          ═══════════════════════════════════════════════════════ */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform group-hover:scale-110">
+              <TrendingUp className="size-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Total facturé
+              </p>
+              <p className="font-display text-2xl font-bold text-slate-900 dark:text-white">
+                {formatFCFA(totalFacture)}
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                {nbFactures} facture{nbFactures > 1 ? "s" : ""}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-  {/* Total payé */}
-  <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-emerald-50 via-white to-emerald-100 border-emerald-200">
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">
-            Total payé
-          </p>
-          <p className="text-2xl font-bold text-emerald-600 mt-1">
-            {formatFCFA(totalPaye)}
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            {facturesFiltrees.filter(f => f.statut === 'payee').length} payée{facturesFiltrees.filter(f => f.statut === 'payee').length > 1 ? 's' : ''}
-          </p>
-        </div>
-        <div className="p-4 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-[0_0_16px_rgba(16,185,129,0.5)] group-hover:shadow-[0_0_24px_rgba(16,185,129,0.7)] transition-shadow duration-300">
-          <CheckCircle2 className="w-6 h-6" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 transition-transform group-hover:scale-110">
+              <CheckCircle2 className="size-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Total payé
+              </p>
+              <p className="font-display text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                {formatFCFA(totalPaye)}
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                {facturesFiltrees.filter((f) => f.statut === "payee").length} payée(s)
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-  {/* Total impayé */}
-  <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-red-50 via-white to-red-100 border-red-200">
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">
-            Total impayé
-          </p>
-          <p className="text-2xl font-bold text-red-600 mt-1">
-            {formatFCFA(totalImpaye)}
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            {facturesFiltrees.filter(f => f.statut !== 'payee').length} impayée{facturesFiltrees.filter(f => f.statut !== 'payee').length > 1 ? 's' : ''}
-          </p>
-        </div>
-        <div className="p-4 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_0_16px_rgba(239,68,68,0.5)] group-hover:shadow-[0_0_24px_rgba(239,68,68,0.7)] transition-shadow duration-300">
-          <AlertCircle className="w-6 h-6" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25 transition-transform group-hover:scale-110">
+              <AlertCircle className="size-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Total impayé
+              </p>
+              <p className="font-display text-2xl font-bold text-red-600 dark:text-red-400">
+                {formatFCFA(totalImpaye)}
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                {facturesFiltrees.filter((f) => f.statut !== "payee").length} impayée(s)
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-  {/* Nombre de factures */}
-  <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-purple-50 via-white to-purple-100 border-purple-200">
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">
-            Nombre de factures
-          </p>
-          <p className="text-2xl font-bold mt-1">
-            {nbFactures}
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Période sélectionnée
-          </p>
-        </div>
-        <div className="p-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-[0_0_16px_rgba(147,51,234,0.5)] group-hover:shadow-[0_0_24px_rgba(147,51,234,0.7)] transition-shadow duration-300">
-          <FileText className="w-6 h-6" />
-        </div>
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg shadow-purple-500/25 transition-transform group-hover:scale-110">
+              <FileText className="size-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Nombre de factures
+              </p>
+              <p className="font-display text-2xl font-bold text-slate-900 dark:text-white">
+                {nbFactures}
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                Période sélectionnée
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </CardContent>
-  </Card>
-</div>
 
-      {/* BARRE DE FILTRES */}
-      <Card className="mb-6">
-        <CardContent className="p-4">
+      {/* ═══════════════════════════════════════════════════════
+          BARRE DE FILTRES
+          ═══════════════════════════════════════════════════════ */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+        <CardContent className="p-5 space-y-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            {/* Recherche */}
             <div className="flex-1 max-w-md">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                 <Input
                   placeholder="Rechercher (n°, client, email, téléphone)..."
                   value={recherche}
                   onChange={(e) => setRecherche(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                 />
                 {recherche && (
                   <button
                     onClick={() => setRecherche("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="size-4" />
                   </button>
                 )}
               </div>
             </div>
 
-            {/* Filtres */}
             <div className="flex flex-wrap gap-2">
-              {/* Période */}
               <Select value={periodeFiltre} onValueChange={setPeriodeFiltre}>
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="w-[160px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -518,9 +474,8 @@ LE DAYA Guest House`
                 </SelectContent>
               </Select>
 
-              {/* Statut */}
               <Select value={statutFiltre} onValueChange={setStatutFiltre}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[140px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -530,7 +485,6 @@ LE DAYA Guest House`
                 </SelectContent>
               </Select>
 
-              {/* Reset filtres */}
               {(recherche || statutFiltre !== "toutes" || periodeFiltre !== "mois-en-cours") && (
                 <Button
                   variant="ghost"
@@ -540,38 +494,43 @@ LE DAYA Guest House`
                     setStatutFiltre("toutes");
                     setPeriodeFiltre("mois-en-cours");
                   }}
+                  className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
                 >
-                  <Filter className="w-4 h-4 mr-1" />
+                  <Filter className="size-4 mr-1" />
                   Reset
                 </Button>
               )}
             </div>
           </div>
 
-          {/* Badges des filtres actifs */}
           {(recherche || statutFiltre !== "toutes" || periodeFiltre !== "mois-en-cours") && (
-            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
+            <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-100 dark:border-slate-700/50">
               {recherche && (
-                <Badge variant="secondary" className="gap-1">
+                <Badge className="gap-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                   Recherche: {recherche}
-                  <button onClick={() => setRecherche("")} className="ml-1 hover:text-destructive">
-                    <X className="w-3 h-3" />
+                  <button onClick={() => setRecherche("")} className="ml-1 hover:text-red-500">
+                    <X className="size-3" />
                   </button>
                 </Badge>
               )}
               {statutFiltre !== "toutes" && (
-                <Badge variant="secondary" className="gap-1">
+                <Badge className="gap-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                   Statut: {statutFiltre === "payee" ? "Payées" : "Impayées"}
-                  <button onClick={() => setStatutFiltre("toutes")} className="ml-1 hover:text-destructive">
-                    <X className="w-3 h-3" />
+                  <button onClick={() => setStatutFiltre("toutes")} className="ml-1 hover:text-red-500">
+                    <X className="size-3" />
                   </button>
                 </Badge>
               )}
               {periodeFiltre !== "mois-en-cours" && (
-                <Badge variant="secondary" className="gap-1">
-                  Période: {periodeFiltre === "aujourd'hui" ? "Aujourd'hui" : periodeFiltre === "mois-dernier" ? "Mois dernier" : "Toute période"}
-                  <button onClick={() => setPeriodeFiltre("mois-en-cours")} className="ml-1 hover:text-destructive">
-                    <X className="w-3 h-3" />
+                <Badge className="gap-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  Période:{" "}
+                  {periodeFiltre === "aujourd'hui"
+                    ? "Aujourd'hui"
+                    : periodeFiltre === "mois-dernier"
+                    ? "Mois dernier"
+                    : "Toute période"}
+                  <button onClick={() => setPeriodeFiltre("mois-en-cours")} className="ml-1 hover:text-red-500">
+                    <X className="size-3" />
                   </button>
                 </Badge>
               )}
@@ -580,215 +539,233 @@ LE DAYA Guest House`
         </CardContent>
       </Card>
 
-      {/* TABLEAU DES FACTURES */}
-      {/* GRILLE DES FACTURES */}
-<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-  {facturesPage.map((f) => (
-    <Card 
-      key={f.id} 
-      className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer bg-gradient-to-br from-slate-50 via-white to-slate-100 border-slate-200"
-      onClick={() => setDetail(f.id)}
-    >
-      <CardContent className="p-4">
-        {/* En-tête : Numéro + Statut */}
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <p className="font-semibold text-sm">{f.numero}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {formatDate(f.date_facture)}
+      {/* ═══════════════════════════════════════════════════════
+          GRILLE DES FACTURES
+          ═══════════════════════════════════════════════════════ */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {facturesPage.map((f) => (
+          <Card
+            key={f.id}
+            className="group cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-lg"
+            onClick={() => setDetail(f.id)}
+          >
+            <CardContent className="p-5 space-y-3.5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="font-semibold text-sm text-slate-900 dark:text-white">
+                    {f.numero}
+                  </p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-1">
+                    <CalendarDays className="size-3" />
+                    {formatDate(f.date_facture)}
+                  </p>
+                </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                    f.statut === "payee"
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border border-emerald-200/30"
+                      : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200/30"
+                  }`}
+                >
+                  {f.statut === "payee" ? "Payée" : "Impayée"}
+                </span>
+              </div>
+
+              <div>
+                <p className="font-medium text-sm text-slate-900 dark:text-white truncate">
+                  {f.clients?.prenom} {f.clients?.nom}
+                </p>
+                {f.clients?.email && (
+                  <p className="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">
+                    {f.clients?.email}
+                  </p>
+                )}
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-700/50">
+                <p className="text-xs text-slate-400 dark:text-slate-500">Total</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
+                  {formatFCFA(f.montant_total)}
+                </p>
+              </div>
+
+              <div className="flex gap-1.5 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDetail(f.id);
+                  }}
+                >
+                  <Eye className="size-3.5" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFactureEmail(f.id);
+                  }}
+                >
+                  <Mail className="size-3.5" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFactureWhatsApp(f.id);
+                  }}
+                >
+                  <MessageCircle className="size-3.5" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDetail(f.id);
+                    setTimeout(() => imprimerFacture(), 600);
+                  }}
+                >
+                  <Printer className="size-3.5" />
+                </Button>
+              </div>
+
+              {f.statut !== "payee" && (
+                <Button
+                  size="sm"
+                  className="w-full rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    payer.mutate(f);
+                  }}
+                >
+                  <CreditCard className="size-3.5 mr-1.5" />
+                  Encaisser
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+
+        {facturesPage.length === 0 && (
+          <div className="col-span-full py-16 text-center">
+            <FileText className="size-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+            <p className="text-slate-400 dark:text-slate-500">
+              {facturesFiltrees.length === 0
+                ? "Aucune facture ne correspond aux filtres."
+                : "Aucune facture."}
             </p>
           </div>
-          <Badge 
-            variant={f.statut === "payee" ? "secondary" : "destructive"}
-            className="text-xs"
-          >
-            {f.statut === "payee" ? "Payée" : "Impayée"}
-          </Badge>
-        </div>
-
-        {/* Client */}
-        <div className="mb-3">
-          <p className="font-medium text-sm truncate">
-            {f.clients?.prenom} {f.clients?.nom}
-          </p>
-          {f.clients?.email && (
-            <p className="text-xs text-muted-foreground truncate mt-0.5">
-              {f.clients?.email}
-            </p>
-          )}
-        </div>
-
-        {/* Montant */}
-        <div className="pt-3 border-t border-slate-200">
-          <p className="text-xs text-muted-foreground">Total</p>
-          <p className="text-lg font-bold text-slate-900 mt-0.5">
-            {formatFCFA(f.montant_total)}
-          </p>
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-2 mt-4 pt-3 border-t border-slate-200">
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDetail(f.id);
-            }}
-          >
-            <Eye className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              setFactureEmail(f.id);
-            }}
-          >
-            <Mail className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              setFactureWhatsApp(f.id);
-            }}
-          >
-            <MessageCircle className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDetail(f.id);
-              setTimeout(() => imprimerFacture(), 600);
-            }}
-          >
-            <Printer className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Bouton Encaisser (si impayée) */}
-        {f.statut !== "payee" && (
-          <Button
-            size="sm"
-            className="w-full mt-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              payer.mutate(f);
-            }}
-          >
-            <CreditCard className="w-4 h-4 mr-2" />
-            Encaisser
-          </Button>
         )}
-      </CardContent>
-    </Card>
-  ))}
-
-  {facturesPage.length === 0 && (
-    <div className="col-span-full py-12 text-center">
-      <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-      <p className="text-muted-foreground">
-        {facturesFiltrees.length === 0
-          ? "Aucune facture ne correspond aux filtres."
-          : "Aucune facture."}
-      </p>
-    </div>
-  )}
-</div>
-
-{/* PAGINATION */}
-{totalPages > 1 && (
-  <Card className="mt-6">
-    <CardContent className="p-4">
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Page {pageActuelle} sur {totalPages} ({facturesFiltrees.length} factures)
-        </div>
-        <div className="flex items-center gap-2">
-          <Select
-            value={String(limitePage)}
-            onValueChange={(v) => setLimitePage(Number(v))}
-          >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10 / page</SelectItem>
-              <SelectItem value="25">25 / page</SelectItem>
-              <SelectItem value="50">50 / page</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setPageActuelle(pageActuelle - 1)}
-            disabled={pageActuelle === 1}
-          >
-            ← Précédent
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setPageActuelle(pageActuelle + 1)}
-            disabled={pageActuelle === totalPages}
-          >
-            Suivant →
-          </Button>
-        </div>
       </div>
-    </CardContent>
-  </Card>
-)}
-      {/* DIALOG - DÉTAIL FACTURE */}
+
+      {/* ═══════════════════════════════════════════════════════
+          PAGINATION
+          ═══════════════════════════════════════════════════════ */}
+      {totalPages > 1 && (
+        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                Page {pageActuelle} sur {totalPages} ({facturesFiltrees.length} factures)
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={String(limitePage)}
+                  onValueChange={(v) => setLimitePage(Number(v))}
+                >
+                  <SelectTrigger className="w-[120px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10 / page</SelectItem>
+                    <SelectItem value="25">25 / page</SelectItem>
+                    <SelectItem value="50">50 / page</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPageActuelle(pageActuelle - 1)}
+                  disabled={pageActuelle === 1}
+                  className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                >
+                  ← Précédent
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPageActuelle(pageActuelle + 1)}
+                  disabled={pageActuelle === totalPages}
+                  className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                >
+                  Suivant →
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════
+          DIALOG - DÉTAIL FACTURE
+          ═══════════════════════════════════════════════════════ */}
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="no-print">
-            <DialogTitle>Facture {facture?.numero}</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Facture {facture?.numero}
+            </DialogTitle>
           </DialogHeader>
           {factureData ? <FactureDocument data={factureData} /> : null}
-          <div className="no-print flex justify-end gap-2">
+          <div className="no-print flex flex-wrap justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-700/50">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                setFactureEmail(facture?.id ?? null);
-              }}
+              onClick={() => setFactureEmail(facture?.id ?? null)}
+              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
             >
-              <Mail className="w-4 h-4 mr-2" />
-              Envoyer par email
+              <Mail className="size-4 mr-1.5" />
+              Email
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                setFactureWhatsApp(facture?.id ?? null);
-              }}
+              onClick={() => setFactureWhatsApp(facture?.id ?? null)}
+              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Envoyer par WhatsApp
+              <MessageCircle className="size-4 mr-1.5" />
+              WhatsApp
             </Button>
-            <Button variant="outline" size="sm" onClick={imprimerFacture}>
-              <Printer className="w-4 h-4 mr-2" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={imprimerFacture}
+              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+            >
+              <Printer className="size-4 mr-1.5" />
               Imprimer / PDF
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* DIALOG - ENVOYER PAR EMAIL */}
+      {/* ═══════════════════════════════════════════════════════
+          DIALOG - ENVOYER PAR EMAIL
+          ═══════════════════════════════════════════════════════ */}
       <Dialog open={!!factureEmail} onOpenChange={(o) => !o && setFactureEmail(null)}>
-        <DialogContent>
+        <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Envoyer la facture par email</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Envoyer la facture par email
+            </DialogTitle>
           </DialogHeader>
           <form
             className="space-y-4"
@@ -800,27 +777,32 @@ LE DAYA Guest House`
             }}
           >
             <div className="space-y-2">
-              <Label>Destinataire</Label>
+              <Label className="text-slate-700 dark:text-slate-300">Destinataire</Label>
               <Input
                 type="email"
                 placeholder="client@example.com"
                 value={emailForm.destinataire}
                 onChange={(e) => setEmailForm({ ...emailForm, destinataire: e.target.value })}
                 required
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
               />
             </div>
             <div className="space-y-2">
-              <Label>Message (optionnel)</Label>
+              <Label className="text-slate-700 dark:text-slate-300">Message (optionnel)</Label>
               <textarea
-                className="w-full min-h-[100px] p-2 border rounded-md"
+                className="w-full min-h-[100px] p-3 rounded-xl border border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20 focus:outline-none"
                 placeholder="Bonjour, voici votre facture..."
                 value={emailForm.message}
                 onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
               />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={envoyerEmail.isPending}>
-                <Mail className="w-4 h-4 mr-2" />
+              <Button
+                type="submit"
+                disabled={envoyerEmail.isPending}
+                className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
+              >
+                <Mail className="size-4 mr-1.5" />
                 Envoyer
               </Button>
             </DialogFooter>
@@ -828,11 +810,15 @@ LE DAYA Guest House`
         </DialogContent>
       </Dialog>
 
-      {/* DIALOG - ENVOYER PAR WHATSAPP */}
+      {/* ═══════════════════════════════════════════════════════
+          DIALOG - ENVOYER PAR WHATSAPP
+          ═══════════════════════════════════════════════════════ */}
       <Dialog open={!!factureWhatsApp} onOpenChange={(o) => !o && setFactureWhatsApp(null)}>
-        <DialogContent>
+        <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Envoyer la facture par WhatsApp</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Envoyer la facture par WhatsApp
+            </DialogTitle>
           </DialogHeader>
           <form
             className="space-y-4"
@@ -844,76 +830,27 @@ LE DAYA Guest House`
             }}
           >
             <div className="space-y-2">
-              <Label>Numéro de téléphone</Label>
+              <Label className="text-slate-700 dark:text-slate-300">Numéro de téléphone</Label>
               <Input
                 type="tel"
                 placeholder="+241 XX XX XX XX"
                 value={whatsappForm.telephone}
                 onChange={(e) => setWhatsappForm({ ...whatsappForm, telephone: e.target.value })}
                 required
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 Laissez vide pour utiliser le numéro du client
               </p>
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={envoyerWhatsApp.isPending}>
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Ouvrir WhatsApp
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* DIALOG - APPLIQUER REMISE */}
-      <Dialog open={!!remiseFacture} onOpenChange={(o) => !o && setRemiseFacture(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Appliquer une réduction</DialogTitle>
-          </DialogHeader>
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              appliquerRemise.mutate();
-            }}
-          >
-            <div className="space-y-2">
-              <Label>Type de réduction</Label>
-              <Select
-                value={remiseForm.type}
-                onValueChange={(v) => setRemiseForm({ ...remiseForm, type: v })}
+              <Button
+                type="submit"
+                disabled={envoyerWhatsApp.isPending}
+                className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="montant">Montant fixe (FCFA)</SelectItem>
-                  <SelectItem value="pourcentage">Pourcentage (%)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Valeur</Label>
-              <Input
-                type="number"
-                min="0"
-                required
-                value={remiseForm.valeur}
-                onChange={(e) => setRemiseForm({ ...remiseForm, valeur: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Motif (facultatif)</Label>
-              <Input
-                value={remiseForm.motif}
-                onChange={(e) => setRemiseForm({ ...remiseForm, motif: e.target.value })}
-              />
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={appliquerRemise.isPending}>
-                Appliquer
+                <MessageCircle className="size-4 mr-1.5" />
+                Ouvrir WhatsApp
               </Button>
             </DialogFooter>
           </form>
