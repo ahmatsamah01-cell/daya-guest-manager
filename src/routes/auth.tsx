@@ -1,3 +1,4 @@
+
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -22,10 +23,7 @@ import {
   Chrome,
   Hotel,
   Users,
-  CalendarDays,
   BedDouble,
-  Wallet,
-  TrendingUp,
   Plus,
   Trash2,
 } from "lucide-react";
@@ -36,7 +34,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 // ============================================================
-// FONCTIONS D'AIDE
+// FONCTIONS D'AIDE - WEBAUTHN
 // ============================================================
 
 // Récupérer l'IP du client
@@ -66,6 +64,126 @@ async function logConnexion(userId: string, email: string, ip: string) {
   }
 }
 
+// ============================================================
+// WEBAUTHN - FONCTIONS DE CONVERSION
+// ============================================================
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+function base64UrlToArrayBuffer(base64Url: string): ArrayBuffer {
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const padding = '='.repeat((4 - (base64.length % 4)) % 4);
+  return base64ToArrayBuffer(base64 + padding);
+}
+
+// ============================================================
+// WEBAUTHN - ENREGISTREMENT ET CONNEXION
+// ============================================================
+
+// Enregistrer une clé biométrique (WebAuthn)
+async function registerBiometricKey(
+  userId: string,
+  email: string
+): Promise<{ credentialId: string; publicKey: string; clientData: string } | null> {
+  try {
+    const challenge = new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+
+    const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions = {
+      challenge: challenge,
+      rp: {
+        name: "LE DAYA Hotel Manager",
+        id: window.location.hostname,
+      },
+      user: {
+        id: new TextEncoder().encode(userId),
+        name: email,
+        displayName: email,
+      },
+      pubKeyCredParams: [
+        { type: "public-key", alg: -7 },
+        { type: "public-key", alg: -257 },
+      ],
+      authenticatorSelection: {
+        authenticatorAttachment: "platform",
+        userVerification: "required",
+        residentKey: "required",
+      },
+      timeout: 60000,
+      attestation: "none",
+    };
+
+    const credential = await navigator.credentials.create({
+      publicKey: publicKeyCredentialCreationOptions,
+    }) as PublicKeyCredential;
+
+    if (!credential) return null;
+
+    const response = credential.response as AuthenticatorAttestationResponse;
+    const clientDataJSON = arrayBufferToBase64(response.clientDataJSON);
+    const attestationObject = arrayBufferToBase64(response.attestationObject);
+
+    return {
+      credentialId: credential.id,
+      publicKey: attestationObject,
+      clientData: clientDataJSON,
+    };
+  } catch (err) {
+    console.error("WebAuthn registration error:", err);
+    throw err;
+  }
+}
+
+// Se connecter avec la biométrie (WebAuthn)
+async function loginWithBiometricKey(
+  credentialId: string
+): Promise<boolean> {
+  try {
+    const challenge = new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+
+    const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
+      challenge: challenge,
+      allowCredentials: [
+        {
+          id: base64UrlToArrayBuffer(credentialId),
+          type: "public-key",
+        },
+      ],
+      userVerification: "required",
+      timeout: 60000,
+      rpId: window.location.hostname,
+    };
+
+    const assertion = await navigator.credentials.get({
+      publicKey: publicKeyCredentialRequestOptions,
+    }) as PublicKeyCredential;
+
+    if (!assertion) return false;
+
+    return true;
+  } catch (err) {
+    console.error("WebAuthn login error:", err);
+    return false;
+  }
+}
+
 function AuthPage() {
   const navigate = useNavigate();
 
@@ -76,9 +194,12 @@ function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  // États pour les fonctionnalités avancées
+  // États biométrie
   const [biometricSupported, setBiometricSupported] = useState(false);
   const [biometricRegistered, setBiometricRegistered] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
+
+  // États sécurité
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockTimer, setLockTimer] = useState(0);
@@ -92,11 +213,8 @@ function AuthPage() {
 
   // Vérifier si une clé biométrique est enregistrée
   useEffect(() => {
-    const checkBiometricRegistered = () => {
-      const saved = localStorage.getItem("daya-biometric-credential");
-      setBiometricRegistered(!!saved);
-    };
-    checkBiometricRegistered();
+    const saved = localStorage.getItem("daya-biometric-credential");
+    setBiometricRegistered(!!saved);
   }, []);
 
   // ============================================================
@@ -107,34 +225,25 @@ function AuthPage() {
     queryKey: ["auth-stats"],
     queryFn: async () => {
       try {
-        // Récupérer les réservations
         const { count: reservations, error: e1 } = await supabase
           .from("reservations")
           .select("*", { count: "exact", head: true });
 
-        if (e1) {
-          console.error("Erreur réservations:", e1);
-        }
+        if (e1) console.error("Erreur réservations:", e1);
 
-        // Récupérer les chambres
         const { count: chambres, error: e2 } = await supabase
           .from("chambres")
           .select("*", { count: "exact", head: true });
 
-        if (e2) {
-          console.error("Erreur chambres:", e2);
-        }
+        if (e2) console.error("Erreur chambres:", e2);
 
-        // Récupérer les réservations en cours (même logique que le Dashboard)
         const aujourdhui = new Date().toISOString().split("T")[0];
         const { data: resasEnCours, error: e3 } = await supabase
           .from("reservations")
           .select("chambre_id, statut, date_arrivee, date_depart")
           .neq("statut", "annulee");
 
-        if (e3) {
-          console.error("Erreur enCours:", e3);
-        }
+        if (e3) console.error("Erreur enCours:", e3);
 
         const chambresOccupees = new Set(
           (resasEnCours || [])
@@ -156,11 +265,7 @@ function AuthPage() {
         };
       } catch (error) {
         console.error("Erreur stats:", error);
-        return {
-          reservations: 0,
-          chambres: 0,
-          occupation: 0,
-        };
+        return { reservations: 0, chambres: 0, occupation: 0 };
       }
     },
     staleTime: 5 * 60 * 1000,
@@ -181,14 +286,9 @@ function AuthPage() {
           .select("*")
           .order("created_at", { ascending: false })
           .limit(5);
-
-        if (error) {
-          console.error("Erreur connexions:", error);
-          return [];
-        }
+        if (error) return [];
         return data || [];
-      } catch (error) {
-        console.error("Erreur connexions:", error);
+      } catch {
         return [];
       }
     },
@@ -198,7 +298,7 @@ function AuthPage() {
   });
 
   // ============================================================
-  // VÉRIFICATION DE LA BIOMÉTRIE (uniquement desktop)
+  // VÉRIFICATION DE LA BIOMÉTRIE
   // ============================================================
   useEffect(() => {
     const checkBiometric = async () => {
@@ -280,7 +380,7 @@ function AuthPage() {
         if (newAttempts >= 5) {
           setIsLocked(true);
           setLockTimer(30);
-          toast.error("Compte verrouillé pour 30 secondes après trop de tentatives.");
+          toast.error("Compte verrouillé pour 30 secondes.");
           setLoading(false);
           return;
         }
@@ -290,7 +390,6 @@ function AuthPage() {
         return;
       }
 
-      // JOURNALISATION DE LA CONNEXION
       if (data.user) {
         const ip = await getClientIP();
         await logConnexion(data.user.id, email, ip);
@@ -300,10 +399,8 @@ function AuthPage() {
       if (rememberMe) {
         localStorage.setItem("daya-remember-email", email);
       }
-      
-      // Rafraîchir les stats après connexion
+
       refetchStats();
-      
       navigate({ to: "/dashboard" });
       toast.success("Bienvenue ! Connexion réussie.");
 
@@ -315,7 +412,70 @@ function AuthPage() {
   }
 
   // ============================================================
-  // CONNEXION PAR BIOMÉTRIE - FONCTIONNELLE
+  // BIOMÉTRIE - ENREGISTRER (WEBAUTHN RÉEL)
+  // ============================================================
+  const handleRegisterBiometric = async () => {
+    if (!biometricSupported) {
+      toast.error("La biométrie n'est pas supportée sur cet appareil.");
+      return;
+    }
+
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) {
+        toast.error("Connectez-vous d'abord avec votre mot de passe.");
+        return;
+      }
+
+      setBiometricLoading(true);
+
+      const existing = await supabase
+        .from("user_credentials")
+        .select("*")
+        .eq("user_id", user.user.id)
+        .maybeSingle();
+
+      if (existing.data) {
+        toast.info("Vous avez déjà une clé biométrique enregistrée.");
+        setBiometricLoading(false);
+        return;
+      }
+
+      const result = await registerBiometricKey(user.user.id, user.user.email || "");
+
+      if (!result) {
+        throw new Error("Échec de la création de la clé biométrique.");
+      }
+
+      const { error } = await supabase
+        .from("user_credentials")
+        .insert({
+          user_id: user.user.id,
+          credential_id: result.credentialId,
+          public_key: result.publicKey,
+          client_data_json: result.clientData,
+          device_name: navigator.userAgent.includes("Mac") ? "Mac" :
+                        navigator.userAgent.includes("Windows") ? "Windows" :
+                        navigator.userAgent.includes("Linux") ? "Linux" : "Ordinateur",
+          type: "webauthn",
+        });
+
+      if (error) throw error;
+
+      localStorage.setItem("daya-biometric-credential", result.credentialId);
+      setBiometricRegistered(true);
+      toast.success("🔐 Clé biométrique enregistrée avec succès !");
+
+    } catch (err) {
+      console.error("Erreur biométrique:", err);
+      toast.error("Erreur : " + (err as Error).message);
+    } finally {
+      setBiometricLoading(false);
+    }
+  };
+
+  // ============================================================
+  // BIOMÉTRIE - CONNEXION (WEBAUTHN RÉEL)
   // ============================================================
   const handleBiometricLogin = async () => {
     if (!biometricSupported) {
@@ -324,19 +484,17 @@ function AuthPage() {
     }
 
     try {
-      setLoading(true);
+      setBiometricLoading(true);
 
-      // 1. Vérifier si une clé biométrique est enregistrée
       const savedCredentialId = localStorage.getItem("daya-biometric-credential");
       const savedEmail = localStorage.getItem("daya-remember-email");
 
       if (!savedCredentialId || !savedEmail) {
-        toast.error("Aucune clé biométrique enregistrée. Connectez-vous d'abord avec votre mot de passe.");
-        setLoading(false);
+        toast.error("Aucune clé biométrique enregistrée.");
+        setBiometricLoading(false);
         return;
       }
 
-      // 2. Vérifier si la clé existe dans Supabase
       const { data: credential, error: credError } = await supabase
         .from("user_credentials")
         .select("*")
@@ -344,39 +502,29 @@ function AuthPage() {
         .single();
 
       if (credError || !credential) {
-        toast.error("Clé biométrique introuvable. Veuillez vous reconnecter avec votre mot de passe.");
+        toast.error("Clé biométrique introuvable.");
         localStorage.removeItem("daya-biometric-credential");
         setBiometricRegistered(false);
-        setLoading(false);
+        setBiometricLoading(false);
         return;
       }
 
-      // 3. Simuler la vérification biométrique (WebAuthn)
-      const isAuthenticated = await new Promise<boolean>((resolve) => {
-        if (window.PublicKeyCredential) {
-          setTimeout(() => resolve(true), 1500);
-        } else {
-          resolve(false);
-        }
-      });
+      const isAuthenticated = await loginWithBiometricKey(savedCredentialId);
 
       if (!isAuthenticated) {
         toast.error("Échec de l'authentification biométrique.");
-        setLoading(false);
+        setBiometricLoading(false);
         return;
       }
 
-      // 4. Connexion réussie
       setEmail(savedEmail);
-      toast.success("Authentification biométrique réussie !");
-      
-      // Mettre à jour la date de dernière utilisation
+      toast.success("🔐 Authentification biométrique réussie !");
+
       await supabase
         .from("user_credentials")
         .update({ last_used: new Date().toISOString() })
         .eq("credential_id", savedCredentialId);
 
-      // Journaliser la connexion
       const { data: user } = await supabase.auth.getUser();
       if (user.user) {
         const ip = await getClientIP();
@@ -387,78 +535,14 @@ function AuthPage() {
 
     } catch (err) {
       console.error("Erreur biométrique:", err);
-      toast.error("Erreur lors de l'authentification biométrique.");
+      toast.error("Erreur : " + (err as Error).message);
     } finally {
-      setLoading(false);
+      setBiometricLoading(false);
     }
   };
 
   // ============================================================
-  // ENREGISTRER UNE CLÉ BIOMÉTRIQUE
-  // ============================================================
-  const registerBiometric = async () => {
-    if (!biometricSupported) {
-      toast.error("La biométrie n'est pas supportée sur cet appareil.");
-      return;
-    }
-
-    try {
-      // Vérifier que l'utilisateur est connecté
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) {
-        toast.error("Connectez-vous d'abord avec votre mot de passe.");
-        return;
-      }
-
-      setLoading(true);
-
-      // Vérifier si l'utilisateur a déjà une clé
-      const { data: existing, error: checkError } = await supabase
-        .from("user_credentials")
-        .select("*")
-        .eq("user_id", user.user.id)
-        .maybeSingle();
-
-      if (existing) {
-        toast.info("Vous avez déjà une clé biométrique enregistrée.");
-        setLoading(false);
-        return;
-      }
-
-      // Simuler l'enregistrement d'une clé biométrique
-      const credentialId = `biometric_${Date.now()}_${user.user.id.slice(0, 8)}`;
-      
-      const { error } = await supabase
-        .from("user_credentials")
-        .insert({
-          user_id: user.user.id,
-          credential_id: credentialId,
-          public_key: "simulated_public_key",
-          device_name: navigator.userAgent.includes("Mac") ? "Mac" : 
-                        navigator.userAgent.includes("Windows") ? "Windows" : 
-                        navigator.userAgent.includes("iPhone") ? "iPhone" : "Ordinateur",
-          type: "webauthn",
-        });
-
-      if (error) {
-        console.error("Erreur insert:", error);
-        throw error;
-      }
-
-      localStorage.setItem("daya-biometric-credential", credentialId);
-      setBiometricRegistered(true);
-      toast.success("Clé biométrique enregistrée avec succès !");
-
-    } catch (err) {
-      console.error("Erreur enregistrement:", err);
-      toast.error("Erreur lors de l'enregistrement biométrique.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ============================================================
-  // SUPPRIMER LA CLÉ BIOMÉTRIQUE
+  // BIOMÉTRIE - SUPPRIMER
   // ============================================================
   const deleteBiometric = async () => {
     try {
@@ -486,7 +570,7 @@ function AuthPage() {
   };
 
   // ============================================================
-  // CONNEXION PAR MAGIC LINK
+  // MAGIC LINK
   // ============================================================
   const handleMagicLink = async () => {
     if (!email) {
@@ -516,7 +600,7 @@ function AuthPage() {
   };
 
   // ============================================================
-  // CONNEXION SOCIALE (Google uniquement)
+  // GOOGLE LOGIN
   // ============================================================
   const handleSocialLogin = async () => {
     try {
@@ -550,21 +634,14 @@ function AuthPage() {
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden font-sans">
 
-      {/* ========================================================
-          FOND D'ÉCRAN AVEC EFFET DE PROFONDEUR
-      ======================================================== */}
-
+      {/* Fonds d'écran */}
       <div className="absolute top-[-20%] left-[-10%] w-[700px] h-[700px] rounded-full bg-red-500/15 dark:bg-red-500/10 blur-[140px] pointer-events-none animate-pulse-slow" />
       <div className="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] rounded-full bg-amber-400/10 dark:bg-amber-400/5 blur-[130px] pointer-events-none animate-pulse-slower" />
       <div className="absolute top-[30%] right-[5%] w-[300px] h-[300px] rounded-full bg-blue-400/10 dark:bg-blue-400/5 blur-[100px] pointer-events-none" />
 
-      {/* GRILLE DISCRÈTE */}
       <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03] pointer-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:60px_60px]" />
 
-      {/* ========================================================
-          BOUTON THÈME - EN HAUT À GAUCHE
-      ======================================================== */}
-
+      {/* Bouton thème */}
       <div className="absolute top-5 left-5 z-30">
         <button
           onClick={() => {
@@ -586,10 +663,7 @@ function AuthPage() {
         </button>
       </div>
 
-      {/* ========================================================
-          BADGE SYSTÈME - EN HAUT À DROITE
-      ======================================================== */}
-
+      {/* Badge système */}
       <div className="absolute top-5 right-5 z-30 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/70 dark:border-slate-800/70 shadow-sm text-[9px] sm:text-[10px] uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400 animate-fade-in">
         <span className="relative flex h-2 w-2">
           <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 dark:bg-emerald-500 opacity-60 animate-ping" />
@@ -599,10 +673,7 @@ function AuthPage() {
         <span className="sm:hidden">Opérationnel</span>
       </div>
 
-      {/* ========================================================
-          CONTENU PRINCIPAL
-      ======================================================== */}
-
+      {/* Contenu principal */}
       <div className="relative z-10 w-full max-w-6xl px-4 py-8 animate-fade-in-up">
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -624,10 +695,8 @@ function AuthPage() {
             {/* Carte de connexion */}
             <div className="relative p-7 sm:p-8 bg-white/70 dark:bg-slate-800/70 backdrop-blur-2xl border border-white/70 dark:border-slate-700/70 rounded-3xl shadow-[0_20px_60px_-20px_rgba(15,23,42,0.12)] dark:shadow-[0_20px_60px_-20px_rgba(0,0,0,0.4)] transition-all duration-500 hover:border-red-200/80 dark:hover:border-red-900/80 hover:shadow-[0_25px_70px_-20px_rgba(220,38,38,0.12)]">
 
-              {/* Reflet supérieur */}
               <div className="absolute top-0 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-white/60 dark:via-slate-600/60 to-transparent" />
 
-              {/* Badge sécurisé */}
               <div className="flex items-center justify-center mb-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50/80 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 text-[9px] uppercase tracking-[0.16em] text-red-600 dark:text-red-400 font-semibold">
                   <ShieldCheck size={13} />
@@ -635,20 +704,13 @@ function AuthPage() {
                 </div>
               </div>
 
-              {/* Titre centré */}
               <div className="mb-6 text-center">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                  Accès Manager
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Authentification sécurisée
-                </p>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Accès Manager</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Authentification sécurisée</p>
               </div>
 
-              {/* Formulaire */}
               <form onSubmit={connexion} className="space-y-4">
 
-                {/* Email */}
                 <div className="relative group/input">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-all duration-300 group-focus-within/input:text-red-500 dark:group-focus-within/input:text-red-400" />
                   <Input
@@ -662,7 +724,6 @@ function AuthPage() {
                   />
                 </div>
 
-                {/* Mot de passe */}
                 <div className="relative group/input">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 transition-all duration-300 group-focus-within/input:text-red-500 dark:group-focus-within/input:text-red-400" />
                   <Input
@@ -683,7 +744,6 @@ function AuthPage() {
                   </button>
                 </div>
 
-                {/* Options */}
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
                     <input
@@ -694,7 +754,6 @@ function AuthPage() {
                     />
                     Se souvenir de moi
                   </label>
-
                   <button
                     type="button"
                     onClick={() => setShowMagicLink(!showMagicLink)}
@@ -704,7 +763,6 @@ function AuthPage() {
                   </button>
                 </div>
 
-                {/* Magic Link */}
                 {showMagicLink && (
                   <div className="p-3 rounded-xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/50 dark:border-blue-800/50">
                     <p className="text-xs text-blue-600 dark:text-blue-400 mb-2">
@@ -718,21 +776,14 @@ function AuthPage() {
                       className="w-full h-9 text-xs rounded-xl border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                     >
                       {magicLinkSent ? (
-                        <>
-                          <CheckCircle className="size-3.5 mr-1.5" />
-                          Envoyé !
-                        </>
+                        <><CheckCircle className="size-3.5 mr-1.5" /> Envoyé !</>
                       ) : (
-                        <>
-                          <Smartphone className="size-3.5 mr-1.5" />
-                          Envoyer le lien magique
-                        </>
+                        <><Smartphone className="size-3.5 mr-1.5" /> Envoyer le lien magique</>
                       )}
                     </Button>
                   </div>
                 )}
 
-                {/* Bouton connexion */}
                 <Button
                   type="submit"
                   disabled={loading || isLocked}
@@ -743,30 +794,21 @@ function AuthPage() {
                   )}
                   <span className="relative z-10 flex items-center justify-center gap-2">
                     {loading ? (
-                      <>
-                        <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                        Authentification...
-                      </>
+                      <><span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Authentification...</>
                     ) : isLocked ? (
                       `Verrouillé (${lockTimer}s)`
                     ) : (
-                      <>
-                        Se connecter
-                        <ArrowRight size={16} className="transition-transform duration-300 group-hover/button:translate-x-1" />
-                      </>
+                      <>Se connecter <ArrowRight size={16} className="transition-transform duration-300 group-hover/button:translate-x-1" /></>
                     )}
                   </span>
                 </Button>
 
-                {/* Connexion sociale - uniquement Google */}
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-slate-200/60 dark:border-slate-700/60" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="px-3 bg-white/70 dark:bg-slate-800/70 text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                      ou
-                    </span>
+                    <span className="px-3 bg-white/70 dark:bg-slate-800/70 text-slate-400 dark:text-slate-500 uppercase tracking-wider">ou</span>
                   </div>
                 </div>
 
@@ -780,18 +822,13 @@ function AuthPage() {
                   Continuer avec Google
                 </Button>
 
-                {/* Tentatives restantes */}
                 {loginAttempts > 0 && loginAttempts < 5 && (
                   <div className="flex items-center justify-center gap-2 text-xs text-amber-600 dark:text-amber-400">
                     <AlertCircle size={14} />
-                    <span>
-                      {5 - loginAttempts} tentative{5 - loginAttempts > 1 ? "s" : ""} restante
-                      {5 - loginAttempts > 1 ? "s" : ""}
-                    </span>
+                    <span>{5 - loginAttempts} tentative{5 - loginAttempts > 1 ? "s" : ""} restante{5 - loginAttempts > 1 ? "s" : ""}</span>
                   </div>
                 )}
 
-                {/* Sécurité */}
                 <div className="flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-slate-500 pt-2 border-t border-slate-200/50 dark:border-slate-700/50">
                   <ShieldCheck size={14} />
                   <span>Chiffrement AES-256</span>
@@ -801,7 +838,6 @@ function AuthPage() {
               </form>
             </div>
 
-            {/* Footer */}
             <div className="mt-6 text-center">
               <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
                 © 2026 LE DAYA — Tous droits réservés
@@ -810,12 +846,11 @@ function AuthPage() {
           </div>
 
           {/* ====================================================
-              COLONNE DROITE - INFORMATIONS (Desktop uniquement)
+              COLONNE DROITE - INFORMATIONS
           ==================================================== */}
 
           <div className="hidden lg:block space-y-6">
 
-            {/* Carte de bienvenue */}
             <div className="relative p-8 bg-white/60 dark:bg-slate-800/60 backdrop-blur-2xl border border-white/60 dark:border-slate-700/60 rounded-3xl shadow-[0_20px_60px_-20px_rgba(15,23,42,0.10)]">
               <div className="absolute top-0 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-white/60 dark:via-slate-600/60 to-transparent" />
 
@@ -834,7 +869,6 @@ function AuthPage() {
                 de gestion hôtelière : réservations, chambres, facturation et bien plus encore.
               </p>
 
-              {/* Statistiques - avec données réelles */}
               <div className="grid grid-cols-3 gap-3 mt-6 pt-5 border-t border-slate-200/50 dark:border-slate-700/50">
                 <div className="text-center">
                   <p className="text-xs text-slate-400 dark:text-slate-500">Réservations</p>
@@ -857,7 +891,6 @@ function AuthPage() {
               </div>
             </div>
 
-            {/* Connexions récentes - avec données réelles */}
             <div className="p-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 rounded-3xl">
               <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                 <Users className="size-4 text-red-500" />
@@ -888,7 +921,6 @@ function AuthPage() {
               </div>
             </div>
 
-            {/* Dispositifs connectés */}
             <div className="flex items-center gap-3 p-4 bg-white/40 dark:bg-slate-800/40 backdrop-blur-md border border-white/40 dark:border-slate-700/40 rounded-2xl">
               <div className="flex -space-x-2">
                 <div className="flex size-8 items-center justify-center rounded-full bg-blue-500/10 text-blue-500 border-2 border-white dark:border-slate-800">
@@ -906,32 +938,34 @@ function AuthPage() {
               </button>
             </div>
 
-            {/* Biométrie - desktop uniquement */}
+            {/* BIOMÉTRIE - DESKTOP UNIQUEMENT */}
             {biometricSupported && (
               <div className="space-y-2">
                 <button
                   onClick={handleBiometricLogin}
-                  className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200/50 dark:border-blue-800/50 text-blue-600 dark:text-blue-400 transition-all hover:scale-[1.02] hover:shadow-lg"
-                  disabled={!biometricRegistered}
+                  disabled={!biometricRegistered || biometricLoading}
+                  className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200/50 dark:border-blue-800/50 text-blue-600 dark:text-blue-400 transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:hover:scale-100"
                 >
                   <Fingerprint className="size-5" />
                   <span className="text-sm font-medium">
-                    {biometricRegistered ? "Connexion par empreinte" : "Biométrie non enregistrée"}
+                    {biometricLoading ? "Vérification..." : biometricRegistered ? "Connexion par empreinte" : "Biométrie non enregistrée"}
                   </span>
                 </button>
 
                 <div className="flex gap-2">
                   <button
-                    onClick={registerBiometric}
-                    className="flex-1 flex items-center justify-center gap-2 p-3 rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border border-amber-200/50 dark:border-amber-800/50 text-amber-600 dark:text-amber-400 transition-all hover:scale-[1.02] hover:shadow-lg text-sm"
+                    onClick={handleRegisterBiometric}
+                    disabled={biometricLoading}
+                    className="flex-1 flex items-center justify-center gap-2 p-3 rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border border-amber-200/50 dark:border-amber-800/50 text-amber-600 dark:text-amber-400 transition-all hover:scale-[1.02] hover:shadow-lg text-sm disabled:opacity-50 disabled:hover:scale-100"
                   >
                     <Plus className="size-4" />
-                    <span>Enregistrer</span>
+                    <span>{biometricLoading ? "En cours..." : "Enregistrer"}</span>
                   </button>
                   {biometricRegistered && (
                     <button
                       onClick={deleteBiometric}
-                      className="flex-1 flex items-center justify-center gap-2 p-3 rounded-2xl bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border border-red-200/50 dark:border-red-800/50 text-red-600 dark:text-red-400 transition-all hover:scale-[1.02] hover:shadow-lg text-sm"
+                      disabled={biometricLoading}
+                      className="flex-1 flex items-center justify-center gap-2 p-3 rounded-2xl bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border border-red-200/50 dark:border-red-800/50 text-red-600 dark:text-red-400 transition-all hover:scale-[1.02] hover:shadow-lg text-sm disabled:opacity-50 disabled:hover:scale-100"
                     >
                       <Trash2 className="size-4" />
                       <span>Supprimer</span>
@@ -944,42 +978,30 @@ function AuthPage() {
         </div>
       </div>
 
-      {/* ========================================================
-          ANIMATIONS CSS
-      ======================================================== */}
-
       <style>{`
         @keyframes fade-in-up {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-in-up {
-          animation: fade-in-up 0.8s ease-out forwards;
-        }
+        .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
 
         @keyframes pulse-slow {
           0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.6; }
           50% { transform: scale(1.1) rotate(5deg); opacity: 1; }
         }
-        .animate-pulse-slow {
-          animation: pulse-slow 8s ease-in-out infinite;
-        }
+        .animate-pulse-slow { animation: pulse-slow 8s ease-in-out infinite; }
 
         @keyframes pulse-slower {
           0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
           50% { transform: scale(1.08) rotate(-5deg); opacity: 0.9; }
         }
-        .animate-pulse-slower {
-          animation: pulse-slower 10s ease-in-out infinite;
-        }
+        .animate-pulse-slower { animation: pulse-slower 10s ease-in-out infinite; }
 
         @keyframes fade-in {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        .animate-fade-in {
-          animation: fade-in 0.8s ease-out forwards;
-        }
+        .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
       `}</style>
     </div>
   );
