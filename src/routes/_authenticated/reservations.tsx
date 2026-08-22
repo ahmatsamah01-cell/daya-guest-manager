@@ -733,76 +733,75 @@ function ReservationsPage() {
       </div>
 
       {vue === "planning" ? (
-         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden flex-1 min-h-[calc(100vh-300px)]">
-          <CardContent className="p-5 pb-0">
-            <div className="mb-4 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
-              <span className="flex items-center gap-1.5">
-                <span className="size-2.5 rounded-full bg-emerald-500" /> En cours
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2.5 rounded-full bg-amber-500" /> Réservée
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2.5 rounded-full bg-blue-500" /> Terminée
-              </span>
+  <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+    <CardContent className="p-5">
+      <div className="mb-4 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
+        <span className="flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full bg-emerald-500" /> En cours
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full bg-amber-500" /> Réservée
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full bg-blue-500" /> Terminée
+        </span>
+      </div>
+      <div className="overflow-x-auto">
+        <div style={{ minWidth: `${140 + joursPlanning.length * 70}px` }}>
+          <div
+            className="grid"
+            style={{ gridTemplateColumns: `140px repeat(${joursPlanning.length}, 70px)` }}
+          >
+            <div className="sticky left-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm p-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
+              Chambre
             </div>
-            <div className="overflow-x-auto">
-              <div style={{ minWidth: `${140 + joursPlanning.length * 70}px` }}>
-                <div
-                  className="grid"
-                  style={{ gridTemplateColumns: `140px repeat(${joursPlanning.length}, 70px)` }}
-                >
-                  <div className="sticky left-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm p-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
-                    Chambre
-                  </div>
-                  {joursPlanning.map((j) => (
-                    <div
-                      key={j}
-                      className="border-l border-slate-200/50 dark:border-slate-700/50 p-2 text-center text-xs text-slate-400 dark:text-slate-500"
-                    >
-                      {new Date(j).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}
-                    </div>
-                  ))}
-                </div>
-                {(chambres ?? []).map((c) => (
-                  <div
-                    key={c.id}
-                    className="grid border-t border-slate-200/50 dark:border-slate-700/50"
-                    style={{ gridTemplateColumns: `140px repeat(${joursPlanning.length}, 70px)` }}
-                  >
-                    <div className="sticky left-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm p-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {c.nom}
-                    </div>
-                    {joursPlanning.map((j) => {
-                      const r = reservationPourJour(c.id, j);
-                      return (
-                        <div key={j} className="border-l border-slate-200/50 dark:border-slate-700/50 p-1">
-                          {r ? (
-                            <div
-                              title={`${r.clients?.prenom ?? ""} ${r.clients?.nom ?? ""}`}
-                              className={`flex h-7 items-center justify-center truncate rounded-xl px-1 text-[10px] font-medium text-white shadow-sm ${couleurStatutPlanning(r.statut)}`}
-                            >
-                              {r.clients?.nom ?? ""}
-                            </div>
-                          ) : (
-                            <div className="h-7 rounded-xl bg-emerald-50/50 dark:bg-emerald-900/10" />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
-                {(chambres ?? []).length === 0 ? (
-                  <p className="py-8 text-center text-sm text-slate-400 dark:text-slate-500">
-                    Aucune chambre enregistrée.
-                  </p>
-                ) : null}
+            {joursPlanning.map((j) => (
+              <div
+                key={j}
+                className="border-l border-slate-200/50 dark:border-slate-700/50 p-2 text-center text-xs text-slate-400 dark:text-slate-500"
+              >
+                {new Date(j).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}
               </div>
+            ))}
+          </div>
+          {(chambres ?? []).map((c) => (
+            <div
+              key={c.id}
+              className="grid border-t border-slate-200/50 dark:border-slate-700/50"
+              style={{ gridTemplateColumns: `140px repeat(${joursPlanning.length}, 70px)` }}
+            >
+              <div className="sticky left-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm p-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                {c.nom}
+              </div>
+              {joursPlanning.map((j) => {
+                const r = reservationPourJour(c.id, j);
+                return (
+                  <div key={j} className="border-l border-slate-200/50 dark:border-slate-700/50 p-1">
+                    {r ? (
+                      <div
+                        title={`${r.clients?.prenom ?? ""} ${r.clients?.nom ?? ""}`}
+                        className={`flex h-7 items-center justify-center truncate rounded-xl px-1 text-[10px] font-medium text-white shadow-sm ${couleurStatutPlanning(r.statut)}`}
+                      >
+                        {r.clients?.nom ?? ""}
+                      </div>
+                    ) : (
+                      <div className="h-7 rounded-xl bg-emerald-50/50 dark:bg-emerald-900/10" />
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
+          ))}
+          {(chambres ?? []).length === 0 ? (
+            <p className="py-8 text-center text-sm text-slate-400 dark:text-slate-500">
+              Aucune chambre enregistrée.
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+) : null}
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative max-w-xs flex-1">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
