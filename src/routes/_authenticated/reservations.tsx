@@ -1144,4 +1144,293 @@ function ReservationsPage() {
               modifier.mutate();
             }}
           >
-        
+        <div className="space-y-2">
+              <Label className="text-slate-700 dark:text-slate-300">Client</Label>
+              <Select
+                value={editForm.client_id}
+                onValueChange={(v) => setEditForm({ ...editForm, client_id: v })}
+              >
+                <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                  <SelectValue placeholder="Client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(clients ?? []).map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.prenom} {c.nom}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 dark:text-slate-300">Chambre</Label>
+              <Select
+                value={editForm.chambre_id}
+                onValueChange={(v) => setEditForm({ ...editForm, chambre_id: v })}
+              >
+                <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                  <SelectValue placeholder="Chambre" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(chambres ?? []).map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.nom} — {formatFCFA(c.prix_nuit)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">Arrivée</Label>
+                <Input
+                  type="date"
+                  required
+                  value={editForm.date_arrivee}
+                  onChange={(e) => setEditForm({ ...editForm, date_arrivee: e.target.value })}
+                  className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">Départ</Label>
+                <Input
+                  type="date"
+                  required
+                  value={editForm.date_depart}
+                  onChange={(e) => setEditForm({ ...editForm, date_depart: e.target.value })}
+                  className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">Personnes</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={editForm.nb_personnes}
+                  onChange={(e) => setEditForm({ ...editForm, nb_personnes: e.target.value })}
+                  className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">Prix / nuit (FCFA)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={editForm.prix_nuit}
+                  onChange={(e) => setEditForm({ ...editForm, prix_nuit: e.target.value })}
+                  className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">Taxe / nuitée (FCFA)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={editForm.taxe_nuit}
+                  onChange={(e) => setEditForm({ ...editForm, taxe_nuit: e.target.value })}
+                  className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">Statut</Label>
+                <Select
+                  value={editForm.statut}
+                  onValueChange={(v) => setEditForm({ ...editForm, statut: v })}
+                >
+                  <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(STATUTS).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>
+                        {v.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 dark:text-slate-300">Notes</Label>
+              <Input
+                value={editForm.notes}
+                onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+              />
+            </div>
+            {conflitEdition ? (
+              <div className="rounded-xl border border-red-200/50 bg-red-50/80 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
+                ⚠️ Chambre déjà réservée du {formatDate(conflitEdition.date_arrivee)} au{" "}
+                {formatDate(conflitEdition.date_depart)} pour{" "}
+                {conflitEdition.clients?.prenom} {conflitEdition.clients?.nom}.
+              </div>
+            ) : null}
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={modifier.isPending || !!conflitEdition}
+                className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
+              >
+                Enregistrer les modifications
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!facturerResa} onOpenChange={(o) => !o && setFacturerResa(null)}>
+        <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Check-out & facturation
+            </DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!facturerResa) return;
+              cloturer.mutate({
+                r: facturerResa,
+                avance: Number(facturerForm.avance) || 0,
+                buanderie: Number(facturerForm.buanderie) || 0,
+                remiseType: facturerForm.remiseType,
+                remiseValeur: Number(facturerForm.remiseValeur) || 0,
+              });
+            }}
+          >
+            <div className="rounded-xl bg-slate-50/80 dark:bg-slate-700/50 p-4 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50">
+              <p className="font-medium text-slate-900 dark:text-white">
+                {facturerResa?.clients?.prenom} {facturerResa?.clients?.nom}
+              </p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {facturerResa?.chambres?.nom} — {formatDate(facturerResa?.date_arrivee || "")} →{" "}
+                {formatDate(facturerResa?.date_depart || "")}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-700 dark:text-slate-300">
+                Service buanderie (FCFA) — laisser vide si aucun
+              </Label>
+              <Input
+                type="number"
+                min="0"
+                value={facturerForm.buanderie}
+                onChange={(e) => setFacturerForm({ ...facturerForm, buanderie: e.target.value })}
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">Type de remise</Label>
+                <Select
+                  value={facturerForm.remiseType}
+                  onValueChange={(v) => setFacturerForm({ ...facturerForm, remiseType: v })}
+                >
+                  <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="montant">Montant fixe (FCFA)</SelectItem>
+                    <SelectItem value="pourcentage">Pourcentage (%)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">
+                  Valeur de la remise — laisser vide si aucune
+                </Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={facturerForm.remiseValeur}
+                  onChange={(e) =>
+                    setFacturerForm({ ...facturerForm, remiseValeur: e.target.value })
+                  }
+                  className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-700 dark:text-slate-300">
+                Avance déjà versée (FCFA) — laisser vide si aucune
+              </Label>
+              <Input
+                type="number"
+                min="0"
+                value={facturerForm.avance}
+                onChange={(e) => setFacturerForm({ ...facturerForm, avance: e.target.value })}
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={cloturer.isPending}
+                className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
+              >
+                Clôturer et générer la facture
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!prolongerResa} onOpenChange={(o) => !o && setProlongerResa(null)}>
+        <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Prolonger le séjour
+            </DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              prolonger.mutate();
+            }}
+          >
+            <div className="rounded-xl bg-slate-50/80 dark:bg-slate-700/50 p-4 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50">
+              <p className="font-medium text-slate-900 dark:text-white">
+                {prolongerResa?.clients?.prenom} {prolongerResa?.clients?.nom}
+              </p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {prolongerResa?.chambres?.nom}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 dark:text-slate-300">Date de départ actuelle</Label>
+              <p className="text-sm font-medium text-slate-900 dark:text-white">
+                {prolongerResa ? formatDate(prolongerResa.date_depart) : ""}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700 dark:text-slate-300">Nouvelle date de départ</Label>
+              <Input
+                type="date"
+                required
+                min={prolongerResa?.date_depart}
+                value={nouvelleDatePeriode}
+                onChange={(e) => setNouvelleDatePeriode(e.target.value)}
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={prolonger.isPending}
+                className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
+              >
+                Prolonger le séjour
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
