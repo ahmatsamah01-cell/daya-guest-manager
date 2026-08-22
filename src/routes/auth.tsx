@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,37 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+// ============================================================
+// FONCTIONS D'AIDE
+// ============================================================
+
+// Récupérer l'IP du client
+async function getClientIP(): Promise<string> {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch {
+    return '0.0.0.0';
+  }
+}
+
+// Journaliser une connexion
+async function logConnexion(userId: string, email: string, ip: string) {
+  try {
+    await supabase
+      .from("connexions_log")
+      .insert({
+        user_id: userId,
+        email: email,
+        ip_address: ip,
+        user_agent: navigator.userAgent,
+      });
+  } catch (error) {
+    console.error("Erreur de journalisation:", error);
+  }
+}
+
 function AuthPage() {
   const navigate = useNavigate();
 
@@ -56,11 +88,63 @@ function AuthPage() {
   });
 
   // ============================================================
+  // STATISTIQUES RÉELLES
+  // ============================================================
+
+  const { data: statsReels } = useQuery({
+    queryKey: ["auth-stats"],
+    queryFn: async () => {
+      const { count: reservations, error: e1 } = await supabase
+        .from("reservations")
+        .select("*", { count: "exact", head: true });
+
+      const { count: chambres, error: e2 } = await supabase
+        .from("chambres")
+        .select("*", { count: "exact", head: true });
+
+      const aujourdhui = new Date().toISOString().split("T")[0];
+      const { count: enCours, error: e3 } = await supabase
+        .from("reservations")
+        .select("*", { count: "exact", head: true })
+        .eq("statut", "en_cours");
+
+      const occupation = chambres ? Math.round((enCours || 0) / chambres * 100) : 0;
+
+      return {
+        reservations: reservations || 0,
+        chambres: chambres || 0,
+        occupation: isNaN(occupation) ? 0 : occupation,
+      };
+    },
+    staleTime: 5 * 60 * 1000,
+    enabled: true,
+  });
+
+  // ============================================================
+  // DERNIÈRES CONNEXIONS
+  // ============================================================
+
+  const { data: dernieresConnexions } = useQuery({
+    queryKey: ["auth-connexions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("connexions_log")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (error) return [];
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+    enabled: true,
+  });
+
+  // ============================================================
   // VÉRIFICATION DE LA BIOMÉTRIE (uniquement desktop)
   // ============================================================
   useEffect(() => {
     const checkBiometric = async () => {
-      // Vérifier si c'est un appareil mobile
       const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent);
       if (isMobile) {
         setBiometricSupported(false);
@@ -149,10 +233,17 @@ function AuthPage() {
         return;
       }
 
+      // JOURNALISATION DE LA CONNEXION
+      if (data.user) {
+        const ip = await getClientIP();
+        await logConnexion(data.user.id, email, ip);
+      }
+
       setLoginAttempts(0);
       if (rememberMe) {
         localStorage.setItem("daya-remember-email", email);
       }
+      
       navigate({ to: "/dashboard" });
       toast.success("Bienvenue ! Connexion réussie.");
 
@@ -318,7 +409,7 @@ function AuthPage() {
 
           <div className="w-full max-w-md mx-auto lg:mx-0">
 
-            {/* Logo - avec fond qui remplit la carte */}
+            {/* Logo */}
             <div className="mb-8 flex justify-center lg:justify-start">
               <div className="relative w-full max-w-[280px] bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/70 dark:border-slate-700/70 rounded-3xl shadow-lg overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:border-red-200 dark:hover:border-red-900 hover:shadow-[0_20px_45px_-10px_rgba(220,38,38,0.15)]">
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-slate-600/60 to-transparent" />
@@ -326,7 +417,7 @@ function AuthPage() {
               </div>
             </div>
 
-            {/* Carte de connexion - avec "Accès Manager" centré */}
+            {/* Carte de connexion */}
             <div className="relative p-7 sm:p-8 bg-white/70 dark:bg-slate-800/70 backdrop-blur-2xl border border-white/70 dark:border-slate-700/70 rounded-3xl shadow-[0_20px_60px_-20px_rgba(15,23,42,0.12)] dark:shadow-[0_20px_60px_-20px_rgba(0,0,0,0.4)] transition-all duration-500 hover:border-red-200/80 dark:hover:border-red-900/80 hover:shadow-[0_25px_70px_-20px_rgba(220,38,38,0.12)]">
 
               {/* Reflet supérieur */}
@@ -539,42 +630,57 @@ function AuthPage() {
                 de gestion hôtelière : réservations, chambres, facturation et bien plus encore.
               </p>
 
-              {/* Statistiques */}
+              {/* Statistiques - avec données réelles */}
               <div className="grid grid-cols-3 gap-3 mt-6 pt-5 border-t border-slate-200/50 dark:border-slate-700/50">
                 <div className="text-center">
                   <p className="text-xs text-slate-400 dark:text-slate-500">Réservations</p>
-                  <p className="text-lg font-bold text-slate-900 dark:text-white">142</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white">
+                    {statsReels?.reservations || 0}
+                  </p>
                 </div>
                 <div className="text-center">
                   <p className="text-xs text-slate-400 dark:text-slate-500">Chambres</p>
-                  <p className="text-lg font-bold text-slate-900 dark:text-white">12</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white">
+                    {statsReels?.chambres || 0}
+                  </p>
                 </div>
                 <div className="text-center">
                   <p className="text-xs text-slate-400 dark:text-slate-500">Occupation</p>
-                  <p className="text-lg font-bold text-emerald-500">62%</p>
+                  <p className="text-lg font-bold text-emerald-500">
+                    {statsReels?.occupation || 0}%
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Connexions récentes */}
+            {/* Connexions récentes - avec données réelles */}
             <div className="p-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 rounded-3xl">
               <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                 <Users className="size-4 text-red-500" />
                 Dernières connexions
               </h4>
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600 dark:text-slate-400">Administrateur</span>
-                  <span className="text-xs text-slate-400 dark:text-slate-500">Aujourd'hui, 14:30</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600 dark:text-slate-400">Manager</span>
-                  <span className="text-xs text-slate-400 dark:text-slate-500">Hier, 09:15</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600 dark:text-slate-400">Réceptionniste</span>
-                  <span className="text-xs text-slate-400 dark:text-slate-500">22/08/2026, 18:00</span>
-                </div>
+                {(dernieresConnexions || []).length > 0 ? (
+                  dernieresConnexions?.map((log) => (
+                    <div key={log.id} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600 dark:text-slate-400 truncate max-w-[120px]">
+                        {log.email}
+                      </span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
+                        {new Date(log.created_at).toLocaleString('fr-FR', {
+                          day: '2-digit',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-slate-400 dark:text-slate-500 text-center py-2">
+                    Aucune connexion récente
+                  </div>
+                )}
               </div>
             </div>
 
