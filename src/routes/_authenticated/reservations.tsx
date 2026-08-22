@@ -734,7 +734,7 @@ function ReservationsPage() {
 
       {vue === "planning" ? (
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
-          <CardContent className="p-5">
+          <CardContent className="p-5 pb-0">
             <div className="mb-4 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
               <span className="flex items-center gap-1.5">
                 <span className="size-2.5 rounded-full bg-emerald-500" /> En cours
