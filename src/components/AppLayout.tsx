@@ -194,11 +194,11 @@ function SidebarContent({
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 dark:via-white/20 to-transparent pointer-events-none" />
 
       {/* ═══════════════════════════════════════ */}
-      {/* EN-TÊTE "THE DAYA" */}
+      {/* EN-TÊTE "THE DAYA" AVEC LOGO OFFICIEL */}
       {/* ═══════════════════════════════════════ */}
       <div className="flex items-center gap-3 px-5 pt-8 pb-4 border-b border-slate-200/60 dark:border-slate-700/50">
-        <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-          D
+        <div className="h-10 w-10 rounded-2xl bg-white shadow-lg shadow-slate-200/50 dark:shadow-slate-700/50 flex items-center justify-center flex-shrink-0 overflow-hidden p-1">
+          <BrandLogo className="h-full w-full object-contain" />
         </div>
 
         <div className="flex flex-col leading-tight">
