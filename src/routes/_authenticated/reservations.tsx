@@ -801,334 +801,334 @@ function ReservationsPage() {
       </div>
     </CardContent>
   </Card>
-) : null}
-   ) :(
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative max-w-xs flex-1">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              <Input
-                placeholder="Rechercher client ou chambre…"
-                value={recherche}
-                onChange={(e) => setRecherche(e.target.value)}
-                className="pl-9 rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
-              />
-            </div>
-            <Select value={filtreStatut} onValueChange={setFiltreStatut}>
-              <SelectTrigger className="w-[160px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
-                <SelectValue placeholder="Statut" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tous">Tous les statuts</SelectItem>
-                {Object.entries(STATUTS).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>
-                    {v.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="ml-auto flex rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-1 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
-              <Button
-                variant={sousVueListe === "tableau" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSousVueListe("tableau")}
-                className={sousVueListe === "tableau" ? "bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl" : "rounded-xl"}
-              >
-                <Rows3 className="size-4" />
-              </Button>
-              <Button
-                variant={sousVueListe === "cartes" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSousVueListe("cartes")}
-                className={sousVueListe === "cartes" ? "bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl" : "rounded-xl"}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
-          </div>
+) : (
+  <>
+    <div className="flex flex-wrap items-center gap-3">
+      <div className="relative max-w-xs flex-1">
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+        <Input
+          placeholder="Rechercher client ou chambre…"
+          value={recherche}
+          onChange={(e) => setRecherche(e.target.value)}
+          className="pl-9 rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+        />
+      </div>
+      <Select value={filtreStatut} onValueChange={setFiltreStatut}>
+        <SelectTrigger className="w-[160px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+          <SelectValue placeholder="Statut" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="tous">Tous les statuts</SelectItem>
+          {Object.entries(STATUTS).map(([k, v]) => (
+            <SelectItem key={k} value={k}>
+              {v.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <div className="ml-auto flex rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-1 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+        <Button
+          variant={sousVueListe === "tableau" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setSousVueListe("tableau")}
+          className={sousVueListe === "tableau" ? "bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl" : "rounded-xl"}
+        >
+          <Rows3 className="size-4" />
+        </Button>
+        <Button
+          variant={sousVueListe === "cartes" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setSousVueListe("cartes")}
+          className={sousVueListe === "cartes" ? "bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl" : "rounded-xl"}
+        >
+          <LayoutGrid className="size-4" />
+        </Button>
+      </div>
+    </div>
 
-          {sousVueListe === "cartes" ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    {sousVueListe === "cartes" ? (
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {reservationsFiltrees.map((r) => {
+          const n = nbNuits(r.date_arrivee, r.date_depart);
+          return (
+            <Card
+              key={r.id}
+              className="group overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-lg"
+            >
+              <CardContent className="space-y-3.5 p-5">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-display text-lg font-bold text-slate-900 dark:text-white">
+                      {r.clients?.prenom} {r.clients?.nom}
+                    </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {r.chambres?.nom}
+                    </p>
+                  </div>
+                  <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${STATUTS[r.statut]?.badge || STATUTS.reservee.badge}`}>
+                    {STATUTS[r.statut]?.label || r.statut}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                  <CalendarDays className="size-4" />
+                  {formatDate(r.date_arrivee)} → {formatDate(r.date_depart)}
+                  <span className="text-xs">({n} nuit(s))</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Users className="size-4 text-slate-400 dark:text-slate-500" />
+                  <span className="text-slate-600 dark:text-slate-300">{r.nb_personnes} pers.</span>
+                </div>
+                <p className="text-lg font-bold text-red-500">
+                  {formatFCFA(n * Number(r.prix_nuit) + n * Number(r.taxe_nuit))}
+                </p>
+                <div className="flex flex-wrap gap-2 border-t border-slate-100 dark:border-slate-700/50 pt-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                    onClick={() => {
+                      setEditId(r.id);
+                      setEditForm({
+                        client_id: r.client_id,
+                        chambre_id: r.chambre_id,
+                        date_arrivee: r.date_arrivee,
+                        date_depart: r.date_depart,
+                        nb_personnes: String(r.nb_personnes),
+                        prix_nuit: String(r.prix_nuit),
+                        taxe_nuit: String(r.taxe_nuit),
+                        statut: r.statut,
+                        notes: r.notes ?? "",
+                      });
+                    }}
+                  >
+                    Modifier
+                  </Button>
+                  {r.statut === "reservee" ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-500 dark:hover:text-emerald-400"
+                        onClick={() =>
+                          changerStatut.mutate({ id: r.id, statut: "en_cours" })
+                        }
+                      >
+                        <CheckCircle className="size-3.5 mr-1" /> Check-in
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400"
+                        onClick={() =>
+                          changerStatut.mutate({ id: r.id, statut: "annulee" })
+                        }
+                      >
+                        <XCircle className="size-3.5 mr-1" /> Annuler
+                      </Button>
+                    </>
+                  ) : null}
+                  {r.statut === "en_cours" ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 dark:hover:text-blue-400"
+                        onClick={() => {
+                          setProlongerResa(r);
+                          setNouvelleDatePeriode(r.date_depart);
+                        }}
+                      >
+                        <CalendarPlus className="size-3.5 mr-1" /> Prolonger
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-xl"
+                        onClick={() => {
+                          setFacturerResa(r);
+                          setFacturerForm({
+                            avance: "",
+                            buanderie: "",
+                            remiseType: "montant",
+                            remiseValeur: "",
+                          });
+                        }}
+                      >
+                        Check-out & facturer
+                      </Button>
+                    </>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+        {reservationsFiltrees.length === 0 ? (
+          <p className="col-span-full py-16 text-center text-sm text-slate-400 dark:text-slate-500">
+            Aucune réservation trouvée.
+          </p>
+        ) : null}
+      </div>
+    ) : (
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+        <CardContent className="overflow-x-auto p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-slate-100 dark:border-slate-700/50">
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Client
+                </TableHead>
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Chambre
+                </TableHead>
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Séjour
+                </TableHead>
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Personnes
+                </TableHead>
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Montant
+                </TableHead>
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Statut
+                </TableHead>
+                <TableHead className="text-right text-slate-600 dark:text-slate-300 font-semibold">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {reservationsFiltrees.map((r) => {
                 const n = nbNuits(r.date_arrivee, r.date_depart);
                 return (
-                  <Card
+                  <TableRow
                     key={r.id}
-                    className="group overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-lg"
+                    className="border-b border-slate-100/50 dark:border-slate-700/30 hover:bg-slate-50/50 dark:hover:bg-slate-700/20"
                   >
-                    <CardContent className="space-y-3.5 p-5">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="font-display text-lg font-bold text-slate-900 dark:text-white">
-                            {r.clients?.prenom} {r.clients?.nom}
-                          </p>
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {r.chambres?.nom}
-                          </p>
-                        </div>
-                        <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${STATUTS[r.statut]?.badge || STATUTS.reservee.badge}`}>
-                          {STATUTS[r.statut]?.label || r.statut}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                        <CalendarDays className="size-4" />
-                        {formatDate(r.date_arrivee)} → {formatDate(r.date_depart)}
-                        <span className="text-xs">({n} nuit(s))</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Users className="size-4 text-slate-400 dark:text-slate-500" />
-                        <span className="text-slate-600 dark:text-slate-300">{r.nb_personnes} pers.</span>
-                      </div>
-                      <p className="text-lg font-bold text-red-500">
-                        {formatFCFA(n * Number(r.prix_nuit) + n * Number(r.taxe_nuit))}
-                      </p>
-                      <div className="flex flex-wrap gap-2 border-t border-slate-100 dark:border-slate-700/50 pt-3">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
-                          onClick={() => {
-                            setEditId(r.id);
-                            setEditForm({
-                              client_id: r.client_id,
-                              chambre_id: r.chambre_id,
-                              date_arrivee: r.date_arrivee,
-                              date_depart: r.date_depart,
-                              nb_personnes: String(r.nb_personnes),
-                              prix_nuit: String(r.prix_nuit),
-                              taxe_nuit: String(r.taxe_nuit),
-                              statut: r.statut,
-                              notes: r.notes ?? "",
-                            });
-                          }}
-                        >
-                          Modifier
-                        </Button>
-                        {r.statut === "reservee" ? (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-500 dark:hover:text-emerald-400"
-                              onClick={() =>
-                                changerStatut.mutate({ id: r.id, statut: "en_cours" })
-                              }
-                            >
-                              <CheckCircle className="size-3.5 mr-1" /> Check-in
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400"
-                              onClick={() =>
-                                changerStatut.mutate({ id: r.id, statut: "annulee" })
-                              }
-                            >
-                              <XCircle className="size-3.5 mr-1" /> Annuler
-                            </Button>
-                          </>
-                        ) : null}
-                        {r.statut === "en_cours" ? (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 dark:hover:text-blue-400"
-                              onClick={() => {
-                                setProlongerResa(r);
-                                setNouvelleDatePeriode(r.date_depart);
-                              }}
-                            >
-                              <CalendarPlus className="size-3.5 mr-1" /> Prolonger
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-xl"
-                              onClick={() => {
-                                setFacturerResa(r);
-                                setFacturerForm({
-                                  avance: "",
-                                  buanderie: "",
-                                  remiseType: "montant",
-                                  remiseValeur: "",
-                                });
-                              }}
-                            >
-                              Check-out & facturer
-                            </Button>
-                          </>
-                        ) : null}
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <TableCell className="font-medium text-slate-900 dark:text-white">
+                      {r.clients?.prenom} {r.clients?.nom}
+                    </TableCell>
+                    <TableCell className="text-slate-600 dark:text-slate-300">
+                      {r.chambres?.nom}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-slate-600 dark:text-slate-300">
+                      {formatDate(r.date_arrivee)} → {formatDate(r.date_depart)}
+                      <span className="block text-xs text-slate-400 dark:text-slate-500">
+                        {n} nuit(s)
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-slate-600 dark:text-slate-300">
+                      {r.nb_personnes}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap font-medium text-slate-900 dark:text-white">
+                      {formatFCFA(n * Number(r.prix_nuit) + n * Number(r.taxe_nuit))}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                          STATUTS[r.statut]?.badge || STATUTS.reservee.badge
+                        }`}
+                      >
+                        {STATUTS[r.statut]?.label || r.statut}
+                      </span>
+                    </TableCell>
+                    <TableCell className="space-x-1.5 text-right whitespace-nowrap">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                        onClick={() => {
+                          setEditId(r.id);
+                          setEditForm({
+                            client_id: r.client_id,
+                            chambre_id: r.chambre_id,
+                            date_arrivee: r.date_arrivee,
+                            date_depart: r.date_depart,
+                            nb_personnes: String(r.nb_personnes),
+                            prix_nuit: String(r.prix_nuit),
+                            taxe_nuit: String(r.taxe_nuit),
+                            statut: r.statut,
+                            notes: r.notes ?? "",
+                          });
+                        }}
+                      >
+                        Modifier
+                      </Button>
+                      {r.statut === "reservee" ? (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-500 dark:hover:text-emerald-400"
+                            onClick={() =>
+                              changerStatut.mutate({ id: r.id, statut: "en_cours" })
+                            }
+                          >
+                            <CheckCircle className="size-3.5 mr-1" /> Check-in
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400"
+                            onClick={() =>
+                              changerStatut.mutate({ id: r.id, statut: "annulee" })
+                            }
+                          >
+                            <XCircle className="size-3.5 mr-1" /> Annuler
+                          </Button>
+                        </>
+                      ) : null}
+                      {r.statut === "en_cours" ? (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 dark:hover:text-blue-400"
+                            onClick={() => {
+                              setProlongerResa(r);
+                              setNouvelleDatePeriode(r.date_depart);
+                            }}
+                          >
+                            <CalendarPlus className="size-3.5 mr-1" /> Prolonger
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-xl"
+                            onClick={() => {
+                              setFacturerResa(r);
+                              setFacturerForm({
+                                avance: "",
+                                buanderie: "",
+                                remiseType: "montant",
+                                remiseValeur: "",
+                              });
+                            }}
+                          >
+                            Check-out & facturer
+                          </Button>
+                        </>
+                      ) : null}
+                    </TableCell>
+                  </TableRow>
                 );
               })}
               {reservationsFiltrees.length === 0 ? (
-                <p className="col-span-full py-16 text-center text-sm text-slate-400 dark:text-slate-500">
-                  Aucune réservation trouvée.
-                </p>
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="py-8 text-center text-slate-400 dark:text-slate-500"
+                  >
+                    Aucune réservation trouvée.
+                  </TableCell>
+                </TableRow>
               ) : null}
-            </div>
-          ) : (
-            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
-              <CardContent className="overflow-x-auto p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-b border-slate-100 dark:border-slate-700/50">
-                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
-                        Client
-                      </TableHead>
-                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
-                        Chambre
-                      </TableHead>
-                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
-                        Séjour
-                      </TableHead>
-                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
-                        Personnes
-                      </TableHead>
-                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
-                        Montant
-                      </TableHead>
-                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
-                        Statut
-                      </TableHead>
-                      <TableHead className="text-right text-slate-600 dark:text-slate-300 font-semibold">
-                        Actions
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {reservationsFiltrees.map((r) => {
-                      const n = nbNuits(r.date_arrivee, r.date_depart);
-                      return (
-                        <TableRow
-                          key={r.id}
-                          className="border-b border-slate-100/50 dark:border-slate-700/30 hover:bg-slate-50/50 dark:hover:bg-slate-700/20"
-                        >
-                          <TableCell className="font-medium text-slate-900 dark:text-white">
-                            {r.clients?.prenom} {r.clients?.nom}
-                          </TableCell>
-                          <TableCell className="text-slate-600 dark:text-slate-300">
-                            {r.chambres?.nom}
-                          </TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600 dark:text-slate-300">
-                            {formatDate(r.date_arrivee)} → {formatDate(r.date_depart)}
-                            <span className="block text-xs text-slate-400 dark:text-slate-500">
-                              {n} nuit(s)
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-slate-600 dark:text-slate-300">
-                            {r.nb_personnes}
-                          </TableCell>
-                          <TableCell className="whitespace-nowrap font-medium text-slate-900 dark:text-white">
-                            {formatFCFA(n * Number(r.prix_nuit) + n * Number(r.taxe_nuit))}
-                          </TableCell>
-                          <TableCell>
-                            <span
-                              className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
-                                STATUTS[r.statut]?.badge || STATUTS.reservee.badge
-                              }`}
-                            >
-                              {STATUTS[r.statut]?.label || r.statut}
-                            </span>
-                          </TableCell>
-                          <TableCell className="space-x-1.5 text-right whitespace-nowrap">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
-                              onClick={() => {
-                                setEditId(r.id);
-                                setEditForm({
-                                  client_id: r.client_id,
-                                  chambre_id: r.chambre_id,
-                                  date_arrivee: r.date_arrivee,
-                                  date_depart: r.date_depart,
-                                  nb_personnes: String(r.nb_personnes),
-                                  prix_nuit: String(r.prix_nuit),
-                                  taxe_nuit: String(r.taxe_nuit),
-                                  statut: r.statut,
-                                  notes: r.notes ?? "",
-                                });
-                              }}
-                            >
-                              Modifier
-                            </Button>
-                            {r.statut === "reservee" ? (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-500 dark:hover:text-emerald-400"
-                                  onClick={() =>
-                                    changerStatut.mutate({ id: r.id, statut: "en_cours" })
-                                  }
-                                >
-                                  <CheckCircle className="size-3.5 mr-1" /> Check-in
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400"
-                                  onClick={() =>
-                                    changerStatut.mutate({ id: r.id, statut: "annulee" })
-                                  }
-                                >
-                                  <XCircle className="size-3.5 mr-1" /> Annuler
-                                </Button>
-                              </>
-                            ) : null}
-                            {r.statut === "en_cours" ? (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 dark:hover:text-blue-400"
-                                  onClick={() => {
-                                    setProlongerResa(r);
-                                    setNouvelleDatePeriode(r.date_depart);
-                                  }}
-                                >
-                                  <CalendarPlus className="size-3.5 mr-1" /> Prolonger
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-xl"
-                                  onClick={() => {
-                                    setFacturerResa(r);
-                                    setFacturerForm({
-                                      avance: "",
-                                      buanderie: "",
-                                      remiseType: "montant",
-                                      remiseValeur: "",
-                                    });
-                                  }}
-                                >
-                                  Check-out & facturer
-                                </Button>
-                              </>
-                            ) : null}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    {reservationsFiltrees.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={7}
-                          className="py-8 text-center text-slate-400 dark:text-slate-500"
-                        >
-                          Aucune réservation trouvée.
-                        </TableCell>
-                      </TableRow>
-                    ) : null}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    )}
+  </>
+)}
 
       <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
         <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
