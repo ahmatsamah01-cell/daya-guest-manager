@@ -21,6 +21,7 @@ import {
   IdCard,
   Globe,
   MapPin,
+  CalendarDays, 
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
