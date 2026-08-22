@@ -21,10 +21,6 @@ import {
   Plus,
   Eye,
   X,
-  Sparkles,
-  Hotel,
-  Clock,
-  CheckCircle,
   FileText,
   BarChart3,
   Settings,
@@ -71,7 +67,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 // ============================================================
-// COMPOSANT STAT CARD - HARMONISÉ AVEC LE RESTE
+// COMPOSANT STAT CARD - AVEC COULEURS VARIÉES
 // ============================================================
 function StatCard({
   titre,
@@ -80,6 +76,7 @@ function StatCard({
   icon: Icon,
   to,
   variation,
+  couleur,
 }: {
   titre: string;
   valeur: string;
@@ -87,11 +84,18 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
   to?: string;
   variation?: { texte: string; hausse: boolean } | null;
+  couleur: {
+    from: string;
+    to: string;
+    shadow: string;
+  };
 }) {
   const contenu = (
     <Card className="group h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 backdrop-blur-xl border border-white/30 shadow-lg rounded-3xl overflow-hidden">
       <CardContent className="flex h-full items-start gap-4 p-5">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25 transition-transform group-hover:scale-110">
+        <div
+          className={`flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${couleur.from} ${couleur.to} shadow-lg ${couleur.shadow} transition-transform group-hover:scale-110`}
+        >
           <Icon className="size-5 text-white" />
         </div>
         <div className="min-w-0 flex-1">
@@ -546,6 +550,37 @@ function Dashboard() {
   };
 
   // ============================================================
+  // COULEURS DES STAT CARDS - CHAQUE ICÔNE A SA COULEUR
+  // ============================================================
+  const couleursStatCards = [
+    {
+      from: "from-emerald-500",
+      to: "to-emerald-600",
+      shadow: "shadow-emerald-500/25",
+    },
+    {
+      from: "from-amber-500",
+      to: "to-amber-600",
+      shadow: "shadow-amber-500/25",
+    },
+    {
+      from: "from-blue-500",
+      to: "to-blue-600",
+      shadow: "shadow-blue-500/25",
+    },
+    {
+      from: "from-red-500",
+      to: "to-red-600",
+      shadow: "shadow-red-500/25",
+    },
+    {
+      from: "from-purple-500",
+      to: "to-purple-600",
+      shadow: "shadow-purple-500/25",
+    },
+  ];
+
+  // ============================================================
   // RENDU
   // ============================================================
   return (
@@ -582,7 +617,7 @@ function Dashboard() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════
-          KPI CARDS - TOUTES AVEC LE MÊME STYLE ROUGE
+          KPI CARDS - AVEC COULEURS VARIÉES
           ═══════════════════════════════════════════════════════ */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
@@ -592,6 +627,7 @@ function Dashboard() {
           icon={BedDouble}
           to="/chambres"
           variation={varOccupation}
+          couleur={couleursStatCards[0]}
         />
         <StatCard
           titre="Arrivées"
@@ -600,6 +636,7 @@ function Dashboard() {
           icon={ArrowDown}
           to="/reservations"
           variation={varArrivees}
+          couleur={couleursStatCards[1]}
         />
         <StatCard
           titre="Départs"
@@ -608,6 +645,7 @@ function Dashboard() {
           icon={ArrowUp}
           to="/reservations"
           variation={varDeparts}
+          couleur={couleursStatCards[2]}
         />
         <StatCard
           titre="CA du mois"
@@ -616,6 +654,7 @@ function Dashboard() {
           icon={Wallet}
           to="/caisse"
           variation={varCA}
+          couleur={couleursStatCards[3]}
         />
         <StatCard
           titre="En cours"
@@ -624,19 +663,25 @@ function Dashboard() {
           icon={Users}
           to="/reservations"
           variation={varEnCours}
+          couleur={couleursStatCards[4]}
         />
       </div>
 
       {/* ═══════════════════════════════════════════════════════
-          GRAPHIQUE CA + NUITS VENDUES
+          GRAPHIQUE CA + NUITS VENDUES - MÊME STYLE QUE LES STAT CARDS
           ═══════════════════════════════════════════════════════ */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Évolution CA */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
-              Évolution du CA
-            </CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25">
+                <Wallet className="size-4 text-white" />
+              </div>
+              <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                Évolution du CA
+              </CardTitle>
+            </div>
             <Select
               value={evolutionVue}
               onValueChange={(v) => setEvolutionVue(v as "mois" | "annee")}
@@ -713,9 +758,14 @@ function Dashboard() {
         {/* Nuits vendues */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
-              Nuits vendues
-            </CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25">
+                <BedDouble className="size-4 text-white" />
+              </div>
+              <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                Nuits vendues
+              </CardTitle>
+            </div>
             <Select value={rapportPeriode} onValueChange={setRapportPeriode}>
               <SelectTrigger className="w-[140px] bg-white/50 dark:bg-slate-700/50 border-white/30 dark:border-slate-600/50 rounded-xl text-xs dark:text-slate-300">
                 <SelectValue />
@@ -814,7 +864,7 @@ function Dashboard() {
             <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
               État des chambres
             </CardTitle>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
               <BedDouble className="size-4" />
             </div>
           </CardHeader>
@@ -893,7 +943,7 @@ function Dashboard() {
             <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
               Activité récente
             </CardTitle>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
               <Users className="size-4" />
             </div>
           </CardHeader>
@@ -933,7 +983,7 @@ function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Actions rapides - AVEC ICÔNES COLORÉES */}
+        {/* Actions rapides */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
