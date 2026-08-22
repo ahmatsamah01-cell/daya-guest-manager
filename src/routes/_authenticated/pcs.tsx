@@ -2,7 +2,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, TrendingUp, TrendingDown, Wallet, FileText, Search, Filter, X, Eye, Download } from "lucide-react";
+import {
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  FileText,
+  Search,
+  Filter,
+  X,
+  Eye,
+  Download,
+  CalendarDays,
+  Users,
+  Tag,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +38,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
 import { DocumentHeader } from "@/components/Brand";
 import { formatFCFA, formatDate, today } from "@/lib/format";
@@ -51,14 +72,13 @@ function PcsPage() {
   const { data: etab } = useEtablissement();
   const [open, setOpen] = useState(false);
   const [recu, setRecu] = useState<string | null>(null);
-  
-  // États pour les filtres
+
   const [recherche, setRecherche] = useState("");
   const [typeFiltre, setTypeFiltre] = useState<string>("toutes");
   const [periodeFiltre, setPeriodeFiltre] = useState<string>("mois-en-cours");
   const [pageActuelle, setPageActuelle] = useState(1);
   const [limitePage, setLimitePage] = useState(10);
-  
+
   const [form, setForm] = useState({
     type_piece: "sortie",
     date_piece: today(),
@@ -80,9 +100,7 @@ function PcsPage() {
     },
   });
 
-  // Filtrage des pièces
   const piecesFiltrees = (pieces ?? []).filter((p) => {
-    // Filtre par recherche
     if (recherche) {
       const terme = recherche.toLowerCase();
       const correspondRecherche =
@@ -92,15 +110,13 @@ function PcsPage() {
       if (!correspondRecherche) return false;
     }
 
-    // Filtre par type
     if (typeFiltre !== "toutes" && p.type_piece !== typeFiltre) {
       return false;
     }
 
-    // Filtre par période
     const datePiece = new Date(p.date_piece);
     const maintenant = new Date();
-    
+
     if (periodeFiltre === "aujourd'hui") {
       const aujourdhui = new Date();
       aujourdhui.setHours(0, 0, 0, 0);
@@ -126,14 +142,12 @@ function PcsPage() {
     return true;
   });
 
-  // Pagination
   const totalPages = Math.ceil(piecesFiltrees.length / limitePage);
   const piecesPage = piecesFiltrees.slice(
     (pageActuelle - 1) * limitePage,
     pageActuelle * limitePage
   );
 
-  // Calcul des statistiques
   const totalEntrees = piecesFiltrees
     .filter((p) => p.type_piece === "entree")
     .reduce((sum, p) => sum + Number(p.montant), 0);
@@ -150,7 +164,9 @@ function PcsPage() {
         .from("pieces_caisse")
         .select("id", { count: "exact", head: true });
       const prefixe = form.type_piece === "entree" ? "PCE" : "PCS";
-      const numero = `${prefixe}-${new Date().getFullYear()}-${String((count ?? 0) + 1).padStart(4, "0")}`;
+      const numero = `${prefixe}-${new Date().getFullYear()}-${String(
+        (count ?? 0) + 1
+      ).padStart(4, "0")}`;
 
       const { data: op, error: eOp } = await supabase
         .from("caisse_operations")
@@ -199,471 +215,550 @@ function PcsPage() {
 
   const pieceRecu = (pieces ?? []).find((p) => p.id === recu);
 
-  // Réinitialiser la pagination quand les filtres changent
-  useState(() => {
-    setPageActuelle(1);
-  }, [recherche, typeFiltre, periodeFiltre, limitePage]);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 animate-gradient-bg">
-      <div className="relative max-w-7xl mx-auto px-4 py-8">
-        <PageHeader
-          title="Pièces de caisse (PCS)"
-          description="Justificatifs numérotés des mouvements d'espèces"
-          action={
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                  <Plus className="size-4 mr-2" /> Nouvelle pièce
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Nouvelle pièce de caisse</DialogTitle>
-                </DialogHeader>
-                <form
-                  className="space-y-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    creer.mutate();
-                  }}
-                >
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Type</Label>
-                      <Select
-                        value={form.type_piece}
-                        onValueChange={(v) => setForm({ ...form, type_piece: v })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="sortie">Sortie (décaissement)</SelectItem>
-                          <SelectItem value="entree">Entrée (encaissement)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Date</Label>
-                      <Input
-                        type="date"
-                        required
-                        value={form.date_piece}
-                        onChange={(e) => setForm({ ...form, date_piece: e.target.value })}
-                      />
-                    </div>
-                  </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Pièces de caisse (PCS)"
+        description="Justificatifs numérotés des mouvements d'espèces"
+        action={
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-5 py-2.5">
+                <Plus className="size-4 mr-2" /> Nouvelle pièce
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+                  Nouvelle pièce de caisse
+                </DialogTitle>
+              </DialogHeader>
+              <form
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  creer.mutate();
+                }}
+              >
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Bénéficiaire</Label>
-                    <Input
-                      required
-                      value={form.beneficiaire}
-                      onChange={(e) => setForm({ ...form, beneficiaire: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Motif</Label>
-                    <Input
-                      required
-                      value={form.motif}
-                      onChange={(e) => setForm({ ...form, motif: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Catégorie</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Type</Label>
                     <Select
-                      value={form.categorie}
-                      onValueChange={(v) => setForm({ ...form, categorie: v })}
+                      value={form.type_piece}
+                      onValueChange={(v) => setForm({ ...form, type_piece: v })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="fournisseur">Fournisseur</SelectItem>
-                        <SelectItem value="client">Client</SelectItem>
-                        <SelectItem value="personnel">Personnel</SelectItem>
-                        <SelectItem value="administration">Administration</SelectItem>
-                        <SelectItem value="divers">Divers</SelectItem>
+                        <SelectItem value="sortie">Sortie (décaissement)</SelectItem>
+                        <SelectItem value="entree">Entrée (encaissement)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Montant (FCFA)</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Date</Label>
                     <Input
-                      type="number"
-                      min="0"
+                      type="date"
                       required
-                      value={form.montant}
-                      onChange={(e) => setForm({ ...form, montant: e.target.value })}
+                      value={form.date_piece}
+                      onChange={(e) => setForm({ ...form, date_piece: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
-                  <DialogFooter>
-                    <Button type="submit" disabled={creer.isPending || !etab}>
-                      Enregistrer
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-          }
-        />
-
-        {/* CARTES DE SYNTHÈSE */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-          {/* Total entrées */}
-          <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-emerald-50 via-white to-emerald-100 border-emerald-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total entrées
-                  </p>
-                  <p className="text-2xl font-bold text-emerald-600 mt-1">
-                    {formatFCFA(totalEntrees)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {piecesFiltrees.filter(p => p.type_piece === 'entree').length} pièce{piecesFiltrees.filter(p => p.type_piece === 'entree').length > 1 ? 's' : ''}
-                  </p>
                 </div>
-                <div className="p-4 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-[0_0_16px_rgba(16,185,129,0.5)] group-hover:shadow-[0_0_24px_rgba(16,185,129,0.7)] transition-shadow duration-300">
-                  <TrendingUp className="w-6 h-6" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Total sorties */}
-          <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-red-50 via-white to-red-100 border-red-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total sorties
-                  </p>
-                  <p className="text-2xl font-bold text-red-600 mt-1">
-                    {formatFCFA(totalSorties)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {piecesFiltrees.filter(p => p.type_piece === 'sortie').length} pièce{piecesFiltrees.filter(p => p.type_piece === 'sortie').length > 1 ? 's' : ''}
-                  </p>
-                </div>
-                <div className="p-4 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_0_16px_rgba(239,68,68,0.5)] group-hover:shadow-[0_0_24px_rgba(239,68,68,0.7)] transition-shadow duration-300">
-                  <TrendingDown className="w-6 h-6" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Solde net */}
-          <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-blue-50 via-white to-blue-100 border-blue-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Solde net
-                  </p>
-                  <p className={`text-2xl font-bold mt-1 ${soldeNet >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                    {formatFCFA(Math.abs(soldeNet))}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {soldeNet >= 0 ? 'Excédent' : 'Déficit'}
-                  </p>
-                </div>
-                <div className="p-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-[0_0_16px_rgba(59,130,246,0.5)] group-hover:shadow-[0_0_24px_rgba(59,130,246,0.7)] transition-shadow duration-300">
-                  <Wallet className="w-6 h-6" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Nombre de pièces */}
-          <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-purple-50 via-white to-purple-100 border-purple-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Nombre de pièces
-                  </p>
-                  <p className="text-2xl font-bold mt-1">
-                    {nbPieces}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Période sélectionnée
-                  </p>
-                </div>
-                <div className="p-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-[0_0_16px_rgba(147,51,234,0.5)] group-hover:shadow-[0_0_24px_rgba(147,51,234,0.7)] transition-shadow duration-300">
-                  <FileText className="w-6 h-6" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* BARRE DE FILTRES */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              {/* Recherche */}
-              <div className="flex-1 max-w-md">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <div className="space-y-2">
+                  <Label className="text-slate-700 dark:text-slate-300">Bénéficiaire</Label>
                   <Input
-                    placeholder="Rechercher (n°, bénéficiaire, motif)..."
-                    value={recherche}
-                    onChange={(e) => setRecherche(e.target.value)}
-                    className="pl-9"
+                    required
+                    value={form.beneficiaire}
+                    onChange={(e) => setForm({ ...form, beneficiaire: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
-                  {recherche && (
-                    <button
-                      onClick={() => setRecherche("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
                 </div>
-              </div>
-
-              {/* Filtres */}
-              <div className="flex flex-wrap gap-2">
-                {/* Période */}
-                <Select value={periodeFiltre} onValueChange={setPeriodeFiltre}>
-                  <SelectTrigger className="w-[160px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="aujourd'hui">Aujourd'hui</SelectItem>
-                    <SelectItem value="mois-en-cours">Ce mois-ci</SelectItem>
-                    <SelectItem value="mois-dernier">Mois dernier</SelectItem>
-                    <SelectItem value="tout">Toute période</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {/* Type */}
-                <Select value={typeFiltre} onValueChange={setTypeFiltre}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="toutes">Tous types</SelectItem>
-                    <SelectItem value="entree">Entrées</SelectItem>
-                    <SelectItem value="sortie">Sorties</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {/* Reset filtres */}
-                {(recherche || typeFiltre !== "toutes" || periodeFiltre !== "mois-en-cours") && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setRecherche("");
-                      setTypeFiltre("toutes");
-                      setPeriodeFiltre("mois-en-cours");
-                    }}
+                <div className="space-y-2">
+                  <Label className="text-slate-700 dark:text-slate-300">Motif</Label>
+                  <Input
+                    required
+                    value={form.motif}
+                    onChange={(e) => setForm({ ...form, motif: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-700 dark:text-slate-300">Catégorie</Label>
+                  <Select
+                    value={form.categorie}
+                    onValueChange={(v) => setForm({ ...form, categorie: v })}
                   >
-                    <Filter className="w-4 h-4 mr-1" />
-                    Reset
+                    <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fournisseur">Fournisseur</SelectItem>
+                      <SelectItem value="client">Client</SelectItem>
+                      <SelectItem value="personnel">Personnel</SelectItem>
+                      <SelectItem value="administration">Administration</SelectItem>
+                      <SelectItem value="divers">Divers</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-700 dark:text-slate-300">Montant (FCFA)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    required
+                    value={form.montant}
+                    onChange={(e) => setForm({ ...form, montant: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="submit"
+                    disabled={creer.isPending || !etab}
+                    className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
+                  >
+                    Enregistrer
                   </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        }
+      />
+
+      {/* ═══════════════════════════════════════════════════════
+          CARTES DE SYNTHÈSE
+          ═══════════════════════════════════════════════════════ */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 transition-transform group-hover:scale-110">
+              <TrendingUp className="size-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Total entrées
+              </p>
+              <p className="font-display text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                {formatFCFA(totalEntrees)}
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                {piecesFiltrees.filter((p) => p.type_piece === "entree").length} pièce(s)
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25 transition-transform group-hover:scale-110">
+              <TrendingDown className="size-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Total sorties
+              </p>
+              <p className="font-display text-2xl font-bold text-red-600 dark:text-red-400">
+                {formatFCFA(totalSorties)}
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                {piecesFiltrees.filter((p) => p.type_piece === "sortie").length} pièce(s)
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform group-hover:scale-110">
+              <Wallet className="size-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Solde net
+              </p>
+              <p
+                className={`font-display text-2xl font-bold ${
+                  soldeNet >= 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-red-600 dark:text-red-400"
+                }`}
+              >
+                {formatFCFA(Math.abs(soldeNet))}
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                {soldeNet >= 0 ? "Excédent" : "Déficit"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg shadow-purple-500/25 transition-transform group-hover:scale-110">
+              <FileText className="size-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Nombre de pièces
+              </p>
+              <p className="font-display text-2xl font-bold text-slate-900 dark:text-white">
+                {nbPieces}
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                Période sélectionnée
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════
+          BARRE DE FILTRES
+          ═══════════════════════════════════════════════════════ */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+        <CardContent className="p-5 space-y-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex-1 max-w-md">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+                <Input
+                  placeholder="Rechercher (n°, bénéficiaire, motif)..."
+                  value={recherche}
+                  onChange={(e) => setRecherche(e.target.value)}
+                  className="pl-9 rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+                />
+                {recherche && (
+                  <button
+                    onClick={() => setRecherche("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  >
+                    <X className="size-4" />
+                  </button>
                 )}
               </div>
             </div>
 
-            {/* Badges des filtres actifs */}
-            {(recherche || typeFiltre !== "toutes" || periodeFiltre !== "mois-en-cours") && (
-              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
-                {recherche && (
-                  <Badge variant="secondary" className="gap-1">
-                    Recherche: {recherche}
-                    <button onClick={() => setRecherche("")} className="ml-1 hover:text-destructive">
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                )}
-                {typeFiltre !== "toutes" && (
-                  <Badge variant="secondary" className="gap-1">
-                    Type: {typeFiltre === "entree" ? "Entrées" : "Sorties"}
-                    <button onClick={() => setTypeFiltre("toutes")} className="ml-1 hover:text-destructive">
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                )}
-                {periodeFiltre !== "mois-en-cours" && (
-                  <Badge variant="secondary" className="gap-1">
-                    Période: {periodeFiltre === "aujourd'hui" ? "Aujourd'hui" : periodeFiltre === "mois-dernier" ? "Mois dernier" : "Toute période"}
-                    <button onClick={() => setPeriodeFiltre("mois-en-cours")} className="ml-1 hover:text-destructive">
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            <div className="flex flex-wrap gap-2">
+              <Select value={periodeFiltre} onValueChange={setPeriodeFiltre}>
+                <SelectTrigger className="w-[160px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="aujourd'hui">Aujourd'hui</SelectItem>
+                  <SelectItem value="mois-en-cours">Ce mois-ci</SelectItem>
+                  <SelectItem value="mois-dernier">Mois dernier</SelectItem>
+                  <SelectItem value="tout">Toute période</SelectItem>
+                </SelectContent>
+              </Select>
 
-        {/* TABLEAU DES PIÈCES */}
-        <Card>
-          <CardContent className="overflow-x-auto p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Numéro</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Bénéficiaire</TableHead>
-                  <TableHead>Motif</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Montant</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {piecesPage.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.numero}</TableCell>
-                    <TableCell className="whitespace-nowrap">{formatDate(p.date_piece)}</TableCell>
-                    <TableCell>{p.beneficiaire}</TableCell>
-                    <TableCell>{p.motif}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {p.categorie || 'Divers'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={p.type_piece === "entree" ? "secondary" : "destructive"}>
-                        {p.type_piece === "entree" ? "Entrée" : "Sortie"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right whitespace-nowrap font-medium">
-                      {formatFCFA(p.montant)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => setRecu(p.id)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => {
-                            // Fonction export à implémenter
-                            toast.info("Export à venir");
-                          }}
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {piecesPage.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                      {piecesFiltrees.length === 0
-                        ? "Aucune pièce ne correspond aux filtres."
-                        : "Aucune pièce de caisse enregistrée."}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
+              <Select value={typeFiltre} onValueChange={setTypeFiltre}>
+                <SelectTrigger className="w-[140px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="toutes">Tous types</SelectItem>
+                  <SelectItem value="entree">Entrées</SelectItem>
+                  <SelectItem value="sortie">Sorties</SelectItem>
+                </SelectContent>
+              </Select>
 
-          {/* PAGINATION */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between p-4 border-t">
-              <div className="text-sm text-muted-foreground">
-                Page {pageActuelle} sur {totalPages} ({piecesFiltrees.length} pièces)
-              </div>
-              <div className="flex items-center gap-2">
-                <Select
-                  value={String(limitePage)}
-                  onValueChange={(v) => setLimitePage(Number(v))}
-                >
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="10">10 / page</SelectItem>
-                    <SelectItem value="25">25 / page</SelectItem>
-                    <SelectItem value="50">50 / page</SelectItem>
-                  </SelectContent>
-                </Select>
+              {(recherche || typeFiltre !== "toutes" || periodeFiltre !== "mois-en-cours") && (
                 <Button
+                  variant="ghost"
                   size="sm"
-                  variant="outline"
-                  onClick={() => setPageActuelle(pageActuelle - 1)}
-                  disabled={pageActuelle === 1}
+                  onClick={() => {
+                    setRecherche("");
+                    setTypeFiltre("toutes");
+                    setPeriodeFiltre("mois-en-cours");
+                  }}
+                  className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
                 >
-                  ← Précédent
+                  <Filter className="size-4 mr-1" />
+                  Reset
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setPageActuelle(pageActuelle + 1)}
-                  disabled={pageActuelle === totalPages}
-                >
-                  Suivant →
-                </Button>
-              </div>
+              )}
+            </div>
+          </div>
+
+          {(recherche || typeFiltre !== "toutes" || periodeFiltre !== "mois-en-cours") && (
+            <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-100 dark:border-slate-700/50">
+              {recherche && (
+                <Badge className="gap-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  Recherche: {recherche}
+                  <button onClick={() => setRecherche("")} className="ml-1 hover:text-red-500">
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              )}
+              {typeFiltre !== "toutes" && (
+                <Badge className="gap-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  Type: {typeFiltre === "entree" ? "Entrées" : "Sorties"}
+                  <button onClick={() => setTypeFiltre("toutes")} className="ml-1 hover:text-red-500">
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              )}
+              {periodeFiltre !== "mois-en-cours" && (
+                <Badge className="gap-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  Période:{" "}
+                  {periodeFiltre === "aujourd'hui"
+                    ? "Aujourd'hui"
+                    : periodeFiltre === "mois-dernier"
+                    ? "Mois dernier"
+                    : "Toute période"}
+                  <button onClick={() => setPeriodeFiltre("mois-en-cours")} className="ml-1 hover:text-red-500">
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              )}
             </div>
           )}
-        </Card>
+        </CardContent>
+      </Card>
 
-        {/* DIALOG - REÇU */}
-<Dialog open={!!recu} onOpenChange={(o) => !o && setRecu(null)}>
-  <DialogContent className="max-w-2xl">
-    <DialogHeader className="no-print">
-      <DialogTitle>Reçu — pièce de caisse</DialogTitle>
-    </DialogHeader>
-    {pieceRecu ? (
-      <div className="print-area space-y-3 text-sm">
-        <DocumentHeader
-          titre={`Pièce de caisse ${pieceRecu.numero}`}
-          sousTitre={formatDate(pieceRecu.date_piece)}
-          etablissement={etab}
-        />
-        <div className="divide-y rounded-lg border">
-          <div className="flex justify-between gap-4 p-3">
-            <span className="text-muted-foreground">Type</span>
-            <span>{pieceRecu.type_piece === "entree" ? "Entrée" : "Sortie"}</span>
+      {/* ═══════════════════════════════════════════════════════
+          TABLEAU DES PIÈCES
+          ═══════════════════════════════════════════════════════ */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+        <CardContent className="overflow-x-auto p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-slate-100 dark:border-slate-700/50">
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Numéro
+                </TableHead>
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Date
+                </TableHead>
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Bénéficiaire
+                </TableHead>
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Motif
+                </TableHead>
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Catégorie
+                </TableHead>
+                <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                  Type
+                </TableHead>
+                <TableHead className="text-right text-slate-600 dark:text-slate-300 font-semibold">
+                  Montant
+                </TableHead>
+                <TableHead className="text-right text-slate-600 dark:text-slate-300 font-semibold">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {piecesPage.map((p) => (
+                <TableRow
+                  key={p.id}
+                  className="border-b border-slate-100/50 dark:border-slate-700/30 hover:bg-slate-50/50 dark:hover:bg-slate-700/20"
+                >
+                  <TableCell className="font-medium text-slate-900 dark:text-white">
+                    {p.numero}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-slate-600 dark:text-slate-300">
+                    {formatDate(p.date_piece)}
+                  </TableCell>
+                  <TableCell className="text-slate-700 dark:text-slate-300">
+                    {p.beneficiaire}
+                  </TableCell>
+                  <TableCell className="text-slate-600 dark:text-slate-300">
+                    {p.motif}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className="rounded-full border-slate-200 dark:border-slate-600/50 text-slate-600 dark:text-slate-300"
+                    >
+                      {p.categorie || "Divers"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                        p.type_piece === "entree"
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border border-emerald-200/30"
+                          : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200/30"
+                      }`}
+                    >
+                      {p.type_piece === "entree" ? "Entrée" : "Sortie"}
+                    </span>
+                  </TableCell>
+                  <TableCell
+                    className={`text-right whitespace-nowrap font-medium ${
+                      p.type_piece === "entree"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    {formatFCFA(p.montant)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1.5">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                        onClick={() => setRecu(p.id)}
+                      >
+                        <Eye className="size-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                        onClick={() => {
+                          toast.info("Export à venir");
+                        }}
+                      >
+                        <Download className="size-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {piecesPage.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={8}
+                    className="py-8 text-center text-slate-400 dark:text-slate-500"
+                  >
+                    {piecesFiltrees.length === 0
+                      ? "Aucune pièce ne correspond aux filtres."
+                      : "Aucune pièce de caisse enregistrée."}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+
+        {/* ═══════════════════════════════════════════════════════
+            PAGINATION
+            ═══════════════════════════════════════════════════════ */}
+        {totalPages > 1 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-t border-slate-100 dark:border-slate-700/50">
+            <div className="text-sm text-slate-500 dark:text-slate-400">
+              Page {pageActuelle} sur {totalPages} ({piecesFiltrees.length} pièces)
+            </div>
+            <div className="flex items-center gap-2">
+              <Select
+                value={String(limitePage)}
+                onValueChange={(v) => setLimitePage(Number(v))}
+              >
+                <SelectTrigger className="w-[120px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10 / page</SelectItem>
+                  <SelectItem value="25">25 / page</SelectItem>
+                  <SelectItem value="50">50 / page</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setPageActuelle(pageActuelle - 1)}
+                disabled={pageActuelle === 1}
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+              >
+                ← Précédent
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setPageActuelle(pageActuelle + 1)}
+                disabled={pageActuelle === totalPages}
+                className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+              >
+                Suivant →
+              </Button>
+            </div>
           </div>
-          <div className="flex justify-between gap-4 p-3">
-            <span className="text-muted-foreground">Bénéficiaire</span>
-            <span>{pieceRecu.beneficiaire}</span>
+        )}
+      </Card>
+
+      {/* ═══════════════════════════════════════════════════════
+          DIALOG - REÇU
+          ═══════════════════════════════════════════════════════ */}
+      <Dialog open={!!recu} onOpenChange={(o) => !o && setRecu(null)}>
+        <DialogContent className="max-w-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="no-print">
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Reçu — pièce de caisse
+            </DialogTitle>
+          </DialogHeader>
+          {pieceRecu ? (
+            <div className="print-area space-y-4 text-sm">
+              <DocumentHeader
+                titre={`Pièce de caisse ${pieceRecu.numero}`}
+                sousTitre={formatDate(pieceRecu.date_piece)}
+                etablissement={etab}
+              />
+              <div className="divide-y divide-slate-100 dark:divide-slate-700/50 rounded-2xl border border-slate-200/50 dark:border-slate-600/50 overflow-hidden">
+                <div className="flex justify-between gap-4 p-4">
+                  <span className="text-slate-500 dark:text-slate-400">Type</span>
+                  <span className="font-medium text-slate-900 dark:text-white">
+                    {pieceRecu.type_piece === "entree" ? "Entrée" : "Sortie"}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4 p-4">
+                  <span className="text-slate-500 dark:text-slate-400">Bénéficiaire</span>
+                  <span className="font-medium text-slate-900 dark:text-white">
+                    {pieceRecu.beneficiaire}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4 p-4">
+                  <span className="text-slate-500 dark:text-slate-400">Motif</span>
+                  <span className="font-medium text-slate-900 dark:text-white">
+                    {pieceRecu.motif}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4 p-4">
+                  <span className="text-slate-500 dark:text-slate-400">Catégorie</span>
+                  <span className="font-medium text-slate-900 dark:text-white capitalize">
+                    {pieceRecu.categorie || "Divers"}
+                  </span>
+                </div>
+              </div>
+              <div className="font-display flex justify-between text-xl font-bold">
+                <span className="text-slate-700 dark:text-slate-300">Montant</span>
+                <span
+                  className={
+                    pieceRecu.type_piece === "entree"
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-red-600 dark:text-red-400"
+                  }
+                >
+                  {formatFCFA(pieceRecu.montant)}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-6 pt-6 text-xs text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-700/50">
+                <p>Signature bénéficiaire</p>
+                <p className="text-right">Signature caissier</p>
+              </div>
+            </div>
+          ) : null}
+          <div className="no-print flex justify-end mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.print()}
+              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+            >
+              <Printer className="size-4 mr-1.5" />
+              Imprimer / PDF
+            </Button>
           </div>
-          <div className="flex justify-between gap-4 p-3">
-            <span className="text-muted-foreground">Motif</span>
-            <span>{pieceRecu.motif}</span>
-          </div>
-          <div className="flex justify-between gap-4 p-3">
-            <span className="text-muted-foreground">Catégorie</span>
-            <span className="capitalize">{pieceRecu.categorie || 'Divers'}</span>
-          </div>
-        </div>
-        <div className="font-display flex justify-between text-lg font-semibold">
-          <span>Montant</span>
-          <span>{formatFCFA(pieceRecu.montant)}</span>
-        </div>
-        <div className="grid grid-cols-2 gap-6 pt-6 text-[11px] text-muted-foreground">
-          <p>Signature bénéficiaire</p>
-          <p className="text-right">Signature caissier</p>
-        </div>
-      </div>
-    ) : null}
-    <div className="no-print flex justify-end mt-4">
-      <Button variant="outline" size="sm" onClick={() => window.print()}>
-        Imprimer / PDF
-      </Button>
-    </div>
-  </DialogContent>
-</Dialog>
-</div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
