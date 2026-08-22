@@ -67,7 +67,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 // ============================================================
-// COMPOSANT STAT CARD - AVEC COULEURS VARIÉES
+// COMPOSANT STAT CARD
 // ============================================================
 function StatCard({
   titre,
@@ -91,7 +91,7 @@ function StatCard({
   };
 }) {
   const contenu = (
-    <Card className="group h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 backdrop-blur-xl border border-white/30 shadow-lg rounded-3xl overflow-hidden">
+    <Card className="group h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
       <CardContent className="flex h-full items-start gap-4 p-5">
         <div
           className={`flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${couleur.from} ${couleur.to} shadow-lg ${couleur.shadow} transition-transform group-hover:scale-110`}
@@ -148,7 +148,7 @@ function StatCard({
 }
 
 // ============================================================
-// COMPOSANT POUR L'ÉTAT DES CHAMBRES - HAUTEUR UNIFORME
+// COMPOSANT POUR L'ÉTAT DES CHAMBRES
 // ============================================================
 function ChambreItem({
   nom,
@@ -550,7 +550,7 @@ function Dashboard() {
   };
 
   // ============================================================
-  // COULEURS DES STAT CARDS - CHAQUE ICÔNE A SA COULEUR
+  // COULEURS DES STAT CARDS
   // ============================================================
   const couleursStatCards = [
     {
@@ -585,9 +585,7 @@ function Dashboard() {
   // ============================================================
   return (
     <div className="space-y-6">
-      {/* ═══════════════════════════════════════════════════════
-          EN-TÊTE AVEC BIENVENUE
-          ═══════════════════════════════════════════════════════ */}
+      {/* EN-TÊTE */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
@@ -616,9 +614,7 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════
-          KPI CARDS - AVEC COULEURS VARIÉES
-          ═══════════════════════════════════════════════════════ */}
+      {/* KPI CARDS */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           titre="Occupation"
@@ -667,9 +663,7 @@ function Dashboard() {
         />
       </div>
 
-      {/* ═══════════════════════════════════════════════════════
-          GRAPHIQUE CA + NUITS VENDUES - MÊME STYLE QUE LES STAT CARDS
-          ═══════════════════════════════════════════════════════ */}
+      {/* GRAPHIQUE CA + NUITS VENDUES */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Évolution CA */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
@@ -854,9 +848,7 @@ function Dashboard() {
         </Card>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════
-          ÉTAT DES CHAMBRES + ACTIVITÉ RÉCENTE + ACTIONS
-          ═══════════════════════════════════════════════════════ */}
+      {/* ÉTAT DES CHAMBRES + ACTIVITÉ RÉCENTE + ACTIONS */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* État des chambres */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
