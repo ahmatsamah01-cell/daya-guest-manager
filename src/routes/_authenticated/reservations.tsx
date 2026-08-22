@@ -2,7 +2,22 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, LayoutGrid, List, ChevronLeft, ChevronRight, Search, Rows3, CalendarPlus } from "lucide-react";
+import {
+  Plus,
+  LayoutGrid,
+  List,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Rows3,
+  CalendarPlus,
+  Users,
+  BedDouble,
+  CalendarDays,
+  CheckCircle,
+  XCircle,
+  Clock,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +39,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
 import { formatFCFA, formatDate, nbNuits, today } from "@/lib/format";
 import { useEtablissement, useParametres } from "@/hooks/use-hotel";
@@ -45,11 +67,23 @@ export const Route = createFileRoute("/_authenticated/reservations")({
   component: ReservationsPage,
 });
 
-const STATUTS: Record<string, string> = {
-  reservee: "Réservée",
-  en_cours: "En cours",
-  terminee: "Terminée",
-  annulee: "Annulée",
+const STATUTS: Record<string, { label: string; badge: string }> = {
+  reservee: {
+    label: "Réservée",
+    badge: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border-amber-200/30",
+  },
+  en_cours: {
+    label: "En cours",
+    badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200/30",
+  },
+  terminee: {
+    label: "Terminée",
+    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border-blue-200/30",
+  },
+  annulee: {
+    label: "Annulée",
+    badge: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border-red-200/30",
+  },
 };
 
 function ReservationsPage() {
@@ -118,7 +152,9 @@ function ReservationsPage() {
       const conflit = detecterConflit(form.chambre_id, form.date_arrivee, form.date_depart);
       if (conflit) {
         throw new Error(
-          `Chambre déjà réservée du ${formatDate(conflit.date_arrivee)} au ${formatDate(conflit.date_depart)} pour cette période.`,
+          `Chambre déjà réservée du ${formatDate(conflit.date_arrivee)} au ${formatDate(
+            conflit.date_depart
+          )} pour cette période.`
         );
       }
       const { error } = await supabase.from("reservations").insert({
@@ -159,7 +195,7 @@ function ReservationsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-const [facturerResa, setFacturerResa] = useState<Resa | null>(null);
+  const [facturerResa, setFacturerResa] = useState<Resa | null>(null);
   const [facturerForm, setFacturerForm] = useState({
     avance: "",
     buanderie: "",
@@ -186,11 +222,13 @@ const [facturerResa, setFacturerResa] = useState<Resa | null>(null);
         editForm.chambre_id,
         editForm.date_arrivee,
         editForm.date_depart,
-        editId ?? undefined,
+        editId ?? undefined
       );
       if (conflit) {
         throw new Error(
-          `Chambre déjà réservée du ${formatDate(conflit.date_arrivee)} au ${formatDate(conflit.date_depart)} pour cette période.`,
+          `Chambre déjà réservée du ${formatDate(conflit.date_arrivee)} au ${formatDate(
+            conflit.date_depart
+          )} pour cette période.`
         );
       }
       const { error } = await supabase
@@ -217,7 +255,7 @@ const [facturerResa, setFacturerResa] = useState<Resa | null>(null);
     onError: (e: Error) => toast.error(e.message),
   });
 
-const [prolongerResa, setProlongerResa] = useState<Resa | null>(null);
+  const [prolongerResa, setProlongerResa] = useState<Resa | null>(null);
   const [nouvelleDatePeriode, setNouvelleDatePeriode] = useState("");
 
   const prolonger = useMutation({
@@ -227,11 +265,11 @@ const [prolongerResa, setProlongerResa] = useState<Resa | null>(null);
         prolongerResa.chambre_id,
         prolongerResa.date_arrivee,
         nouvelleDatePeriode,
-        prolongerResa.id,
+        prolongerResa.id
       );
       if (conflit) {
         throw new Error(
-          `Impossible : chambre déjà réservée à partir du ${formatDate(conflit.date_arrivee)}.`,
+          `Impossible : chambre déjà réservée à partir du ${formatDate(conflit.date_arrivee)}.`
         );
       }
       const { error } = await supabase
@@ -261,7 +299,7 @@ const [prolongerResa, setProlongerResa] = useState<Resa | null>(null);
     onError: (e: Error) => toast.error(e.message),
   });
 
-type Resa = NonNullable<typeof reservations>[number];
+  type Resa = NonNullable<typeof reservations>[number];
 
   const cloturer = useMutation({
     mutationFn: async ({
@@ -289,7 +327,9 @@ type Resa = NonNullable<typeof reservations>[number];
       const { count } = await supabase
         .from("factures")
         .select("id", { count: "exact", head: true });
-      const numero = `${prefixeFacture}-${new Date().getFullYear()}-${String((count ?? 0) + 1).padStart(4, "0")}`;
+      const numero = `${prefixeFacture}-${new Date().getFullYear()}-${String(
+        (count ?? 0) + 1
+      ).padStart(4, "0")}`;
 
       const { data: facture, error: eFacture } = await supabase
         .from("factures")
@@ -381,7 +421,7 @@ type Resa = NonNullable<typeof reservations>[number];
     chambreId: string,
     dateArrivee: string,
     dateDepart: string,
-    ignorerId?: string,
+    ignorerId?: string
   ) {
     return (reservations ?? []).find(
       (r) =>
@@ -389,7 +429,7 @@ type Resa = NonNullable<typeof reservations>[number];
         r.chambre_id === chambreId &&
         r.statut !== "annulee" &&
         dateArrivee < r.date_depart &&
-        dateDepart > r.date_arrivee,
+        dateDepart > r.date_arrivee
     );
   }
 
@@ -400,7 +440,12 @@ type Resa = NonNullable<typeof reservations>[number];
 
   const conflitEdition =
     editForm.chambre_id && editForm.date_arrivee && editForm.date_depart
-      ? detecterConflit(editForm.chambre_id, editForm.date_arrivee, editForm.date_depart, editId ?? undefined)
+      ? detecterConflit(
+          editForm.chambre_id,
+          editForm.date_arrivee,
+          editForm.date_depart,
+          editId ?? undefined
+        )
       : null;
 
   const joursPlanning = Array.from({ length: 14 }, (_, i) => {
@@ -415,15 +460,15 @@ type Resa = NonNullable<typeof reservations>[number];
         r.chambre_id === chambreId &&
         r.statut !== "annulee" &&
         jour >= r.date_arrivee &&
-        jour < r.date_depart,
+        jour < r.date_depart
     );
   }
 
   function couleurStatutPlanning(statut: string) {
-    if (statut === "en_cours") return "bg-red-500";
-    if (statut === "reservee") return "bg-orange-400";
-    if (statut === "terminee") return "bg-gray-300";
-    return "bg-gray-200";
+    if (statut === "en_cours") return "bg-gradient-to-br from-emerald-500 to-emerald-600";
+    if (statut === "reservee") return "bg-gradient-to-br from-amber-500 to-amber-600";
+    if (statut === "terminee") return "bg-gradient-to-br from-blue-500 to-blue-600";
+    return "bg-gradient-to-br from-gray-400 to-gray-500";
   }
 
   const reservationsFiltrees = (reservations ?? []).filter((r) => {
@@ -438,20 +483,22 @@ type Resa = NonNullable<typeof reservations>[number];
   });
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Réservations"
         description="Séjours réservés, en cours et terminés"
         action={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="size-4" /> Nouvelle réservation
+              <Button className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-5 py-2.5">
+                <Plus className="size-4 mr-2" /> Nouvelle réservation
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Nouvelle réservation</DialogTitle>
+                <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+                  Nouvelle réservation
+                </DialogTitle>
               </DialogHeader>
               <form
                 className="space-y-4"
@@ -461,12 +508,12 @@ type Resa = NonNullable<typeof reservations>[number];
                 }}
               >
                 <div className="space-y-2">
-                  <Label>Client</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Client</Label>
                   <Select
                     value={form.client_id}
                     onValueChange={(v) => setForm({ ...form, client_id: v })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                       <SelectValue placeholder="Sélectionner un client" />
                     </SelectTrigger>
                     <SelectContent>
@@ -479,7 +526,7 @@ type Resa = NonNullable<typeof reservations>[number];
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Chambre</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Chambre</Label>
                   <Select
                     value={form.chambre_id}
                     onValueChange={(v) => {
@@ -487,7 +534,7 @@ type Resa = NonNullable<typeof reservations>[number];
                       setForm({ ...form, chambre_id: v, prix_nuit: String(ch?.prix_nuit ?? "") });
                     }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                       <SelectValue placeholder="Sélectionner une chambre" />
                     </SelectTrigger>
                     <SelectContent>
@@ -501,59 +548,64 @@ type Resa = NonNullable<typeof reservations>[number];
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Arrivée</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Arrivée</Label>
                     <Input
                       type="date"
                       required
                       value={form.date_arrivee}
                       onChange={(e) => setForm({ ...form, date_arrivee: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Départ</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Départ</Label>
                     <Input
                       type="date"
                       required
                       value={form.date_depart}
                       onChange={(e) => setForm({ ...form, date_depart: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Personnes</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Personnes</Label>
                     <Input
                       type="number"
                       min="1"
                       value={form.nb_personnes}
                       onChange={(e) => setForm({ ...form, nb_personnes: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Prix / nuit (FCFA)</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Prix / nuit (FCFA)</Label>
                     <Input
                       type="number"
                       min="0"
                       required
                       value={form.prix_nuit}
                       onChange={(e) => setForm({ ...form, prix_nuit: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Notes</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Notes</Label>
                   <Input
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
 
-                <div className="grid gap-4 border-t pt-4 sm:grid-cols-2">
+                <div className="grid gap-4 border-t border-slate-200/50 dark:border-slate-700/50 pt-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Moyen de paiement</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Moyen de paiement</Label>
                     <Select
                       value={form.mode_paiement}
                       onValueChange={(v) => setForm({ ...form, mode_paiement: v })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
                       <SelectContent>
@@ -564,43 +616,48 @@ type Resa = NonNullable<typeof reservations>[number];
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Montant déjà payé (FCFA)</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Montant déjà payé (FCFA)</Label>
                     <Input
                       type="number"
                       min="0"
                       value={form.montant_paye}
                       onChange={(e) => setForm({ ...form, montant_paye: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Réservé par</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Réservé par</Label>
                     <Input
                       value={form.reserve_par}
                       onChange={(e) => setForm({ ...form, reserve_par: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>N° de confirmation</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">N° de confirmation</Label>
                     <Input
                       value={form.numero_confirmation}
                       onChange={(e) => setForm({ ...form, numero_confirmation: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
                 </div>
 
                 {conflitCreation ? (
-                  <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+                  <div className="rounded-xl border border-red-200/50 bg-red-50/80 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">
                     ⚠️ Chambre déjà réservée du {formatDate(conflitCreation.date_arrivee)} au{" "}
                     {formatDate(conflitCreation.date_depart)} pour{" "}
                     {conflitCreation.clients?.prenom} {conflitCreation.clients?.nom}.
                   </div>
                 ) : null}
 
-                <div className="rounded-lg bg-muted p-3 text-sm">
-                  <p>
+                <div className="rounded-xl bg-slate-50/80 dark:bg-slate-700/50 p-4 text-sm backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50">
+                  <p className="text-slate-600 dark:text-slate-300">
                     {nuits} nuit(s) — taxe de séjour {formatFCFA(taxeParNuit)} / nuitée
                   </p>
-                  <p className="font-medium">Total estimé : {formatFCFA(totalEstime)}</p>
+                  <p className="font-semibold text-slate-900 dark:text-white mt-1">
+                    Total estimé : {formatFCFA(totalEstime)}
+                  </p>
                 </div>
                 <DialogFooter>
                   <Button
@@ -612,6 +669,7 @@ type Resa = NonNullable<typeof reservations>[number];
                       !form.chambre_id ||
                       !!conflitCreation
                     }
+                    className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
                   >
                     Enregistrer
                   </Button>
@@ -622,19 +680,21 @@ type Resa = NonNullable<typeof reservations>[number];
         }
       />
 
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-lg border p-1">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-1 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
           <Button
-            variant={vue === "planning" ? "secondary" : "ghost"}
+            variant={vue === "planning" ? "default" : "ghost"}
             size="sm"
             onClick={() => setVue("planning")}
+            className={vue === "planning" ? "bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl" : "rounded-xl"}
           >
             <LayoutGrid className="size-4" /> Planning
           </Button>
           <Button
-            variant={vue === "liste" ? "secondary" : "ghost"}
+            variant={vue === "liste" ? "default" : "ghost"}
             size="sm"
             onClick={() => setVue("liste")}
+            className={vue === "liste" ? "bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl" : "rounded-xl"}
           >
             <List className="size-4" /> Liste
           </Button>
@@ -644,6 +704,7 @@ type Resa = NonNullable<typeof reservations>[number];
             <Button
               variant="outline"
               size="icon"
+              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
               onClick={() => {
                 const d = new Date(planningDebut);
                 d.setDate(d.getDate() - 7);
@@ -652,12 +713,13 @@ type Resa = NonNullable<typeof reservations>[number];
             >
               <ChevronLeft className="size-4" />
             </Button>
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
               {formatDate(joursPlanning[0])} → {formatDate(joursPlanning[13])}
             </span>
             <Button
               variant="outline"
               size="icon"
+              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
               onClick={() => {
                 const d = new Date(planningDebut);
                 d.setDate(d.getDate() + 7);
@@ -671,331 +733,409 @@ type Resa = NonNullable<typeof reservations>[number];
       </div>
 
       {vue === "planning" ? (
-        <Card className="group mb-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20">
-          <CardContent className="overflow-x-auto p-4">
-            <div className="mb-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
+        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+          <CardContent className="p-5">
+            <div className="mb-4 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
               <span className="flex items-center gap-1.5">
-                <span className="size-2.5 rounded-full bg-red-500" /> En cours
+                <span className="size-2.5 rounded-full bg-emerald-500" /> En cours
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="size-2.5 rounded-full bg-orange-400" /> Réservée
+                <span className="size-2.5 rounded-full bg-amber-500" /> Réservée
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="size-2.5 rounded-full bg-gray-300" /> Terminée
+                <span className="size-2.5 rounded-full bg-blue-500" /> Terminée
               </span>
             </div>
-            <div style={{ minWidth: `${140 + joursPlanning.length * 70}px` }}>
-              <div className="grid" style={{ gridTemplateColumns: `140px repeat(${joursPlanning.length}, 70px)` }}>
-                <div className="sticky left-0 bg-card p-2 text-xs font-medium">Chambre</div>
-                {joursPlanning.map((j) => (
-                  <div key={j} className="border-l p-2 text-center text-xs text-muted-foreground">
-                    {new Date(j).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}
-                  </div>
-                ))}
-              </div>
-              {(chambres ?? []).map((c) => (
+            <div className="overflow-x-auto">
+              <div style={{ minWidth: `${140 + joursPlanning.length * 70}px` }}>
                 <div
-                  key={c.id}
-                  className="grid border-t"
+                  className="grid"
                   style={{ gridTemplateColumns: `140px repeat(${joursPlanning.length}, 70px)` }}
                 >
-                  <div className="sticky left-0 bg-card p-2 text-sm font-medium">{c.nom}</div>
-                  {joursPlanning.map((j) => {
-                    const r = reservationPourJour(c.id, j);
-                    return (
-                      <div key={j} className="border-l p-1">
-                        {r ? (
-                          <div
-                            title={`${r.clients?.prenom ?? ""} ${r.clients?.nom ?? ""}`}
-                            className={`flex h-6 items-center justify-center truncate rounded px-1 text-[10px] font-medium text-white ${couleurStatutPlanning(r.statut)}`}
-                          >
-                            {r.clients?.nom ?? ""}
-                          </div>
-                        ) : (
-                          <div className="h-6 rounded bg-green-50 dark:bg-green-950/20" />
-                        )}
-                      </div>
-                    );
-                  })}
+                  <div className="sticky left-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm p-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Chambre
+                  </div>
+                  {joursPlanning.map((j) => (
+                    <div
+                      key={j}
+                      className="border-l border-slate-200/50 dark:border-slate-700/50 p-2 text-center text-xs text-slate-400 dark:text-slate-500"
+                    >
+                      {new Date(j).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}
+                    </div>
+                  ))}
                 </div>
-              ))}
-              {(chambres ?? []).length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                  Aucune chambre enregistrée.
-                </p>
-              ) : null}
+                {(chambres ?? []).map((c) => (
+                  <div
+                    key={c.id}
+                    className="grid border-t border-slate-200/50 dark:border-slate-700/50"
+                    style={{ gridTemplateColumns: `140px repeat(${joursPlanning.length}, 70px)` }}
+                  >
+                    <div className="sticky left-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm p-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                      {c.nom}
+                    </div>
+                    {joursPlanning.map((j) => {
+                      const r = reservationPourJour(c.id, j);
+                      return (
+                        <div key={j} className="border-l border-slate-200/50 dark:border-slate-700/50 p-1">
+                          {r ? (
+                            <div
+                              title={`${r.clients?.prenom ?? ""} ${r.clients?.nom ?? ""}`}
+                              className={`flex h-7 items-center justify-center truncate rounded-xl px-1 text-[10px] font-medium text-white shadow-sm ${couleurStatutPlanning(r.statut)}`}
+                            >
+                              {r.clients?.nom ?? ""}
+                            </div>
+                          ) : (
+                            <div className="h-7 rounded-xl bg-emerald-50/50 dark:bg-emerald-900/10" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+                {(chambres ?? []).length === 0 ? (
+                  <p className="py-8 text-center text-sm text-slate-400 dark:text-slate-500">
+                    Aucune chambre enregistrée.
+                  </p>
+                ) : null}
+              </div>
             </div>
           </CardContent>
         </Card>
       ) : (
-      <>
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="relative max-w-xs flex-1">
-          <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher client ou chambre…"
-            value={recherche}
-            onChange={(e) => setRecherche(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <Select value={filtreStatut} onValueChange={setFiltreStatut}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="tous">Tous les statuts</SelectItem>
-            {Object.entries(STATUTS).map(([k, v]) => (
-              <SelectItem key={k} value={k}>
-                {v}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className="ml-auto flex rounded-lg border p-1">
-          <Button
-            variant={sousVueListe === "tableau" ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setSousVueListe("tableau")}
-          >
-            <Rows3 className="size-4" />
-          </Button>
-          <Button
-            variant={sousVueListe === "cartes" ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setSousVueListe("cartes")}
-          >
-            <LayoutGrid className="size-4" />
-          </Button>
-        </div>
-      </div>
+        <>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative max-w-xs flex-1">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+              <Input
+                placeholder="Rechercher client ou chambre…"
+                value={recherche}
+                onChange={(e) => setRecherche(e.target.value)}
+                className="pl-9 rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+              />
+            </div>
+            <Select value={filtreStatut} onValueChange={setFiltreStatut}>
+              <SelectTrigger className="w-[160px] rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                <SelectValue placeholder="Statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tous">Tous les statuts</SelectItem>
+                {Object.entries(STATUTS).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>
+                    {v.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="ml-auto flex rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-1 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+              <Button
+                variant={sousVueListe === "tableau" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSousVueListe("tableau")}
+                className={sousVueListe === "tableau" ? "bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl" : "rounded-xl"}
+              >
+                <Rows3 className="size-4" />
+              </Button>
+              <Button
+                variant={sousVueListe === "cartes" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSousVueListe("cartes")}
+                className={sousVueListe === "cartes" ? "bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl" : "rounded-xl"}
+              >
+                <LayoutGrid className="size-4" />
+              </Button>
+            </div>
+          </div>
 
-      {sousVueListe === "cartes" ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {reservationsFiltrees.map((r) => {
-            const n = nbNuits(r.date_arrivee, r.date_depart);
-            return (
-              <Card key={r.id} className="group overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20">
-                <CardContent className="space-y-3 p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="font-display font-semibold">
-                        {r.clients?.prenom} {r.clients?.nom}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{r.chambres?.nom}</p>
-                    </div>
-                    <Badge variant={r.statut === "annulee" ? "destructive" : "secondary"}>
-                      {STATUTS[r.statut] ?? r.statut}
-                    </Badge>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatDate(r.date_arrivee)} → {formatDate(r.date_depart)}
-                    <span className="ml-1">({n} nuit(s))</span>
-                  </div>
-                  <p className="text-sm font-semibold text-primary">
-                    {formatFCFA(n * Number(r.prix_nuit) + n * Number(r.taxe_nuit))}
-                  </p>
-                  <div className="flex flex-wrap gap-2 border-t pt-3">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditId(r.id);
-                        setEditForm({
-                          client_id: r.client_id,
-                          chambre_id: r.chambre_id,
-                          date_arrivee: r.date_arrivee,
-                          date_depart: r.date_depart,
-                          nb_personnes: String(r.nb_personnes),
-                          prix_nuit: String(r.prix_nuit),
-                          taxe_nuit: String(r.taxe_nuit),
-                          statut: r.statut,
-                          notes: r.notes ?? "",
-                        });
-                      }}
-                    >
-                      Modifier
-                    </Button>
-                    {r.statut === "reservee" ? (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => changerStatut.mutate({ id: r.id, statut: "en_cours" })}
-                        >
-                          Check-in
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => changerStatut.mutate({ id: r.id, statut: "annulee" })}
-                        >
-                          Annuler
-                        </Button>
-                      </>
-                    ) : null}
-                    {r.statut === "en_cours" ? (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setProlongerResa(r);
-                            setNouvelleDatePeriode(r.date_depart);
-                          }}
-                        >
-                          <CalendarPlus className="size-3.5" /> Prolonger
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            setFacturerResa(r);
-                            setFacturerForm({
-                              avance: "",
-                              buanderie: "",
-                              remiseType: "montant",
-                              remiseValeur: "",
-                            });
-                          }}
-                        >
-                          Check-out & facturer
-                        </Button>
-                      </>
-                    ) : null}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-          {reservationsFiltrees.length === 0 ? (
-            <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
-              Aucune réservation trouvée.
-            </p>
-          ) : null}
-        </div>
-      ) : (
-      <Card className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20">
-        <CardContent className="overflow-x-auto p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Client</TableHead>
-                <TableHead>Chambre</TableHead>
-                <TableHead>Séjour</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          {sousVueListe === "cartes" ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {reservationsFiltrees.map((r) => {
                 const n = nbNuits(r.date_arrivee, r.date_depart);
                 return (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-medium">
-                      {r.clients?.prenom} {r.clients?.nom}
-                    </TableCell>
-                    <TableCell>{r.chambres?.nom}</TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {formatDate(r.date_arrivee)} → {formatDate(r.date_depart)}
-                      <span className="block text-xs text-muted-foreground">{n} nuit(s)</span>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {formatFCFA(n * Number(r.prix_nuit) + n * Number(r.taxe_nuit))}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={r.statut === "annulee" ? "destructive" : "secondary"}>
-                        {STATUTS[r.statut] ?? r.statut}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="space-x-2 text-right whitespace-nowrap">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditId(r.id);
-                          setEditForm({
-                            client_id: r.client_id,
-                            chambre_id: r.chambre_id,
-                            date_arrivee: r.date_arrivee,
-                            date_depart: r.date_depart,
-                            nb_personnes: String(r.nb_personnes),
-                            prix_nuit: String(r.prix_nuit),
-                            taxe_nuit: String(r.taxe_nuit),
-                            statut: r.statut,
-                            notes: r.notes ?? "",
-                          });
-                        }}
-                      >
-                        Modifier
-                      </Button>
-                      {r.statut === "reservee" ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              changerStatut.mutate({ id: r.id, statut: "en_cours" })
-                            }
-                          >
-                            Check-in
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => changerStatut.mutate({ id: r.id, statut: "annulee" })}
-                          >
-                            Annuler
-                          </Button>
-                        </>
-                      ) : null}
-                      {r.statut === "en_cours" ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setProlongerResa(r);
-                              setNouvelleDatePeriode(r.date_depart);
-                            }}
-                          >
-                            <CalendarPlus className="size-3.5" /> Prolonger
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              setFacturerResa(r);
-                              setFacturerForm({ avance: "", buanderie: "", remiseType: "montant", remiseValeur: "" });
-                            }}
-                          >
-                            Check-out & facturer
-                          </Button>
-                        </>
-                      ) : null}
-                    </TableCell>
-                  </TableRow>
+                  <Card
+                    key={r.id}
+                    className="group overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-lg"
+                  >
+                    <CardContent className="space-y-3.5 p-5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-display text-lg font-bold text-slate-900 dark:text-white">
+                            {r.clients?.prenom} {r.clients?.nom}
+                          </p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                            {r.chambres?.nom}
+                          </p>
+                        </div>
+                        <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${STATUTS[r.statut]?.badge || STATUTS.reservee.badge}`}>
+                          {STATUTS[r.statut]?.label || r.statut}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                        <CalendarDays className="size-4" />
+                        {formatDate(r.date_arrivee)} → {formatDate(r.date_depart)}
+                        <span className="text-xs">({n} nuit(s))</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Users className="size-4 text-slate-400 dark:text-slate-500" />
+                        <span className="text-slate-600 dark:text-slate-300">{r.nb_personnes} pers.</span>
+                      </div>
+                      <p className="text-lg font-bold text-red-500">
+                        {formatFCFA(n * Number(r.prix_nuit) + n * Number(r.taxe_nuit))}
+                      </p>
+                      <div className="flex flex-wrap gap-2 border-t border-slate-100 dark:border-slate-700/50 pt-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                          onClick={() => {
+                            setEditId(r.id);
+                            setEditForm({
+                              client_id: r.client_id,
+                              chambre_id: r.chambre_id,
+                              date_arrivee: r.date_arrivee,
+                              date_depart: r.date_depart,
+                              nb_personnes: String(r.nb_personnes),
+                              prix_nuit: String(r.prix_nuit),
+                              taxe_nuit: String(r.taxe_nuit),
+                              statut: r.statut,
+                              notes: r.notes ?? "",
+                            });
+                          }}
+                        >
+                          Modifier
+                        </Button>
+                        {r.statut === "reservee" ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-500 dark:hover:text-emerald-400"
+                              onClick={() =>
+                                changerStatut.mutate({ id: r.id, statut: "en_cours" })
+                              }
+                            >
+                              <CheckCircle className="size-3.5 mr-1" /> Check-in
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400"
+                              onClick={() =>
+                                changerStatut.mutate({ id: r.id, statut: "annulee" })
+                              }
+                            >
+                              <XCircle className="size-3.5 mr-1" /> Annuler
+                            </Button>
+                          </>
+                        ) : null}
+                        {r.statut === "en_cours" ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 dark:hover:text-blue-400"
+                              onClick={() => {
+                                setProlongerResa(r);
+                                setNouvelleDatePeriode(r.date_depart);
+                              }}
+                            >
+                              <CalendarPlus className="size-3.5 mr-1" /> Prolonger
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-xl"
+                              onClick={() => {
+                                setFacturerResa(r);
+                                setFacturerForm({
+                                  avance: "",
+                                  buanderie: "",
+                                  remiseType: "montant",
+                                  remiseValeur: "",
+                                });
+                              }}
+                            >
+                              Check-out & facturer
+                            </Button>
+                          </>
+                        ) : null}
+                      </div>
+                    </CardContent>
+                  </Card>
                 );
               })}
-             {reservationsFiltrees.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                    Aucune réservation trouvée.
-                  </TableCell>
-                </TableRow>
+              {reservationsFiltrees.length === 0 ? (
+                <p className="col-span-full py-16 text-center text-sm text-slate-400 dark:text-slate-500">
+                  Aucune réservation trouvée.
+                </p>
               ) : null}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-      )}
-      </>
+            </div>
+          ) : (
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+              <CardContent className="overflow-x-auto p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-slate-100 dark:border-slate-700/50">
+                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                        Client
+                      </TableHead>
+                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                        Chambre
+                      </TableHead>
+                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                        Séjour
+                      </TableHead>
+                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                        Personnes
+                      </TableHead>
+                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                        Montant
+                      </TableHead>
+                      <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                        Statut
+                      </TableHead>
+                      <TableHead className="text-right text-slate-600 dark:text-slate-300 font-semibold">
+                        Actions
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reservationsFiltrees.map((r) => {
+                      const n = nbNuits(r.date_arrivee, r.date_depart);
+                      return (
+                        <TableRow
+                          key={r.id}
+                          className="border-b border-slate-100/50 dark:border-slate-700/30 hover:bg-slate-50/50 dark:hover:bg-slate-700/20"
+                        >
+                          <TableCell className="font-medium text-slate-900 dark:text-white">
+                            {r.clients?.prenom} {r.clients?.nom}
+                          </TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-300">
+                            {r.chambres?.nom}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600 dark:text-slate-300">
+                            {formatDate(r.date_arrivee)} → {formatDate(r.date_depart)}
+                            <span className="block text-xs text-slate-400 dark:text-slate-500">
+                              {n} nuit(s)
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-300">
+                            {r.nb_personnes}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap font-medium text-slate-900 dark:text-white">
+                            {formatFCFA(n * Number(r.prix_nuit) + n * Number(r.taxe_nuit))}
+                          </TableCell>
+                          <TableCell>
+                            <span
+                              className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                                STATUTS[r.statut]?.badge || STATUTS.reservee.badge
+                              }`}
+                            >
+                              {STATUTS[r.statut]?.label || r.statut}
+                            </span>
+                          </TableCell>
+                          <TableCell className="space-x-1.5 text-right whitespace-nowrap">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+                              onClick={() => {
+                                setEditId(r.id);
+                                setEditForm({
+                                  client_id: r.client_id,
+                                  chambre_id: r.chambre_id,
+                                  date_arrivee: r.date_arrivee,
+                                  date_depart: r.date_depart,
+                                  nb_personnes: String(r.nb_personnes),
+                                  prix_nuit: String(r.prix_nuit),
+                                  taxe_nuit: String(r.taxe_nuit),
+                                  statut: r.statut,
+                                  notes: r.notes ?? "",
+                                });
+                              }}
+                            >
+                              Modifier
+                            </Button>
+                            {r.statut === "reservee" ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-500 dark:hover:text-emerald-400"
+                                  onClick={() =>
+                                    changerStatut.mutate({ id: r.id, statut: "en_cours" })
+                                  }
+                                >
+                                  <CheckCircle className="size-3.5 mr-1" /> Check-in
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400"
+                                  onClick={() =>
+                                    changerStatut.mutate({ id: r.id, statut: "annulee" })
+                                  }
+                                >
+                                  <XCircle className="size-3.5 mr-1" /> Annuler
+                                </Button>
+                              </>
+                            ) : null}
+                            {r.statut === "en_cours" ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 dark:hover:text-blue-400"
+                                  onClick={() => {
+                                    setProlongerResa(r);
+                                    setNouvelleDatePeriode(r.date_depart);
+                                  }}
+                                >
+                                  <CalendarPlus className="size-3.5 mr-1" /> Prolonger
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-xl"
+                                  onClick={() => {
+                                    setFacturerResa(r);
+                                    setFacturerForm({
+                                      avance: "",
+                                      buanderie: "",
+                                      remiseType: "montant",
+                                      remiseValeur: "",
+                                    });
+                                  }}
+                                >
+                                  Check-out & facturer
+                                </Button>
+                              </>
+                            ) : null}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    {reservationsFiltrees.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={7}
+                          className="py-8 text-center text-slate-400 dark:text-slate-500"
+                        >
+                          Aucune réservation trouvée.
+                        </TableCell>
+                      </TableRow>
+                    ) : null}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
 
       <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
-
-        <DialogContent>
+        <DialogContent className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifier la réservation</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Modifier la réservation
+            </DialogTitle>
           </DialogHeader>
           <form
             className="space-y-4"
@@ -1004,252 +1144,4 @@ type Resa = NonNullable<typeof reservations>[number];
               modifier.mutate();
             }}
           >
-            <div className="space-y-2">
-              <Label>Client</Label>
-              <Select
-                value={editForm.client_id}
-                onValueChange={(v) => setEditForm({ ...editForm, client_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(clients ?? []).map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.prenom} {c.nom}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Chambre</Label>
-              <Select
-                value={editForm.chambre_id}
-                onValueChange={(v) => setEditForm({ ...editForm, chambre_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Chambre" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(chambres ?? []).map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.nom} — {formatFCFA(c.prix_nuit)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Arrivée</Label>
-                <Input
-                  type="date"
-                  required
-                  value={editForm.date_arrivee}
-                  onChange={(e) => setEditForm({ ...editForm, date_arrivee: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Départ</Label>
-                <Input
-                  type="date"
-                  required
-                  value={editForm.date_depart}
-                  onChange={(e) => setEditForm({ ...editForm, date_depart: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Personnes</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={editForm.nb_personnes}
-                  onChange={(e) => setEditForm({ ...editForm, nb_personnes: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Prix / nuit (FCFA)</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={editForm.prix_nuit}
-                  onChange={(e) => setEditForm({ ...editForm, prix_nuit: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Taxe / nuitée (FCFA)</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={editForm.taxe_nuit}
-                  onChange={(e) => setEditForm({ ...editForm, taxe_nuit: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Statut</Label>
-                <Select
-                  value={editForm.statut}
-                  onValueChange={(v) => setEditForm({ ...editForm, statut: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(STATUTS).map(([k, v]) => (
-                      <SelectItem key={k} value={k}>
-                        {v}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Notes</Label>
-              <Input
-                value={editForm.notes}
-                onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-              />
-            </div>
-            {conflitEdition ? (
-              <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-                ⚠️ Chambre déjà réservée du {formatDate(conflitEdition.date_arrivee)} au{" "}
-                {formatDate(conflitEdition.date_depart)} pour{" "}
-                {conflitEdition.clients?.prenom} {conflitEdition.clients?.nom}.
-              </div>
-            ) : null}
-            <DialogFooter>
-              <Button type="submit" disabled={modifier.isPending || !!conflitEdition}>
-                Enregistrer les modifications
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!facturerResa} onOpenChange={(o) => !o && setFacturerResa(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Check-out & facturation</DialogTitle>
-          </DialogHeader>
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!facturerResa) return;
-              cloturer.mutate({
-                r: facturerResa,
-                avance: Number(facturerForm.avance) || 0,
-                buanderie: Number(facturerForm.buanderie) || 0,
-                remiseType: facturerForm.remiseType,
-                remiseValeur: Number(facturerForm.remiseValeur) || 0,
-              });
-            }}
-          >
-            <p className="text-sm text-muted-foreground">
-              {facturerResa?.clients?.prenom} {facturerResa?.clients?.nom} —{" "}
-              {facturerResa?.chambres?.nom}
-            </p>
-
-            <div className="space-y-2">
-              <Label>Service buanderie (FCFA) — laisser vide si aucun</Label>
-              <Input
-                type="number"
-                min="0"
-                value={facturerForm.buanderie}
-                onChange={(e) => setFacturerForm({ ...facturerForm, buanderie: e.target.value })}
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Type de remise</Label>
-                <Select
-                  value={facturerForm.remiseType}
-                  onValueChange={(v) => setFacturerForm({ ...facturerForm, remiseType: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="montant">Montant fixe (FCFA)</SelectItem>
-                    <SelectItem value="pourcentage">Pourcentage (%)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Valeur de la remise — laisser vide si aucune</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={facturerForm.remiseValeur}
-                  onChange={(e) =>
-                    setFacturerForm({ ...facturerForm, remiseValeur: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Avance déjà versée (FCFA) — laisser vide si aucune</Label>
-              <Input
-                type="number"
-                min="0"
-                value={facturerForm.avance}
-                onChange={(e) => setFacturerForm({ ...facturerForm, avance: e.target.value })}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button type="submit" disabled={cloturer.isPending}>
-                Clôturer et générer la facture
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!prolongerResa} onOpenChange={(o) => !o && setProlongerResa(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Prolonger le séjour</DialogTitle>
-          </DialogHeader>
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              prolonger.mutate();
-            }}
-          >
-            <p className="text-sm text-muted-foreground">
-              {prolongerResa?.clients?.prenom} {prolongerResa?.clients?.nom} —{" "}
-              {prolongerResa?.chambres?.nom}
-            </p>
-            <div className="space-y-2">
-              <Label>Date de départ actuelle</Label>
-              <p className="text-sm font-medium">
-                {prolongerResa ? formatDate(prolongerResa.date_depart) : ""}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label>Nouvelle date de départ</Label>
-              <Input
-                type="date"
-                required
-                min={prolongerResa?.date_depart}
-                value={nouvelleDatePeriode}
-                onChange={(e) => setNouvelleDatePeriode(e.target.value)}
-              />
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={prolonger.isPending}>
-                Prolonger le séjour
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+        
