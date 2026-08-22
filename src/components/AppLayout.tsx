@@ -202,8 +202,8 @@ function SidebarContent({
         </div>
 
         <div className="flex flex-col leading-tight">
-          <span className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">THE DAYA</span>
-          <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 tracking-[0.1em] uppercase">Hotel Manager</span>
+          <span className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">Le DAYA Guest House </span>
+          <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 tracking-[0.1em] uppercase">Votre satisfaction notre priorité</span>
         </div>
 
         {mobile && onClose && (
@@ -375,10 +375,10 @@ function SidebarContent({
       </nav>
 
       {/* ═══════════════════════════════════════ */}
-      {/* PIED DE PAGE - PROFIL + DÉCONNEXION */}
+      {/* PIED DE PAGE - PROFIL + DÉCONNEXION (FIXÉ EN BAS) */}
       {/* ═══════════════════════════════════════ */}
       <div className={cn(
-        "border-t border-slate-200/60 dark:border-slate-700/50 p-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md",
+        "border-t border-slate-200/60 dark:border-slate-700/50 p-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md flex-shrink-0",
         mobile && "rounded-b-r-[32px]"
       )}>
         {/* Profil - version desktop */}
@@ -573,7 +573,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <TooltipProvider>
-      {/* Keyframes de l'animation des items du menu mobile */}
       <style>{`
         @keyframes daya-item-in {
           from { opacity: 0; transform: translateX(-12px); }
@@ -583,7 +582,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
           animation: daya-item-in 0.35s ease-out forwards;
         }
 
-        /* Scrollbar personnalisée pour la sidebar */
         .sidebar-scroll::-webkit-scrollbar {
           width: 3px;
         }
@@ -604,17 +602,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
       `}</style>
 
       <div className="min-h-screen bg-gray-50 dark:bg-slate-900 lg:flex">
-        {/* ═══════════════════════════════════════════ */}
-        {/* SIDEBAR DESKTOP - STYLE "THE DAYA" */}
-        {/* ═══════════════════════════════════════════ */}
+        {/* SIDEBAR DESKTOP */}
         <aside className="no-print hidden w-[280px] shrink-0 shadow-[10px_0_30px_-15px_rgba(15,23,42,0.08)] lg:sticky lg:top-0 lg:block lg:h-screen">
           <SidebarContent favoris={favoris} toggleFavori={toggleFavori} />
         </aside>
 
-        {/* ═══════════════════════════════════════════ */}
-        {/* SIDEBAR MOBILE - OVERLAY AVEC EFFET */}
-        {/* ═══════════════════════════════════════════ */}
-        {/* Overlay sombre */}
+        {/* SIDEBAR MOBILE - OVERLAY */}
         <div
           className={cn(
             "fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-all duration-300 lg:hidden",
@@ -623,7 +616,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           onClick={() => setMobileOpen(false)}
         />
 
-        {/* Sidebar mobile - indépendante et scrollable */}
+        {/* SIDEBAR MOBILE */}
         <div
           className={cn(
             "fixed inset-y-0 left-0 z-50 w-[85%] max-w-[320px] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] lg:hidden",
@@ -640,24 +633,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
           />
         </div>
 
-        {/* ═══════════════════════════════════════════ */}
-        {/* COLONNE DE CONTENU */}
-        {/* ═══════════════════════════════════════════ */}
-        {/* 
-          On utilise `overflow-y-auto` pour que la page défile 
-          Quand la sidebar est ouverte sur mobile, le body est bloqué (overflow:hidden)
-        */}
+        {/* CONTENU PRINCIPAL */}
         <div
           className={cn(
             "relative flex min-w-0 flex-1 flex-col bg-background dark:bg-slate-900",
-            // Quand la sidebar est ouverte, on empêche le scroll du contenu
             mobileOpen ? "overflow-hidden" : "overflow-y-auto",
             "h-screen",
           )}
         >
           {/* HEADER */}
           <header className="no-print sticky top-0 z-30 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/60 dark:border-slate-700/50 bg-card/80 dark:bg-slate-800/80 px-4 py-2 shadow-sm backdrop-blur-md">
-            {/* Bouton menu mobile */}
             <Button
               type="button"
               variant="outline"
@@ -668,7 +653,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <Menu className="size-5" />
             </Button>
 
-            {/* Logo */}
             <div className="flex min-w-0 items-center gap-2">
               <div className="rounded-lg bg-white dark:bg-slate-700 p-1.5 shadow-md">
                 <BrandLogo className="max-h-8" />
@@ -678,7 +662,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </span>
             </div>
 
-            {/* Date */}
             <span className="hidden text-sm text-muted-foreground sm:block">
               {new Date().toLocaleDateString("fr-FR", {
                 weekday: "long",
@@ -688,10 +671,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
               })}
             </span>
 
-            {/* Météo - Desktop */}
             <MeteoWidget />
 
-            {/* Notifications */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button type="button" variant="ghost" size="icon" className="relative rounded-xl dark:hover:bg-slate-700/50" asChild>
@@ -715,7 +696,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </TooltipContent>
             </Tooltip>
 
-            {/* Recherche */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -733,7 +713,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <TooltipContent>Recherche globale</TooltipContent>
             </Tooltip>
 
-            {/* Profil - Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -775,7 +754,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </DropdownMenu>
           </header>
 
-          {/* MAIN */}
           <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8 dark:bg-slate-900">
             {children}
           </main>
