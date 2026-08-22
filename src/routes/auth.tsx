@@ -18,10 +18,7 @@ import {
   Monitor,
   CheckCircle,
   AlertCircle,
-  Github,
   Chrome,
-  Apple,
-  Sparkles,
   Hotel,
   Users,
   CalendarDays,
@@ -47,8 +44,6 @@ function AuthPage() {
 
   // États pour les fonctionnalités avancées
   const [biometricSupported, setBiometricSupported] = useState(false);
-  const [showTwoFactor, setShowTwoFactor] = useState(false);
-  const [twoFactorCode, setTwoFactorCode] = useState("");
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockTimer, setLockTimer] = useState(0);
@@ -61,19 +56,17 @@ function AuthPage() {
   });
 
   // ============================================================
-  // STATISTIQUES DE CONNEXION (simulées)
-  // ============================================================
-  const [stats, setStats] = useState({
-    lastLogin: "Aujourd'hui, 14:30",
-    totalLogins: 47,
-    devices: ["Chrome (Windows)", "Safari (iPhone)"],
-  });
-
-  // ============================================================
-  // VÉRIFICATION DE LA BIOMÉTRIE
+  // VÉRIFICATION DE LA BIOMÉTRIE (uniquement desktop)
   // ============================================================
   useEffect(() => {
     const checkBiometric = async () => {
+      // Vérifier si c'est un appareil mobile
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent);
+      if (isMobile) {
+        setBiometricSupported(false);
+        return;
+      }
+
       if (window.PublicKeyCredential) {
         try {
           const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
@@ -171,7 +164,7 @@ function AuthPage() {
   }
 
   // ============================================================
-  // CONNEXION PAR BIOMÉTRIE
+  // CONNEXION PAR BIOMÉTRIE (desktop uniquement)
   // ============================================================
   const handleBiometricLogin = async () => {
     if (!biometricSupported) {
@@ -228,20 +221,20 @@ function AuthPage() {
   };
 
   // ============================================================
-  // CONNEXION SOCIALE
+  // CONNEXION SOCIALE (Google uniquement)
   // ============================================================
-  const handleSocialLogin = async (provider: "google" | "github" | "apple") => {
+  const handleSocialLogin = async () => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
-        provider,
+        provider: "google",
         options: {
           redirectTo: window.location.origin,
         },
       });
       if (error) throw error;
     } catch (err) {
-      toast.error(`Erreur de connexion avec ${provider}`);
+      toast.error("Erreur de connexion avec Google");
     } finally {
       setLoading(false);
     }
@@ -266,27 +259,56 @@ function AuthPage() {
           FOND D'ÉCRAN AVEC EFFET DE PROFONDEUR
       ======================================================== */}
 
-      {/* Cercle lumineux principal - rouge DAYA */}
       <div className="absolute top-[-20%] left-[-10%] w-[700px] h-[700px] rounded-full bg-red-500/15 dark:bg-red-500/10 blur-[140px] pointer-events-none animate-pulse-slow" />
-
-      {/* Cercle lumineux secondaire - or */}
       <div className="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] rounded-full bg-amber-400/10 dark:bg-amber-400/5 blur-[130px] pointer-events-none animate-pulse-slower" />
-
-      {/* Cercle lumineux tertiaire - bleu */}
       <div className="absolute top-[30%] right-[5%] w-[300px] h-[300px] rounded-full bg-blue-400/10 dark:bg-blue-400/5 blur-[100px] pointer-events-none" />
 
       {/* GRILLE DISCRÈTE */}
       <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03] pointer-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:60px_60px]" />
 
       {/* ========================================================
+          BOUTON THÈME - EN HAUT À GAUCHE
+      ======================================================== */}
+
+      <div className="absolute top-5 left-5 z-30">
+        <button
+          onClick={() => {
+            const themes: ("light" | "dark" | "system")[] = ["light", "dark", "system"];
+            const currentIndex = themes.indexOf(theme);
+            const nextIndex = (currentIndex + 1) % themes.length;
+            setTheme(themes[nextIndex]);
+          }}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/70 dark:border-slate-800/70 shadow-sm text-xs text-slate-600 dark:text-slate-300 transition-all hover:bg-white/90 dark:hover:bg-slate-800/90"
+        >
+          {theme === "dark" && <Moon className="size-3.5" />}
+          {theme === "light" && <Sun className="size-3.5" />}
+          {theme === "system" && <Monitor className="size-3.5" />}
+          <span className="hidden sm:inline">
+            {theme === "dark" && "Sombre"}
+            {theme === "light" && "Clair"}
+            {theme === "system" && "Système"}
+          </span>
+        </button>
+      </div>
+
+      {/* ========================================================
+          BADGE SYSTÈME - EN HAUT À DROITE
+      ======================================================== */}
+
+      <div className="absolute top-5 right-5 z-30 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/70 dark:border-slate-800/70 shadow-sm text-[9px] sm:text-[10px] uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400 animate-fade-in">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 dark:bg-emerald-500 opacity-60 animate-ping" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+        </span>
+        <span className="hidden sm:inline">Système opérationnel</span>
+        <span className="sm:hidden">Opérationnel</span>
+      </div>
+
+      {/* ========================================================
           CONTENU PRINCIPAL
       ======================================================== */}
 
       <div className="relative z-10 w-full max-w-6xl px-4 py-8 animate-fade-in-up">
-
-        {/* ======================================================
-            GRID : GAUCHE (FORMULAIRE) / DROITE (INFOS)
-        ====================================================== */}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
 
@@ -296,50 +318,30 @@ function AuthPage() {
 
           <div className="w-full max-w-md mx-auto lg:mx-0">
 
-            {/* Logo */}
+            {/* Logo - avec fond qui remplit la carte */}
             <div className="mb-8 flex justify-center lg:justify-start">
-              <div className="group relative p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/70 dark:border-slate-700/70 rounded-3xl shadow-lg transition-all duration-500 hover:scale-[1.02] hover:border-red-200 dark:hover:border-red-900 hover:shadow-[0_20px_45px_-10px_rgba(220,38,38,0.15)]">
-                <div className="absolute top-0 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-white dark:via-slate-600 to-transparent" />
-                <BrandLogo className="h-14 transition-transform duration-500 group-hover:scale-105" />
+              <div className="relative w-full max-w-[280px] bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/70 dark:border-slate-700/70 rounded-3xl shadow-lg overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:border-red-200 dark:hover:border-red-900 hover:shadow-[0_20px_45px_-10px_rgba(220,38,38,0.15)]">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-slate-600/60 to-transparent" />
+                <BrandLogo className="w-full h-auto p-4 transition-transform duration-500 hover:scale-105" />
               </div>
             </div>
 
-            {/* Carte de connexion */}
+            {/* Carte de connexion - avec "Accès Manager" centré */}
             <div className="relative p-7 sm:p-8 bg-white/70 dark:bg-slate-800/70 backdrop-blur-2xl border border-white/70 dark:border-slate-700/70 rounded-3xl shadow-[0_20px_60px_-20px_rgba(15,23,42,0.12)] dark:shadow-[0_20px_60px_-20px_rgba(0,0,0,0.4)] transition-all duration-500 hover:border-red-200/80 dark:hover:border-red-900/80 hover:shadow-[0_25px_70px_-20px_rgba(220,38,38,0.12)]">
 
               {/* Reflet supérieur */}
               <div className="absolute top-0 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-white/60 dark:via-slate-600/60 to-transparent" />
 
               {/* Badge sécurisé */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-center mb-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50/80 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 text-[9px] uppercase tracking-[0.16em] text-red-600 dark:text-red-400 font-semibold">
                   <ShieldCheck size={13} />
                   Espace sécurisé
                 </div>
-
-                {/* Bouton thème */}
-                <button
-                  onClick={() => {
-                    const themes: ("light" | "dark" | "system")[] = ["light", "dark", "system"];
-                    const currentIndex = themes.indexOf(theme);
-                    const nextIndex = (currentIndex + 1) % themes.length;
-                    setTheme(themes[nextIndex]);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/80 dark:bg-slate-700/80 backdrop-blur-sm border border-slate-200/60 dark:border-slate-600/60 text-xs text-slate-600 dark:text-slate-300 transition-all hover:bg-slate-200/80 dark:hover:bg-slate-600/80"
-                >
-                  {theme === "dark" && <Moon className="size-3.5" />}
-                  {theme === "light" && <Sun className="size-3.5" />}
-                  {theme === "system" && <Monitor className="size-3.5" />}
-                  <span className="hidden sm:inline">
-                    {theme === "dark" && "Sombre"}
-                    {theme === "light" && "Clair"}
-                    {theme === "system" && "Système"}
-                  </span>
-                </button>
               </div>
 
-              {/* Titre */}
-              <div className="mb-6">
+              {/* Titre centré */}
+              <div className="mb-6 text-center">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
                   Accès Manager
                 </h2>
@@ -461,7 +463,7 @@ function AuthPage() {
                   </span>
                 </Button>
 
-                {/* Connexion sociale */}
+                {/* Connexion sociale - uniquement Google */}
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-slate-200/60 dark:border-slate-700/60" />
@@ -473,35 +475,15 @@ function AuthPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleSocialLogin("google")}
-                    className="rounded-xl border-slate-200/80 dark:border-slate-700/80 bg-white/40 dark:bg-slate-800/40 hover:bg-white/70 dark:hover:bg-slate-700/70 text-slate-700 dark:text-slate-300 text-xs h-9"
-                  >
-                    <Chrome size={16} className="mr-1.5" />
-                    Google
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleSocialLogin("github")}
-                    className="rounded-xl border-slate-200/80 dark:border-slate-700/80 bg-white/40 dark:bg-slate-800/40 hover:bg-white/70 dark:hover:bg-slate-700/70 text-slate-700 dark:text-slate-300 text-xs h-9"
-                  >
-                    <Github size={16} className="mr-1.5" />
-                    GitHub
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleSocialLogin("apple")}
-                    className="rounded-xl border-slate-200/80 dark:border-slate-700/80 bg-white/40 dark:bg-slate-800/40 hover:bg-white/70 dark:hover:bg-slate-700/70 text-slate-700 dark:text-slate-300 text-xs h-9"
-                  >
-                    <Apple size={16} className="mr-1.5" />
-                    Apple
-                  </Button>
-                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSocialLogin}
+                  className="w-full rounded-xl border-slate-200/80 dark:border-slate-700/80 bg-white/40 dark:bg-slate-800/40 hover:bg-white/70 dark:hover:bg-slate-700/70 text-slate-700 dark:text-slate-300 text-sm h-11"
+                >
+                  <Chrome size={18} className="mr-2" />
+                  Continuer avec Google
+                </Button>
 
                 {/* Tentatives restantes */}
                 {loginAttempts > 0 && loginAttempts < 5 && (
@@ -533,19 +515,10 @@ function AuthPage() {
           </div>
 
           {/* ====================================================
-              COLONNE DROITE - INFORMATIONS
+              COLONNE DROITE - INFORMATIONS (Desktop uniquement)
           ==================================================== */}
 
           <div className="hidden lg:block space-y-6">
-
-            {/* Badge système */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 shadow-sm text-xs text-emerald-600 dark:text-emerald-400">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 dark:bg-emerald-500 opacity-60 animate-ping" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-              </span>
-              Système opérationnel
-            </div>
 
             {/* Carte de bienvenue */}
             <div className="relative p-8 bg-white/60 dark:bg-slate-800/60 backdrop-blur-2xl border border-white/60 dark:border-slate-700/60 rounded-3xl shadow-[0_20px_60px_-20px_rgba(15,23,42,0.10)]">
@@ -623,7 +596,7 @@ function AuthPage() {
               </button>
             </div>
 
-            {/* Biométrie - si supportée */}
+            {/* Biométrie - desktop uniquement */}
             {biometricSupported && (
               <button
                 onClick={handleBiometricLogin}
@@ -664,6 +637,14 @@ function AuthPage() {
         }
         .animate-pulse-slower {
           animation: pulse-slower 10s ease-in-out infinite;
+        }
+
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.8s ease-out forwards;
         }
       `}</style>
     </div>
