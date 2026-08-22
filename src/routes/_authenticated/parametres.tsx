@@ -17,18 +17,62 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { PageHeader } from "@/components/AppLayout";
 import { BrandLogo, SLOGAN } from "@/components/Brand";
 import { formatFCFA } from "@/lib/format";
 import { useEtablissement, useParametres, useMonRole } from "@/hooks/use-hotel";
 import { useSettings, ThemeType, RadiusType, WallpaperType, ModeType } from "../../context/ThemeContext";
-import { 
-  Palette, Monitor, Layers, Sliders, Building2, Sparkles, Search, Users, 
-  Settings, Database, Bell, Shield, CreditCard, Mail, Globe, Clock, 
-  Save, Upload, Download, RefreshCw, CheckCircle, AlertCircle, X,
-  TrendingUp, Home, Calendar, DollarSign, FileText, PieChart, BarChart3,
-  Wifi, Coffee, Car, Dumbbell, Utensils, Key, Zap, HardDrive, Cloud
+import {
+  Palette,
+  Monitor,
+  Layers,
+  Sliders,
+  Building2,
+  Sparkles,
+  Search,
+  Users,
+  Settings,
+  Database,
+  Bell,
+  Shield,
+  CreditCard,
+  Mail,
+  Globe,
+  Clock,
+  Save,
+  Upload,
+  Download,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
+  X,
+  TrendingUp,
+  Home,
+  Calendar,
+  DollarSign,
+  FileText,
+  PieChart,
+  BarChart3,
+  Wifi,
+  Coffee,
+  Car,
+  Dumbbell,
+  Utensils,
+  Key,
+  Zap,
+  HardDrive,
+  Cloud,
+  Moon,
+  Sun,
+  Monitor as MonitorIcon,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/parametres")({
@@ -76,7 +120,6 @@ function ParametresPage() {
   const { data: monRole } = useMonRole();
   const estAdmin = monRole?.estAdmin ?? false;
 
-  // Paramètres globaux de l'interface
   const {
     theme,
     setTheme,
@@ -95,7 +138,7 @@ function ParametresPage() {
     hotelInfo,
   } = useSettings();
 
-const { buttonTheme, setButtonTheme } = useButtonTheme();
+  const { buttonTheme, setButtonTheme } = useButtonTheme();
 
   const radiusClasses: Record<RadiusType, string> = {
     sm: "rounded-sm",
@@ -105,7 +148,6 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
     full: "rounded-full",
   };
 
-  // États pour les formulaires
   const [etabForm, setEtabForm] = useState({
     nom: "",
     ville: "",
@@ -118,7 +160,6 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
   const [filtreRole, setFiltreRole] = useState<string>("tous");
   const [tabActif, setTabActif] = useState<string>("interface");
 
-  // Paramètres techniques de l'application
   const [paramsApp, setParamsApp] = useState({
     langue: "fr",
     devise: "FCFA",
@@ -133,7 +174,6 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
     cacheEnabled: true,
   });
 
-  // Paramètres techniques de l'établissement
   const [paramsEtab, setParamsEtab] = useState({
     heureCheckIn: "14:00",
     heureCheckOut: "11:00",
@@ -150,7 +190,6 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
     salleSport: false,
   });
 
-  // Paramètres de paiement
   const [paramsPaiement, setParamsPaiement] = useState({
     mobileMoney: true,
     carteBancaire: true,
@@ -160,7 +199,6 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
     delaiPaiementJours: "30",
   });
 
-  // Paramètres email
   const [paramsEmail, setParamsEmail] = useState({
     smtpHost: "smtp.gmail.com",
     smtpPort: "587",
@@ -170,7 +208,6 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
     signatureEmail: "Cordialement,\nL'équipe LE DAYA Guest House",
   });
 
-  // Initialisation des données
   useEffect(() => {
     if (etab) {
       setEtabForm({
@@ -189,7 +226,6 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
     }
   }, [params]);
 
-  // Récupération des utilisateurs
   const { data: utilisateurs } = useQuery({
     queryKey: ["utilisateurs"],
     queryFn: async () => {
@@ -206,7 +242,6 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
     },
   });
 
-  // Filtrage des utilisateurs
   const utilisateursFiltres = useMemo(() => {
     return (utilisateurs ?? []).filter((u) => {
       if (recherche) {
@@ -220,7 +255,6 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
     });
   }, [utilisateurs, recherche, filtreRole]);
 
-  // Statistiques des rôles
   const statsRoles = useMemo(() => {
     const roles = (utilisateurs ?? []).reduce((acc, u) => {
       const role = u.role ?? "aucun";
@@ -230,7 +264,6 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
     return roles;
   }, [utilisateurs]);
 
-  // Mutations
   const enregistrerEtab = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
@@ -303,51 +336,87 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `parametres_${etab?.nom?.replace(/s+/g, "_") ?? "export"}.json`;
+    link.download = `parametres_${etab?.nom?.replace(/\\s+/g, "_") ?? "export"}.json`;
     link.click();
     window.URL.revokeObjectURL(url);
     toast.success("Paramètres exportés.");
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Paramètres"
         description="Configuration de l'application"
+        action={
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exporterParametres}
+              className="rounded-xl border-slate-200 dark:border-slate-600/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
+            >
+              <Download className="size-4 mr-1.5" />
+              Exporter
+            </Button>
+          </div>
+        }
       />
 
-      {/* ONGLETS DE NAVIGATION */}
       <Tabs value={tabActif} onValueChange={setTabActif} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-6">
-          <TabsTrigger value="interface" className="gap-2">
-            <Palette className="w-4 h-4" />
-            <span className="hidden sm:inline">Interface</span>
+        <TabsList className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-1 border border-slate-200/50 dark:border-slate-700/50 flex flex-wrap h-auto gap-1">
+          <TabsTrigger
+            value="interface"
+            className="rounded-xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500 data-[state=active]:to-rose-600 data-[state=active]:text-white text-xs sm:text-sm px-3 py-1.5"
+          >
+            <Palette className="size-3.5 sm:size-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Interface</span>
+            <span className="xs:hidden">UI</span>
           </TabsTrigger>
-          <TabsTrigger value="etablissement" className="gap-2">
-            <Building2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Établissement</span>
+          <TabsTrigger
+            value="etablissement"
+            className="rounded-xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500 data-[state=active]:to-rose-600 data-[state=active]:text-white text-xs sm:text-sm px-3 py-1.5"
+          >
+            <Building2 className="size-3.5 sm:size-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Établissement</span>
+            <span className="xs:hidden">🏨</span>
           </TabsTrigger>
-          <TabsTrigger value="technique" className="gap-2">
-            <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">Technique</span>
+          <TabsTrigger
+            value="technique"
+            className="rounded-xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500 data-[state=active]:to-rose-600 data-[state=active]:text-white text-xs sm:text-sm px-3 py-1.5"
+          >
+            <Settings className="size-3.5 sm:size-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Technique</span>
+            <span className="xs:hidden">⚙️</span>
           </TabsTrigger>
-          <TabsTrigger value="utilisateurs" className="gap-2">
-            <Users className="w-4 h-4" />
-            <span className="hidden sm:inline">Utilisateurs</span>
+          <TabsTrigger
+            value="utilisateurs"
+            className="rounded-xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500 data-[state=active]:to-rose-600 data-[state=active]:text-white text-xs sm:text-sm px-3 py-1.5"
+          >
+            <Users className="size-3.5 sm:size-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Utilisateurs</span>
+            <span className="xs:hidden">👤</span>
           </TabsTrigger>
         </TabsList>
 
-        {/* ONGLET 1 : INTERFACE */}
+        {/* ============================================================
+            ONGLET 1 : INTERFACE
+        ============================================================ */}
         <TabsContent value="interface" className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Thèmes */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-purple-50 via-white to-pink-50 border-purple-200">
-              <CardHeader>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Palette className="w-5 h-5 text-purple-600" />
-                  <CardTitle>Thème & Ambiance</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+                    <Palette className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Thème & Ambiance
+                  </CardTitle>
                 </div>
-                <CardDescription>Sélectionnez l'identité visuelle globale</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Sélectionnez l'identité visuelle globale
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
@@ -355,125 +424,145 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                     <button
                       key={t.id}
                       onClick={() => setTheme(t.id as ThemeType)}
-                      className={`p-4 text-left border-2 rounded-xl transition-all ${
-                        theme === t.id 
-                          ? "border-purple-500 bg-purple-100 shadow-lg scale-[1.02]" 
-                          : "border-gray-200 hover:border-purple-300 bg-white/50"
+                      className={`p-4 text-left border-2 rounded-2xl transition-all ${
+                        theme === t.id
+                          ? "border-red-500 bg-red-50 dark:bg-red-900/20 shadow-lg scale-[1.02]"
+                          : "border-slate-200 dark:border-slate-700 hover:border-red-200 dark:hover:border-red-800 bg-white/50 dark:bg-slate-800/50"
                       }`}
                     >
                       <div className="flex gap-1 mb-2">
                         {t.couleurs.map((c, i) => (
-                          <div 
-                            key={i} 
-                            className="w-6 h-6 rounded-full border border-gray-300"
+                          <div
+                            key={i}
+                            className="w-6 h-6 rounded-full border border-slate-200 dark:border-slate-600"
                             style={{ backgroundColor: c }}
                           />
                         ))}
                       </div>
-                      <div className="font-semibold text-gray-900 text-sm">{t.name}</div>
-                      <div className="text-xs text-gray-600 mt-0.5">{t.desc}</div>
+                      <div className="font-semibold text-slate-900 dark:text-white text-sm">
+                        {t.name}
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {t.desc}
+                      </div>
                     </button>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-{/* Style des boutons */}
-<Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-indigo-50 via-white to-blue-50 border-indigo-200">
-  <CardHeader>
-    <div className="flex items-center gap-2">
-      <Settings className="w-5 h-5 text-indigo-600" />
-      <CardTitle>Style des boutons</CardTitle>
-    </div>
-    <CardDescription>Apparence globale des boutons</CardDescription>
-  </CardHeader>
-  <CardContent className="space-y-4">
-    <div className="grid grid-cols-3 gap-2">
-      {[
-        { id: "default", label: "Classique" },
-        { id: "glow", label: "Glow ✨" },
-        { id: "glass", label: "Verre 🪟" },
-      ].map((t) => (
-        <button
-          key={t.id}
-          onClick={() => setButtonTheme(t.id as "default" | "glow" | "glass")}
-          className={`py-3 px-2 text-center font-medium border-2 rounded-xl transition-all text-sm ${
-            buttonTheme === t.id
-              ? "border-indigo-500 bg-indigo-100 text-indigo-700 shadow-lg"
-              : "border-gray-200 text-gray-600 hover:border-indigo-300 bg-white/50"
-          }`}
-        >
-          {t.label}
-        </button>
-      ))}
-    </div>
-
-    {/* Aperçu en direct */}
-    <div className="pt-2">
-      <p className="text-xs font-medium text-gray-700 mb-2">
-        Aperçu
-      </p>
-      <div className="flex items-center gap-3">
-        <Button>
-          Bouton exemple
-        </Button>
-        <Button variant="outline">
-          Contour
-        </Button>
-      </div>
-      <p className="text-xs text-gray-600 mt-2">
-        Le bouton “Bouton exemple” suit le style global. “Contour” reste fixe.
-      </p>
-    </div>
-
-    <p className="text-xs text-gray-600">
-      Ce réglage s’applique à tous les boutons de l’application (sauf ceux avec un style explicite).
-    </p>
-  </CardContent>
-</Card>
-            {/* Mode d'affichage */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-blue-50 via-white to-cyan-50 border-blue-200">
-              <CardHeader>
+            {/* Style des boutons */}
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Monitor className="w-5 h-5 text-blue-600" />
-                  <CardTitle>Mode d'affichage</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
+                    <Settings className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Style des boutons
+                  </CardTitle>
                 </div>
-                <CardDescription>Clair, Sombre ou Automatique</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Apparence globale des boutons
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: "light", label: "Clair ☀️" },
-                    { id: "dark", label: "Sombre 🌙" },
-                    { id: "auto", label: "Auto ⚡" },
-                  ].map((m) => (
+                    { id: "default", label: "Classique" },
+                    { id: "glow", label: "Glow ✨" },
+                    { id: "glass", label: "Verre 🪟" },
+                  ].map((t) => (
                     <button
-                      key={m.id}
-                      onClick={() => setMode(m.id as ModeType)}
+                      key={t.id}
+                      onClick={() => setButtonTheme(t.id as "default" | "glow" | "glass")}
                       className={`py-3 px-2 text-center font-medium border-2 rounded-xl transition-all text-sm ${
-                        mode === m.id 
-                          ? "border-blue-500 bg-blue-100 text-blue-700 shadow-lg" 
-                          : "border-gray-200 text-gray-600 hover:border-blue-300 bg-white/50"
+                        buttonTheme === t.id
+                          ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 shadow-lg"
+                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-red-200 dark:hover:border-red-800 bg-white/50 dark:bg-slate-800/50"
                       }`}
                     >
-                      {m.label}
+                      {t.label}
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-600">
-                  Le mode *Auto* bascule en mode sombre à partir de 18h00.
+
+                <div className="pt-2">
+                  <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Aperçu
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <Button className="rounded-xl">Bouton exemple</Button>
+                    <Button variant="outline" className="rounded-xl border-slate-200 dark:border-slate-600/50">
+                      Contour
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                    Le bouton “Bouton exemple” suit le style global. “Contour” reste fixe.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Mode d'affichage */}
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+                    <Monitor className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Mode d'affichage
+                  </CardTitle>
+                </div>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Clair, Sombre ou Automatique
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: "light", label: "Clair ☀️", icon: Sun },
+                    { id: "dark", label: "Sombre 🌙", icon: Moon },
+                    { id: "auto", label: "Auto ⚡", icon: MonitorIcon },
+                  ].map((m) => {
+                    const Icon = m.icon;
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => setMode(m.id as ModeType)}
+                        className={`py-3 px-2 text-center font-medium border-2 rounded-xl transition-all text-sm ${
+                          mode === m.id
+                            ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 shadow-lg"
+                            : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-red-200 dark:hover:border-red-800 bg-white/50 dark:bg-slate-800/50"
+                        }`}
+                      >
+                        <Icon className="size-4 mx-auto mb-1" />
+                        {m.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Le mode <span className="font-medium">Auto</span> bascule en mode sombre à partir de 18h00.
                 </p>
               </CardContent>
             </Card>
 
-            {/* Géométrie */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-emerald-50 via-white to-teal-50 border-emerald-200">
-              <CardHeader>
+            {/* Géométrie & Arrondis */}
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-emerald-600" />
-                  <CardTitle>Géométrie & Arrondis</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+                    <Layers className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Géométrie & Arrondis
+                  </CardTitle>
                 </div>
-                <CardDescription>Rondeur des composants</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Rondeur des composants
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
@@ -488,9 +577,9 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                       key={r.id}
                       onClick={() => setRadius(r.id as RadiusType)}
                       className={`py-2 px-4 text-sm font-medium border-2 transition-all ${radiusClasses[r.id as RadiusType]} ${
-                        radius === r.id 
-                          ? "border-emerald-500 bg-emerald-100 text-emerald-700 shadow-lg" 
-                          : "border-gray-200 text-gray-600 hover:border-emerald-300 bg-white/50"
+                        radius === r.id
+                          ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 shadow-lg"
+                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-red-200 dark:hover:border-red-800 bg-white/50 dark:bg-slate-800/50"
                       }`}
                     >
                       {r.label}
@@ -501,19 +590,25 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
             </Card>
 
             {/* Effets visuels */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-amber-50 via-white to-orange-50 border-amber-200">
-              <CardHeader>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Sliders className="w-5 h-5 text-amber-600" />
-                  <CardTitle>Effets visuels</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+                    <Sliders className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Effets visuels
+                  </CardTitle>
                 </div>
-                <CardDescription>Flou et lueurs dynamiques</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Flou et lueurs dynamiques
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-xs font-medium text-gray-700 flex justify-between mb-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex justify-between mb-1">
                     <span>Flou d'arrière-plan</span>
-                    <span className="text-amber-600 font-bold">{blurIntensity}px</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-bold">{blurIntensity}px</span>
                   </label>
                   <input
                     type="range"
@@ -521,19 +616,19 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                     max="32"
                     value={blurIntensity}
                     onChange={(e) => setBlurIntensity(Number(e.target.value))}
-                    className="w-full accent-amber-500 cursor-pointer"
+                    className="w-full accent-red-500 cursor-pointer"
                   />
                 </div>
                 <div className="flex items-center justify-between pt-2">
-                  <span className="text-xs font-medium text-gray-700">Effets de lueur (Glow)</span>
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Effets de lueur (Glow)</span>
                   <button
                     onClick={() => setGlowEnabled(!glowEnabled)}
                     className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${
-                      glowEnabled ? "bg-amber-500" : "bg-gray-300"
+                      glowEnabled ? "bg-red-500" : "bg-slate-300 dark:bg-slate-600"
                     }`}
                   >
                     <div
-                      className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                      className={`bg-white dark:bg-slate-200 w-4 h-4 rounded-full shadow-md transform transition-transform ${
                         glowEnabled ? "translate-x-6" : "translate-x-0"
                       }`}
                     />
@@ -542,14 +637,20 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
               </CardContent>
             </Card>
 
-            {/* Wallpaper */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-pink-50 via-white to-rose-50 border-pink-200">
-              <CardHeader>
+            {/* Arrière-plan / Wallpaper */}
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-pink-600" />
-                  <CardTitle>Arrière-plan</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-pink-500/10 text-pink-500">
+                    <Sparkles className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Arrière-plan
+                  </CardTitle>
                 </div>
-                <CardDescription>Wallpaper et fond personnalisé</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Wallpaper et fond personnalisé
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-3 gap-2">
@@ -557,25 +658,37 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                     <button
                       key={w}
                       onClick={() => setWallpaper(w)}
-                      className={`h-16 border-2 rounded-lg transition-all ${
+                      className={`h-16 border-2 rounded-2xl transition-all ${
                         wallpaper === w
-                          ? "border-pink-500 bg-pink-100 shadow-lg"
-                          : "border-gray-200 hover:border-pink-300 bg-white/50"
+                          ? "border-red-500 ring-2 ring-red-500/20 shadow-lg"
+                          : "border-slate-200 dark:border-slate-700 hover:border-red-200 dark:hover:border-red-800 bg-white/50 dark:bg-slate-800/50"
                       }`}
                       style={{
-                        background: w === "solid" 
-                          ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                          : `linear-gradient(135deg, ${w === "gradient-1" ? "#667eea, #764ba2" : w === "gradient-2" ? "#f093fb, #f5576c" : w === "gradient-3" ? "#4facfe, #00f2fe" : w === "gradient-4" ? "#43e97b, #38f9d7" : "#fa709a, #fee140"})`,
+                        background:
+                          w === "solid"
+                            ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                            : `linear-gradient(135deg, ${
+                                w === "gradient-1"
+                                  ? "#667eea, #764ba2"
+                                  : w === "gradient-2"
+                                  ? "#f093fb, #f5576c"
+                                  : w === "gradient-3"
+                                  ? "#4facfe, #00f2fe"
+                                  : w === "gradient-4"
+                                  ? "#43e97b, #38f9d7"
+                                  : "#fa709a, #fee140"
+                              })`,
                       }}
                     />
                   ))}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">URL personnalisée</Label>
+                  <Label className="text-xs text-slate-700 dark:text-slate-300">URL personnalisée</Label>
                   <Input
                     value={customWallpaperUrl}
                     onChange={(e) => setCustomWallpaperUrl(e.target.value)}
                     placeholder="https://exemple.com/image.jpg"
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
               </CardContent>
@@ -583,23 +696,31 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
           </div>
         </TabsContent>
 
-        {/* ONGLET 2 : ÉTABLISSEMENT */}
+        {/* ============================================================
+            ONGLET 2 : ÉTABLISSEMENT
+        ============================================================ */}
         <TabsContent value="etablissement" className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Informations établissement */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-blue-50 via-white to-indigo-50 border-blue-200">
-              <CardHeader>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-blue-600" />
-                  <CardTitle>Informations</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+                    <Building2 className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Informations
+                  </CardTitle>
                 </div>
-                <CardDescription>Coordonnées de l'établissement</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Coordonnées de l'établissement
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="mb-6 flex flex-wrap items-center gap-4 rounded-lg border bg-white p-4">
+                <div className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200/50 dark:border-slate-600/50 bg-white/50 dark:bg-slate-700/50 p-4">
                   <BrandLogo className="max-h-20" />
-                  <div className="min-w-0 text-sm text-gray-600">
-                    <p className="font-medium text-gray-900">Logo officiel</p>
+                  <div className="min-w-0 text-sm text-slate-600 dark:text-slate-400">
+                    <p className="font-medium text-slate-900 dark:text-white">Logo officiel</p>
                     <p className="italic">{SLOGAN}</p>
                   </div>
                 </div>
@@ -611,42 +732,50 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                   }}
                 >
                   <div className="space-y-2">
-                    <Label>Nom</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Nom</Label>
                     <Input
                       value={etabForm.nom}
                       disabled={!estAdmin}
                       onChange={(e) => setEtabForm({ ...etabForm, nom: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Ville</Label>
+                      <Label className="text-slate-700 dark:text-slate-300">Ville</Label>
                       <Input
                         value={etabForm.ville}
                         disabled={!estAdmin}
                         onChange={(e) => setEtabForm({ ...etabForm, ville: e.target.value })}
+                        className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Téléphone</Label>
+                      <Label className="text-slate-700 dark:text-slate-300">Téléphone</Label>
                       <Input
                         value={etabForm.telephone}
                         disabled={!estAdmin}
                         onChange={(e) => setEtabForm({ ...etabForm, telephone: e.target.value })}
+                        className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Email</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Email</Label>
                     <Input
                       type="email"
                       value={etabForm.email}
                       disabled={!estAdmin}
                       onChange={(e) => setEtabForm({ ...etabForm, email: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
-                  <Button type="submit" disabled={!estAdmin || enregistrerEtab.isPending}>
-                    <Save className="w-4 h-4 mr-2" />
+                  <Button
+                    type="submit"
+                    disabled={!estAdmin || enregistrerEtab.isPending}
+                    className="bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl px-6"
+                  >
+                    <Save className="size-4 mr-1.5" />
                     Enregistrer
                   </Button>
                 </form>
@@ -654,53 +783,63 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
             </Card>
 
             {/* Horaires & Services */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-emerald-50 via-white to-teal-50 border-emerald-200">
-              <CardHeader>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-emerald-600" />
-                  <CardTitle>Horaires & Services</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+                    <Clock className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Horaires & Services
+                  </CardTitle>
                 </div>
-                <CardDescription>Configuration des horaires et équipements</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Configuration des horaires et équipements
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Check-in</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Check-in</Label>
                     <Input
                       type="time"
                       value={paramsEtab.heureCheckIn}
                       onChange={(e) => setParamsEtab({ ...paramsEtab, heureCheckIn: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Check-out</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Check-out</Label>
                     <Input
                       type="time"
                       value={paramsEtab.heureCheckOut}
                       onChange={(e) => setParamsEtab({ ...paramsEtab, heureCheckOut: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm"
                     />
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Ouverture réception</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Ouverture réception</Label>
                     <Input
                       type="time"
                       value={paramsEtab.heureOuvertureReception}
                       onChange={(e) => setParamsEtab({ ...paramsEtab, heureOuvertureReception: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Fermeture réception</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Fermeture réception</Label>
                     <Input
                       type="time"
                       value={paramsEtab.heureFermetureReception}
                       onChange={(e) => setParamsEtab({ ...paramsEtab, heureFermetureReception: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm"
                     />
                   </div>
                 </div>
-                <div className="pt-4 border-t">
-                  <Label className="mb-3 block">Équipements</Label>
+                <div className="pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                  <Label className="mb-3 block text-slate-700 dark:text-slate-300">Équipements</Label>
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       { key: "wifi", label: "WiFi", icon: Wifi },
@@ -713,15 +852,22 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                       const Icon = item.icon;
                       const key = item.key as keyof typeof paramsEtab;
                       return (
-                        <label key={key} className="flex items-center gap-2 p-3 border rounded-lg hover:bg-white/50 cursor-pointer">
+                        <label
+                          key={key}
+                          className="flex items-center gap-2 p-3 border border-slate-200/50 dark:border-slate-600/50 rounded-2xl hover:bg-white/50 dark:hover:bg-slate-700/50 cursor-pointer transition-all"
+                        >
                           <input
                             type="checkbox"
                             checked={paramsEtab[key] as boolean}
-                            onChange={(e) => setParamsEtab({ ...paramsEtab, [key]: e.target.checked })}
-                            className="w-4 h-4 accent-emerald-500"
+                            onChange={(e) =>
+                              setParamsEtab({ ...paramsEtab, [key]: e.target.checked })
+                            }
+                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-red-500 focus:ring-red-500/20"
                           />
-                          <Icon className="w-4 h-4 text-emerald-600" />
-                          <span className="text-sm font-medium">{item.label}</span>
+                          <Icon className="w-4 h-4 text-emerald-500" />
+                          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {item.label}
+                          </span>
                         </label>
                       );
                     })}
@@ -731,67 +877,83 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
             </Card>
 
             {/* Tarifs & Taxes */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-amber-50 via-white to-orange-50 border-amber-200">
-              <CardHeader>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-amber-600" />
-                  <CardTitle>Tarifs & Taxes</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+                    <DollarSign className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Tarifs & Taxes
+                  </CardTitle>
                 </div>
-                <CardDescription>Configuration des prix et taxes</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Configuration des prix et taxes
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Taux TVA (%)</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Taux TVA (%)</Label>
                   <Input
                     type="number"
                     value={paramsEtab.tvaTaux}
                     onChange={(e) => setParamsEtab({ ...paramsEtab, tvaTaux: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Taxe de séjour (FCFA / nuitée)</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Taxe de séjour (FCFA / nuitée)</Label>
                   <Input
                     type="number"
                     value={taxe}
                     disabled={!estAdmin}
                     onChange={(e) => setTaxe(e.target.value)}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Service d'étage (%)</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Service d'étage (%)</Label>
                   <Input
                     type="number"
                     value={paramsEtab.serviceEtageTaux}
                     onChange={(e) => setParamsEtab({ ...paramsEtab, serviceEtageTaux: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Préfixe facture</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Préfixe facture</Label>
                   <Input
                     value={prefixe}
                     disabled={!estAdmin}
                     onChange={(e) => setPrefixe(e.target.value)}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
-                <Button 
+                <Button
                   onClick={() => enregistrerParams.mutate()}
                   disabled={!estAdmin || enregistrerParams.isPending}
-                  className="w-full"
+                  className="w-full bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg shadow-red-500/25 rounded-2xl"
                 >
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className="size-4 mr-1.5" />
                   Enregistrer les tarifs
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Paiement */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-purple-50 via-white to-pink-50 border-purple-200">
-              <CardHeader>
+            {/* Moyens de paiement */}
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-purple-600" />
-                  <CardTitle>Moyens de paiement</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500">
+                    <CreditCard className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Moyens de paiement
+                  </CardTitle>
                 </div>
-                <CardDescription>Configuration des paiements</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Configuration des paiements
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
@@ -803,32 +965,45 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                   ].map((item) => {
                     const key = item.key as keyof typeof paramsPaiement;
                     return (
-                      <label key={key} className="flex items-center gap-2 p-3 border rounded-lg hover:bg-white/50 cursor-pointer">
+                      <label
+                        key={key}
+                        className="flex items-center gap-2 p-3 border border-slate-200/50 dark:border-slate-600/50 rounded-2xl hover:bg-white/50 dark:hover:bg-slate-700/50 cursor-pointer transition-all"
+                      >
                         <input
                           type="checkbox"
                           checked={paramsPaiement[key] as boolean}
-                          onChange={(e) => setParamsPaiement({ ...paramsPaiement, [key]: e.target.checked })}
-                          className="w-4 h-4 accent-purple-500"
+                          onChange={(e) =>
+                            setParamsPaiement({ ...paramsPaiement, [key]: e.target.checked })
+                          }
+                          className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-red-500 focus:ring-red-500/20"
                         />
-                        <span className="text-sm font-medium">{item.label}</span>
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          {item.label}
+                        </span>
                       </label>
                     );
                   })}
                 </div>
                 <div className="space-y-2">
-                  <Label>Acompte (%)</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Acompte (%)</Label>
                   <Input
                     type="number"
                     value={paramsPaiement.acomptePourcentage}
-                    onChange={(e) => setParamsPaiement({ ...paramsPaiement, acomptePourcentage: e.target.value })}
+                    onChange={(e) =>
+                      setParamsPaiement({ ...paramsPaiement, acomptePourcentage: e.target.value })
+                    }
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Délai de paiement (jours)</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Délai de paiement (jours)</Label>
                   <Input
                     type="number"
                     value={paramsPaiement.delaiPaiementJours}
-                    onChange={(e) => setParamsPaiement({ ...paramsPaiement, delaiPaiementJours: e.target.value })}
+                    onChange={(e) =>
+                      setParamsPaiement({ ...paramsPaiement, delaiPaiementJours: e.target.value })
+                    }
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
               </CardContent>
@@ -836,24 +1011,35 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
           </div>
         </TabsContent>
 
-        {/* ONGLET 3 : TECHNIQUE */}
+        {/* ============================================================
+            ONGLET 3 : TECHNIQUE
+        ============================================================ */}
         <TabsContent value="technique" className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Application */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-cyan-50 via-white to-blue-50 border-cyan-200">
-              <CardHeader>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-cyan-600" />
-                  <CardTitle>Application</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-500">
+                    <Settings className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Application
+                  </CardTitle>
                 </div>
-                <CardDescription>Paramètres généraux</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Paramètres généraux
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Langue</Label>
-                    <Select value={paramsApp.langue} onValueChange={(v) => setParamsApp({ ...paramsApp, langue: v })}>
-                      <SelectTrigger>
+                    <Label className="text-slate-700 dark:text-slate-300">Langue</Label>
+                    <Select
+                      value={paramsApp.langue}
+                      onValueChange={(v) => setParamsApp({ ...paramsApp, langue: v })}
+                    >
+                      <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -864,9 +1050,12 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Devise</Label>
-                    <Select value={paramsApp.devise} onValueChange={(v) => setParamsApp({ ...paramsApp, devise: v })}>
-                      <SelectTrigger>
+                    <Label className="text-slate-700 dark:text-slate-300">Devise</Label>
+                    <Select
+                      value={paramsApp.devise}
+                      onValueChange={(v) => setParamsApp({ ...paramsApp, devise: v })}
+                    >
+                      <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -879,9 +1068,30 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Format de date</Label>
-                    <Select value={paramsApp.formatDate} onValueChange={(v) => setParamsApp({ ...paramsApp, formatDate: v })}>
-                      <SelectTrigger>
+                    <Label className="text-slate-700 dark:text-slate-300">Format de date</Label>
+                    <Select
+                      value={paramsApp.formatDate}
+                      onValueChange={(v) => setParamsApp({ ...paramsApp, formatDate: v })}
+                    >
+                      <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="FCFA">FCFA</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="USD">USD</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">Format de date</Label>
+                    <Select
+                      value={paramsApp.formatDate}
+                      onValueChange={(v) => setParamsApp({ ...paramsApp, formatDate: v })}
+                    >
+                      <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -892,9 +1102,12 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Format d'heure</Label>
-                    <Select value={paramsApp.formatHeure} onValueChange={(v) => setParamsApp({ ...paramsApp, formatHeure: v })}>
-                      <SelectTrigger>
+                    <Label className="text-slate-700 dark:text-slate-300">Format d'heure</Label>
+                    <Select
+                      value={paramsApp.formatHeure}
+                      onValueChange={(v) => setParamsApp({ ...paramsApp, formatHeure: v })}
+                    >
+                      <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -905,9 +1118,12 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Fuseau horaire</Label>
-                  <Select value={paramsApp.fuseauHoraire} onValueChange={(v) => setParamsApp({ ...paramsApp, fuseauHoraire: v })}>
-                    <SelectTrigger>
+                  <Label className="text-slate-700 dark:text-slate-300">Fuseau horaire</Label>
+                  <Select
+                    value={paramsApp.fuseauHoraire}
+                    onValueChange={(v) => setParamsApp({ ...paramsApp, fuseauHoraire: v })}
+                  >
+                    <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -921,13 +1137,19 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
             </Card>
 
             {/* Notifications */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-green-50 via-white to-emerald-50 border-green-200">
-              <CardHeader>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-green-600" />
-                  <CardTitle>Notifications</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-green-500/10 text-green-500">
+                    <Bell className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Notifications
+                  </CardTitle>
                 </div>
-                <CardDescription>Alertes et notifications</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Alertes et notifications
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {[
@@ -938,16 +1160,21 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                   const Icon = item.icon;
                   const key = item.key as keyof typeof paramsApp;
                   return (
-                    <label key={key} className="flex items-center justify-between p-3 border rounded-lg hover:bg-white/50 cursor-pointer">
+                    <label
+                      key={key}
+                      className="flex items-center justify-between p-3 border border-slate-200/50 dark:border-slate-600/50 rounded-2xl hover:bg-white/50 dark:hover:bg-slate-700/50 cursor-pointer transition-all"
+                    >
                       <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4 text-green-600" />
-                        <span className="text-sm font-medium">{item.label}</span>
+                        <Icon className="w-4 h-4 text-green-500" />
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          {item.label}
+                        </span>
                       </div>
                       <input
                         type="checkbox"
                         checked={paramsApp[key] as boolean}
                         onChange={(e) => setParamsApp({ ...paramsApp, [key]: e.target.checked })}
-                        className="w-4 h-4 accent-green-500"
+                        className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-red-500 focus:ring-red-500/20"
                       />
                     </label>
                   );
@@ -955,32 +1182,43 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
               </CardContent>
             </Card>
 
-            {/* Sauvegarde */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-indigo-50 via-white to-purple-50 border-indigo-200">
-              <CardHeader>
+            {/* Sauvegarde & Performance */}
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Cloud className="w-5 h-5 text-indigo-600" />
-                  <CardTitle>Sauvegarde & Performance</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
+                    <Cloud className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Sauvegarde & Performance
+                  </CardTitle>
                 </div>
-                <CardDescription>Backup et optimisation</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Backup et optimisation
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <label className="flex items-center justify-between p-3 border rounded-lg hover:bg-white/50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 border border-slate-200/50 dark:border-slate-600/50 rounded-2xl hover:bg-white/50 dark:hover:bg-slate-700/50 cursor-pointer transition-all">
                   <div className="flex items-center gap-2">
-                    <Database className="w-4 h-4 text-indigo-600" />
-                    <span className="text-sm font-medium">Sauvegarde automatique</span>
+                    <Database className="w-4 h-4 text-indigo-500" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Sauvegarde automatique
+                    </span>
                   </div>
                   <input
                     type="checkbox"
                     checked={paramsApp.sauvegardeAuto}
                     onChange={(e) => setParamsApp({ ...paramsApp, sauvegardeAuto: e.target.checked })}
-                    className="w-4 h-4 accent-indigo-500"
+                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-red-500 focus:ring-red-500/20"
                   />
                 </label>
                 <div className="space-y-2">
-                  <Label>Fréquence de sauvegarde</Label>
-                  <Select value={paramsApp.frequenceSauvegarde} onValueChange={(v) => setParamsApp({ ...paramsApp, frequenceSauvegarde: v })}>
-                    <SelectTrigger>
+                  <Label className="text-slate-700 dark:text-slate-300">Fréquence de sauvegarde</Label>
+                  <Select
+                    value={paramsApp.frequenceSauvegarde}
+                    onValueChange={(v) => setParamsApp({ ...paramsApp, frequenceSauvegarde: v })}
+                  >
+                    <SelectTrigger className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -990,75 +1228,89 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                     </SelectContent>
                   </Select>
                 </div>
-                <label className="flex items-center justify-between p-3 border rounded-lg hover:bg-white/50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 border border-slate-200/50 dark:border-slate-600/50 rounded-2xl hover:bg-white/50 dark:hover:bg-slate-700/50 cursor-pointer transition-all">
                   <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-indigo-600" />
-                    <span className="text-sm font-medium">Cache activé</span>
+                    <Zap className="w-4 h-4 text-indigo-500" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Cache activé
+                    </span>
                   </div>
                   <input
                     type="checkbox"
                     checked={paramsApp.cacheEnabled}
                     onChange={(e) => setParamsApp({ ...paramsApp, cacheEnabled: e.target.checked })}
-                    className="w-4 h-4 accent-indigo-500"
+                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-red-500 focus:ring-red-500/20"
                   />
                 </label>
               </CardContent>
             </Card>
 
-            {/* Email */}
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-rose-50 via-white to-pink-50 border-rose-200">
-              <CardHeader>
+            {/* Configuration Email */}
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <Mail className="w-5 h-5 text-rose-600" />
-                  <CardTitle>Configuration Email</CardTitle>
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-rose-500/10 text-rose-500">
+                    <Mail className="size-4" />
+                  </div>
+                  <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">
+                    Configuration Email
+                  </CardTitle>
                 </div>
-                <CardDescription>SMTP et expéditeur</CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  SMTP et expéditeur
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Host SMTP</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Host SMTP</Label>
                     <Input
                       value={paramsEmail.smtpHost}
                       onChange={(e) => setParamsEmail({ ...paramsEmail, smtpHost: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Port SMTP</Label>
+                    <Label className="text-slate-700 dark:text-slate-300">Port SMTP</Label>
                     <Input
                       value={paramsEmail.smtpPort}
                       onChange={(e) => setParamsEmail({ ...paramsEmail, smtpPort: e.target.value })}
+                      className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Utilisateur SMTP</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Utilisateur SMTP</Label>
                   <Input
                     value={paramsEmail.smtpUser}
                     onChange={(e) => setParamsEmail({ ...paramsEmail, smtpUser: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Mot de passe SMTP</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Mot de passe SMTP</Label>
                   <Input
                     type="password"
                     value={paramsEmail.smtpPassword}
                     onChange={(e) => setParamsEmail({ ...paramsEmail, smtpPassword: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email d'expédition</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Email d'expédition</Label>
                   <Input
                     type="email"
                     value={paramsEmail.emailExpediteur}
                     onChange={(e) => setParamsEmail({ ...paramsEmail, emailExpediteur: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Signature</Label>
+                  <Label className="text-slate-700 dark:text-slate-300">Signature</Label>
                   <Input
                     value={paramsEmail.signatureEmail}
                     onChange={(e) => setParamsEmail({ ...paramsEmail, signatureEmail: e.target.value })}
+                    className="rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
                   />
                 </div>
               </CardContent>
@@ -1066,163 +1318,166 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
           </div>
         </TabsContent>
 
-        {/* ONGLET 4 : UTILISATEURS */}
+        {/* ============================================================
+            ONGLET 4 : UTILISATEURS
+        ============================================================ */}
         <TabsContent value="utilisateurs" className="space-y-6">
           {/* Statistiques */}
           <div className="grid gap-4 sm:grid-cols-4">
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-blue-50 via-white to-blue-100 border-blue-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total</p>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">
-                      {utilisateurs?.length ?? 0}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
-                    <Users className="w-6 h-6" />
-                  </div>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+              <CardContent className="flex items-center gap-4 p-5">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25">
+                  <Users className="size-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
+                    Total
+                  </p>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {utilisateurs?.length ?? 0}
+                  </p>
                 </div>
               </CardContent>
             </Card>
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-purple-50 via-white to-purple-100 border-purple-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Admins</p>
-                    <p className="text-2xl font-bold text-purple-600 mt-1">
-                      {statsRoles.admin ?? 0}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg">
-                    <Shield className="w-6 h-6" />
-                  </div>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+              <CardContent className="flex items-center gap-4 p-5">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg shadow-purple-500/25">
+                  <Shield className="size-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
+                    Admins
+                  </p>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {statsRoles.admin ?? 0}
+                  </p>
                 </div>
               </CardContent>
             </Card>
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-emerald-50 via-white to-emerald-100 border-emerald-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Réception</p>
-                    <p className="text-2xl font-bold text-emerald-600 mt-1">
-                      {statsRoles.reception ?? 0}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg">
-                    <Home className="w-6 h-6" />
-                  </div>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+              <CardContent className="flex items-center gap-4 p-5">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
+                  <Home className="size-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
+                    Réception
+                  </p>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {statsRoles.reception ?? 0}
+                  </p>
                 </div>
               </CardContent>
             </Card>
-            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-amber-50 via-white to-amber-100 border-amber-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Comptables</p>
-                    <p className="text-2xl font-bold text-amber-600 mt-1">
-                      {statsRoles.comptable ?? 0}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-lg">
-                    <FileText className="w-6 h-6" />
-                  </div>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+              <CardContent className="flex items-center gap-4 p-5">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25">
+                  <FileText className="size-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
+                    Comptables
+                  </p>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {statsRoles.comptable ?? 0}
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Recherche et filtres */}
-          <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-gray-50 via-white to-gray-100 border-gray-200">
-            <CardContent className="p-4">
-              <div className="flex flex-col gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                  <Input
-                    placeholder="Rechercher un utilisateur..."
-                    value={recherche}
-                    onChange={(e) => setRecherche(e.target.value)}
-                    className="pl-9"
-                  />
-                  {recherche && (
-                    <button
-                      onClick={() => setRecherche("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    >
-                      <X className="w-4 h-4" />
-    </button>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant={filtreRole === "tous" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFiltreRole("tous")}
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+            <CardContent className="p-5 space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+                <Input
+                  placeholder="Rechercher un utilisateur..."
+                  value={recherche}
+                  onChange={(e) => setRecherche(e.target.value)}
+                  className="pl-9 rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm focus:border-red-500 focus:ring-red-500/20"
+                />
+                {recherche && (
+                  <button
+                    onClick={() => setRecherche("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                   >
-                    Tous
-                  </Button>
-                  <Button
-                    variant={filtreRole === "admin" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFiltreRole("admin")}
+                    <X className="size-4" />
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "tous", label: "Tous" },
+                  { value: "admin", label: "Admins" },
+                  { value: "reception", label: "Réception" },
+                  { value: "comptable", label: "Comptables" },
+                ].map((f) => (
+                  <button
+                    key={f.value}
+                    onClick={() => setFiltreRole(f.value)}
+                    className={`px-4 py-1.5 text-xs font-medium rounded-full border transition-all ${
+                      filtreRole === f.value
+                        ? "bg-gradient-to-br from-red-500 to-rose-600 text-white border-transparent shadow-lg shadow-red-500/25"
+                        : "bg-white/50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600/50 text-slate-600 dark:text-slate-300 hover:border-red-200 dark:hover:border-red-800"
+                    }`}
                   >
-                    Admins
-                  </Button>
-                  <Button
-                    variant={filtreRole === "reception" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFiltreRole("reception")}
-                  >
-                    Réception
-                  </Button>
-                  <Button
-                    variant={filtreRole === "comptable" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFiltreRole("comptable")}
-                  >
-                    Comptables
-                  </Button>
-                </div>
+                    {f.label}
+                  </button>
+                ))}
               </div>
             </CardContent>
           </Card>
 
           {/* Tableau des utilisateurs */}
-          <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-white via-white to-gray-50 border-gray-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-gray-600" />
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 shadow-lg rounded-3xl overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                <Users className="size-4 text-red-500" />
                 Liste des utilisateurs
               </CardTitle>
             </CardHeader>
             <CardContent className="overflow-x-auto p-0">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Téléphone</TableHead>
-                    <TableHead>Rôle</TableHead>
+                  <TableRow className="border-b border-slate-100 dark:border-slate-700/50">
+                    <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                      Nom
+                    </TableHead>
+                    <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                      Téléphone
+                    </TableHead>
+                    <TableHead className="text-slate-600 dark:text-slate-300 font-semibold">
+                      Rôle
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {utilisateursFiltres.map((u) => (
-                    <TableRow key={u.id}>
-                      <TableCell className="font-medium">
+                    <TableRow
+                      key={u.id}
+                      className="border-b border-slate-100/50 dark:border-slate-700/30 hover:bg-slate-50/50 dark:hover:bg-slate-700/20"
+                    >
+                      <TableCell className="font-medium text-slate-900 dark:text-white">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white text-xs font-bold shadow-md">
                             {u.nom_complet?.[0]?.toUpperCase() ?? "U"}
                           </div>
                           {u.nom_complet || "—"}
                         </div>
                       </TableCell>
-                      <TableCell>{u.telephone ?? "—"}</TableCell>
+                      <TableCell className="text-slate-600 dark:text-slate-300">
+                        {u.telephone ?? "—"}
+                      </TableCell>
                       <TableCell>
                         {estAdmin ? (
                           <Select
                             value={u.role ?? "reception"}
-                            onValueChange={(v) => changerRole.mutate({ userId: u.id, role: v })}
+                            onValueChange={(v) =>
+                              changerRole.mutate({ userId: u.id, role: v })
+                            }
                           >
-                            <SelectTrigger className="w-48">
+                            <SelectTrigger className="w-48 rounded-xl border-slate-200 dark:border-slate-600/50 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -1234,20 +1489,26 @@ const { buttonTheme, setButtonTheme } = useButtonTheme();
                             </SelectContent>
                           </Select>
                         ) : (
-                          <Badge variant="secondary">
+                          <Badge
+                            variant="secondary"
+                            className="rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                          >
                             {ROLES.find((r) => r.value === u.role)?.label ?? "Aucun"}
                           </Badge>
                         )}
                       </TableCell>
                     </TableRow>
                   ))}
-                  {utilisateursFiltres.length === 0 ? (
+                  {utilisateursFiltres.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={3} className="py-8 text-center text-gray-500">
+                      <TableCell
+                        colSpan={3}
+                        className="py-8 text-center text-slate-400 dark:text-slate-500"
+                      >
                         Aucun utilisateur trouvé.
                       </TableCell>
                     </TableRow>
-                  ) : null}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
