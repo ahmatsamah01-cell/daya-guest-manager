@@ -184,7 +184,7 @@ function SidebarContent({
   return (
     <div
       className={cn(
-        "flex h-full w-full flex-col",
+        "flex h-screen w-full flex-col",
         SIDEBAR_BG,
         SIDEBAR_TEXT,
         mobile ? "rounded-r-[32px]" : "rounded-none",
@@ -643,10 +643,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
         {/* ═══════════════════════════════════════════ */}
         {/* COLONNE DE CONTENU */}
         {/* ═══════════════════════════════════════════ */}
+        {/* 
+          On utilise `overflow-y-auto` pour que la page défile 
+          Quand la sidebar est ouverte sur mobile, le body est bloqué (overflow:hidden)
+        */}
         <div
           className={cn(
-            "relative flex min-w-0 flex-1 flex-col bg-background dark:bg-slate-900 transition-all duration-300",
-            mobileOpen && "lg:translate-x-0",
+            "relative flex min-w-0 flex-1 flex-col bg-background dark:bg-slate-900",
+            // Quand la sidebar est ouverte, on empêche le scroll du contenu
+            mobileOpen ? "overflow-hidden" : "overflow-y-auto",
+            "h-screen",
           )}
         >
           {/* HEADER */}
